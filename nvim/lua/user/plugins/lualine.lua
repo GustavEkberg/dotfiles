@@ -5,7 +5,7 @@ local lualine = utils.call_plugin("lualine")
 lualine.setup({
 	options = {
 		icons_enabled = true,
-		theme = "auto",
+		theme = "ayu_dark",
 		component_separators = { left = "", right = "" },
 		section_separators = { left = "", right = "" },
 		disabled_filetypes = {
@@ -17,8 +17,8 @@ lualine.setup({
 		globalstatus = true,
 		refresh = {
 			statusline = 1000,
-			tabline = 1000,
-			winbar = 1000,
+			tabline = 100000,
+			winbar = 100000,
 		},
 	},
 	sections = {
@@ -27,11 +27,12 @@ lualine.setup({
 		lualine_c = { "diagnostics", {
 			"filename",
 			file_status = true,
-			path = 1,
+			path = 3,
+        color = { fg = "#8583ab" },
 		} },
 		lualine_x = { "encoding", "fileformat", "filetype" },
 		lualine_y = {},
-		lualine_z = { "location" },
+		lualine_z = {},
 	},
 
 	inactive_sections = {
