@@ -1,7 +1,8 @@
 starship init fish | source
 fish_vi_key_bindings
 
-source /Users/abraxas/.config/fish/connections.sh
+
+source $HOME/.config/fish/connections.sh
 
 alias vim='nvim'
 alias vi='nvim'
