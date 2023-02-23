@@ -9,6 +9,9 @@ success_symbol = '[➜](bold green)'
 [aws]
 disabled = true
 
+[lua]
+disabled  = true
+
 [rust]
 format = '| [⚙️  $version](green bold)'
 
