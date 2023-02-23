@@ -1,0 +1,27 @@
+# Get editor completions based on the config schema
+"$schema" = 'https://starship.rs/config-schema.json'
+
+add_newline = true
+
+[character] 
+success_symbol = '[➜](bold green)'
+
+[aws]
+disabled = true
+
+[rust]
+format = '| [⚙️  $version](green bold)'
+
+[package]
+disabled = true
+
+[nodejs]
+disabled = true
+
+[git_status]
+disabled = true
+
+[git_metrics]
+disabled = false
+added_style = 'bold blue'
+format = '[+$added]($added_style)/[-$deleted]($deleted_style) '
