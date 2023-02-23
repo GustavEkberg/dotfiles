@@ -7,7 +7,6 @@ local opts = { silent = true }
 keymap("", "<Space>", "<Nop>", opts)
 vim.g.mapleader = " "
 
--- Yanks
 keymap("v", "Y", '"*y') -- Yank to clipboard
 keymap("n", "<F8>", "<cmd>:LspHover<CR>")
 keymap("n", "<F12>", ":lua vim.lsp.buf.code_action()<CR>")
@@ -15,6 +14,8 @@ keymap("n", "<C-b>", "<cmd>bp<CR>")
 keymap("v", "<C-r>", "*<esc>:%s///gc<left><left><left>")
 keymap("n", "<C-d>", "<C-d>zz")
 keymap("n", "<C-u>", "<C-u>zz")
+
+keymap("n", "Q", "<cmd>:q<CR>")
 
 -- Remove defaults from normal mode
 keymap("n", "s", "<nop>")
