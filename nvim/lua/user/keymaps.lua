@@ -17,8 +17,11 @@ keymap("n", "<C-u>", "<C-u>zz")
 
 keymap("n", "Q", "<cmd>:q<CR>")
 
+
 -- Remove defaults from normal mode
 keymap("n", "s", "<nop>")
+keymap("v", "u", "<nop>")
+keymap("v", "U", "<nop>")
 
 local utils = require("user.utils")
 local wk = utils.call_plugin("which-key")
