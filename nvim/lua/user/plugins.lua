@@ -35,6 +35,7 @@ return packer.startup({
 		use({ "kyazdani42/nvim-web-devicons" }) -- ui dependency of many other plugins
 
 		use({ "windwp/nvim-autopairs" }) -- Autopairs, integrates with both cmp and treesitter
+		use({ "HiPhish/nvim-ts-rainbow2" })
 
 		use({ "kyazdani42/nvim-tree.lua" })
 		use({ "folke/which-key.nvim" }) -- show shortcuts
@@ -74,7 +75,6 @@ return packer.startup({
 		-- Snippets
 		use({ "L3MON4D3/LuaSnip" }) --snippet engine
 		use({ "honza/vim-snippets" })
-		-- use({ "rafamadriz/friendly-snippets" })
 
 		-- Telescope
 		use({ "nvim-telescope/telescope.nvim" })

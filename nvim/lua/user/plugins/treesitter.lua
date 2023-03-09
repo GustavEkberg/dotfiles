@@ -11,5 +11,7 @@ configs.setup({
 	rainbow = {
 		enable = true,
 		extended_mode = true,
+    query = 'rainbow-parens',
+    strategy = require 'ts-rainbow.strategy.global',
 	},
 })
