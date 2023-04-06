@@ -17,7 +17,6 @@ keymap("n", "<C-u>", "<C-u>zz")
 
 keymap("n", "Q", "<cmd>:q<CR>")
 
-
 -- Remove defaults from normal mode
 keymap("n", "s", "<nop>")
 keymap("v", "u", "<nop>")
@@ -27,6 +26,10 @@ local utils = require("user.utils")
 local wk = utils.call_plugin("which-key")
 
 wk.register({
+  h = {
+    name = "HomeHax",
+	  h = { "<cmd>r !uuid -H<CR>", "Insert UUID v4" },
+  },
 	q = { "<cmd>bp<bar>bd #<CR>", "Remove file from buffer" },
 	r = { "<cmd>e!<CR>", "Reload buffer" },
 	w = { "<C-w>w", "Focus next window" },

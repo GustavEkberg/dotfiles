@@ -10,6 +10,7 @@ alias v='nvim'
 alias vv='nvim .'
 alias ll='ls -lah'
 alias wttr='curl wttr.in'
+alias nn='cd /Users/abraxas/Dropbox/Notes/kkdvr && vim'
 
 set -x PATH $PATH $HOME/.cargo/bin
 set -x PATH $PATH /opt/homebrew/bin
