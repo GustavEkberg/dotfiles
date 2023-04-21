@@ -1,7 +1,6 @@
 starship init fish | source
 fish_vi_key_bindings
 
-
 source $HOME/.config/fish/connections.sh
 
 alias vim='nvim'
@@ -14,9 +13,6 @@ alias nn='cd /Users/abraxas/Dropbox/Notes/kkdvr && vim'
 
 set -x PATH $PATH $HOME/.cargo/bin
 set -x PATH $PATH /opt/homebrew/bin
-
-set -gx LDFLAGS "-L/opt/homebrew/opt/openssl@3/lib"
-set -gx CPPFLAGS "-I/opt/homebrew/opt/openssl@3/include"
 
 if type -q prettyping
   alias ping='prettyping'
