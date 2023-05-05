@@ -1,7 +1,7 @@
 local servers = {
 	"rust_analyzer",
   "eslint",
-  "pylsp",
+  "pyright",
 	"cssls",
 	"cssmodules_ls",
 	"html",
