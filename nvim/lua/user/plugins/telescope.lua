@@ -15,6 +15,7 @@ telescope.setup({
 			".DS_Store",
 			".git/",
 			"cdk.out/",
+      ".aws-sam/",
 
 			-- TS
 			".next/",
