@@ -44,7 +44,7 @@ if [ -z $TMUX_POWERLINE_RIGHT_STATUS_SEGMENTS ]; then
 		#"earthquake 3 0" \
 		#"macos_notification_count 29 255" \
 		#"mailcount 9 255" \
-		#"cpu 240 136" \
+		# "cpu 240 136" \
 		#"load 239 136" \
 		#"battery 237 136" \
 	#	"rainbarf 0 ${TMUX_POWERLINE_DEFAULT_FOREGROUND_COLOR}" \
@@ -53,6 +53,6 @@ if [ -z $TMUX_POWERLINE_RIGHT_STATUS_SEGMENTS ]; then
 		#"date_day 235 136" \
 		#"date 232 136" \
 		#"time 232 136 ${TMUX_POWERLINE_SEPARATOR_LEFT_THIN}" \
-		#"utc_time 235 136 ${TMUX_POWERLINE_SEPARATOR_LEFT_THIN}" \
+		"ping 235 136 ${TMUX_POWERLINE_SEPARATOR_LEFT_THIN}" \
 	)
 fi
