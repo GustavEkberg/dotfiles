@@ -96,6 +96,8 @@ return packer.startup({
 		use({ "j-hui/fidget.nvim" }) -- lsp status
 
 		use({ "zbirenbaum/copilot.lua" }) -- github copilot
+		use({ "zbirenbaum/copilot-cmp" }) 
+		-- use({ "github/copilot.vim" }) 
 
     use({ "ggandor/leap.nvim" }) -- jump to any character
 
