@@ -39,6 +39,7 @@ return packer.startup({
 
 		use({ "kyazdani42/nvim-tree.lua" })
 		use({ "folke/which-key.nvim" }) -- show shortcuts
+		use({ "tpope/vim-surround" })
 
 		use({ "numToStr/Comment.nvim" }) -- Comment lines
 
