@@ -14,6 +14,8 @@ alias nn='cd /Users/abraxas/Dropbox/Notes/kkdvr && vim'
 set -x PATH $PATH $HOME/.cargo/bin
 set -x PATH $PATH /opt/homebrew/bin
 
+set -x EDITOR /opt/homebrew/bin/nvim
+
 if type -q prettyping
   alias ping='prettyping'
 end

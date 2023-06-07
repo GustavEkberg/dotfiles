@@ -2,6 +2,7 @@ local servers = {
 	"rust_analyzer",
   "eslint",
   "pyright",
+  "tailwindcss",
 	"cssls",
 	"cssmodules_ls",
 	"html",

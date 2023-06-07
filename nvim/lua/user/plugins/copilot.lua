@@ -3,7 +3,7 @@ local copilot = utils.call_plugin("copilot")
 local copilot_cmp = utils.call_plugin("copilot-cmp")
 
 copilot.setup({
-    suggestion = { enabled = false },
+  suggestion = { enabled = false },
   panel = { enabled = false },
   -- panel = {
   --   enabled = true,
