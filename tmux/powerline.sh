@@ -40,7 +40,7 @@ fi
 if [ -z $TMUX_POWERLINE_RIGHT_STATUS_SEGMENTS ]; then
 	TMUX_POWERLINE_RIGHT_STATUS_SEGMENTS=(
 		"ifstat_sys 234 221" \
-		"tmux_mem_cpu_load 234 221 ${TMUX_POWERLINE_SEPARATOR_LEFT_THIN}" \
+		"cpu 234 221 ${TMUX_POWERLINE_SEPARATOR_LEFT_THIN}" \
 		#"earthquake 3 0" \
 		#"macos_notification_count 29 255" \
 		#"mailcount 9 255" \
@@ -53,6 +53,6 @@ if [ -z $TMUX_POWERLINE_RIGHT_STATUS_SEGMENTS ]; then
 		#"date_day 235 136" \
 		#"date 232 136" \
 		#"time 232 136 ${TMUX_POWERLINE_SEPARATOR_LEFT_THIN}" \
-		"ping 235 136 ${TMUX_POWERLINE_SEPARATOR_LEFT_THIN}" \
+		# "ping 235 136 ${TMUX_POWERLINE_SEPARATOR_LEFT_THIN}" \
 	)
 fi
