@@ -100,6 +100,7 @@ local function lsp_keymaps(bufnr)
 		i = {
 			name = "Issues", -- group name
 			d = { ":LspDiagLine<CR>", "Show Diagnostics" },
+			N = { ":LspDiagPrev<CR>", "Show Previous Diagnostic" },
 			n = { ":LspDiagNext<CR>", "Show Next Diagnostic" },
 		},
 	}, { prefix = "<leader>" })
