@@ -32,6 +32,7 @@ wk.register({
   },
 	q = { "<cmd>bp<bar>bd #<CR>", "Remove file from buffer" },
 	r = { "<cmd>e!<CR>", "Reload buffer" },
+	W = { "<C-w>W", "Focus Previous window" },
 	w = { "<C-w>w", "Focus next window" },
 	s = { "<cmd>w<CR>", "Save buffer" },
 	b = {
