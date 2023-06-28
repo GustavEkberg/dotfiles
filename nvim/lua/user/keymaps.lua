@@ -42,4 +42,11 @@ wk.register({
 		g = { "<cmd>bn<CR>", "Previous buffer" },
 		b = { "<cmd>bp<CR>", "Close current file" },
 	},
+  a = {
+    name = "Harpoon",
+    a = { "<cmd>lua require('harpoon.mark').add_file()<CR>", "Add file to Harpoon" },
+    s = { "<cmd>lua require('harpoon.ui').toggle_quick_menu()<CR>", "Toggle menu" },
+    d = { "<cmd>Telescope harpoon marks<CR>", "Toggle Telescope menu" },
+
+  }
 }, { prefix = "<leader>" })

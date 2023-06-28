@@ -43,6 +43,8 @@ return packer.startup({
 
 		use({ "numToStr/Comment.nvim" }) -- Comment lines
 
+    use({ "ThePrimeagen/harpoon"})
+
 		use({ "akinsho/toggleterm.nvim" })
 		use({ "nvim-lualine/lualine.nvim" })
 
@@ -94,7 +96,7 @@ return packer.startup({
 		use({ "b0o/schemastore.nvim" }) -- import json schemas from SchemaStore catalog
 		use({ "folke/trouble.nvim" }) -- show diagnostics
 		use({ "folke/neodev.nvim" }) -- previously named lua-dev
-		use({ "j-hui/fidget.nvim" }) -- lsp status
+		use({ "j-hui/fidget.nvim", tag = "legacy" }) -- lsp status
 
 		use({ "zbirenbaum/copilot.lua" }) -- github copilot
 		use({ "zbirenbaum/copilot-cmp" }) 

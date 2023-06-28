@@ -5,6 +5,8 @@ local telescope = utils.call_plugin("telescope")
 
 local actions = require("telescope.actions")
 
+telescope.load_extension('harpoon')
+
 telescope.setup({
 	defaults = {
 
