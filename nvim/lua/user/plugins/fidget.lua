@@ -1,4 +1,4 @@
 local utils = require("user.utils")
-local npairs = utils.call_plugin("fidget")
+local fidget = utils.call_plugin("fidget")
 
-npairs.setup()
+fidget.setup()
