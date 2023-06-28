@@ -15,6 +15,9 @@ keymap("v", "<C-r>", "*<esc>:%s///gc<left><left><left>")
 keymap("n", "<C-d>", "<C-d>zz")
 keymap("n", "<C-u>", "<C-u>zz")
 
+-- Harpoon
+keymap("n", "<C-h>", "<cmd>lua require('harpoon.ui').toggle_quick_menu()<CR>")
+
 keymap("n", "Q", "<cmd>:q<CR>")
 
 -- Remove defaults from normal mode
@@ -35,18 +38,11 @@ wk.register({
 	W = { "<C-w>W", "Focus Previous window" },
 	w = { "<C-w>w", "Focus next window" },
 	s = { "<cmd>w<CR>", "Save buffer" },
-	b = {
-		name = "Buffer",
-		l = { "<cmd>ls<CR>", "List buffer" },
-		h = { "<cmd>bp<CR>", "Next buffer" },
-		g = { "<cmd>bn<CR>", "Previous buffer" },
-		b = { "<cmd>bp<CR>", "Close current file" },
-	},
-  a = {
-    name = "Harpoon",
-    a = { "<cmd>lua require('harpoon.mark').add_file()<CR>", "Add file to Harpoon" },
-    s = { "<cmd>lua require('harpoon.ui').toggle_quick_menu()<CR>", "Toggle menu" },
-    d = { "<cmd>Telescope harpoon marks<CR>", "Toggle Telescope menu" },
-
-  }
+	-- b = {
+	-- 	name = "Buffer",
+	-- 	l = { "<cmd>ls<CR>", "List buffer" },
+	-- 	h = { "<cmd>bp<CR>", "Next buffer" },
+	-- 	g = { "<cmd>bn<CR>", "Previous buffer" },
+	-- 	b = { "<cmd>bp<CR>", "Close current file" },
+	-- },
 }, { prefix = "<leader>" })
