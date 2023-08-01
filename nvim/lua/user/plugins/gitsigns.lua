@@ -45,6 +45,8 @@ gitsigns.setup({
 
 local wk = utils.call_plugin("which-key")
 
+vim.keymap.set("v", "<C-S>", function() gitsigns.stage_hunk {vim.fn.line('.'), vim.fn.line('v')} end)
+
 wk.register({
 	m = {
 		name = "Gitsigns",
