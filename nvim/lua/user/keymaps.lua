@@ -29,15 +29,11 @@ local utils = require("user.utils")
 local wk = utils.call_plugin("which-key")
 
 wk.register({
-  h = {
-    name = "HomeHax",
-	  h = { "<cmd>r !uuid -H<CR>", "Insert UUID v4" },
-  },
 	q = { "<cmd>bp<bar>bd #<CR>", "Remove file from buffer" },
 	r = { "<cmd>e!<CR>", "Reload buffer" },
 	W = { "<C-w>W", "Focus Previous window" },
 	w = { "<C-w>w", "Focus next window" },
-	s = { "<cmd>w<CR>", "Save buffer" },
+	s = { "<cmd>w!<CR>", "Save buffer" },
 	-- b = {
 	-- 	name = "Buffer",
 	-- 	l = { "<cmd>ls<CR>", "List buffer" },

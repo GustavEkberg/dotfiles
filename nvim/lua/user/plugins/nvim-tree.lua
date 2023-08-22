@@ -2,8 +2,6 @@ local utils = require("user.utils")
 local nvim_tree = utils.call_plugin("nvim-tree")
 local nvim_tree_config = utils.call_plugin("nvim-tree.config")
 
-local tree_cb = nvim_tree_config.nvim_tree_callback
-
 nvim_tree.setup({
 	filters = {
 		dotfiles = false, -- display dotfiles by default. Can be toggled with H
