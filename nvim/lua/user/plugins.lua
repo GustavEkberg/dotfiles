@@ -79,6 +79,9 @@ return packer.startup({
 		use({ "L3MON4D3/LuaSnip" }) --snippet engine
 		use({ "honza/vim-snippets" })
 
+		use({ "MunifTanjim/nui.nvim" })
+		use({ "jackMort/ChatGPT.nvim" })
+
 		-- Telescope
 		use({ "nvim-telescope/telescope.nvim" })
 		use({ "nvim-telescope/telescope-file-browser.nvim" })
