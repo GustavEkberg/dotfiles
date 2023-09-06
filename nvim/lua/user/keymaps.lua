@@ -10,8 +10,7 @@ vim.g.mapleader = " "
 keymap("v", "Y", '"*y') -- Yank to clipboard
 keymap("n", "<F8>", "<cmd>:LspHover<CR>")
 keymap("n", "<F12>", ":lua vim.lsp.buf.code_action()<CR>")
-keymap("n", "<C-b>", "<cmd>bp<CR>")
-keymap("v", "<C-r>", "*<esc>:%s///gc<left><left><left>")
+keymap("n", "<C-b>", "<cmd>b#<CR>")
 keymap("n", "<C-d>", "<C-d>zz")
 keymap("n", "<C-u>", "<C-u>zz")
 
@@ -29,7 +28,7 @@ local utils = require("user.utils")
 local wk = utils.call_plugin("which-key")
 
 wk.register({
-	q = { "<cmd>bp<bar>bd #<CR>", "Remove file from buffer" },
+	q = { "<cmd>bp<CR>", "Remove file from buffer" },
 	r = { "<cmd>e!<CR>", "Reload buffer" },
 	W = { "<C-w>W", "Focus Previous window" },
 	w = { "<C-w>w", "Focus next window" },
