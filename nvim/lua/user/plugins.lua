@@ -35,7 +35,6 @@ return packer.startup({
 		use({ "kyazdani42/nvim-web-devicons" }) -- ui dependency of many other plugins
 
 		use({ "windwp/nvim-autopairs" }) -- Autopairs, integrates with both cmp and treesitter
-		use({ "HiPhish/nvim-ts-rainbow2" })
 
 		use({ "kyazdani42/nvim-tree.lua" })
 		use({ "folke/which-key.nvim" }) -- show shortcuts
@@ -88,7 +87,6 @@ return packer.startup({
 
 		-- Treesitter
 		use({ "nvim-treesitter/nvim-treesitter" })
-		use({ "p00f/nvim-ts-rainbow" })
 
 		-- LSP
 		use({ "neovim/nvim-lspconfig" }) -- enable LSP

@@ -8,9 +8,8 @@ local b = null_ls.builtins
 local sources = {
 	-- Formatting
 	-- https://github.com/jose-elias-alvarez/null-ls.nvim/tree/main/lua/null-ls/builtins/formatting
-	-- b.formatting.prettier,
+	b.formatting.prettier,
 	b.formatting.black,
-	b.formatting.eslint,
 	-- b.formatting.rustfmt,
 
 	-- Diagnostics
