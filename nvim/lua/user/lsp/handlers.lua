@@ -87,6 +87,9 @@ local function lsp_keymaps(bufnr)
 			R = { ":Telescope lsp_references<CR>", "References" },
 			r = { ":lua require('goto-preview').goto_preview_references()<CR>", "Preview references" },
 			D = { ":LspDefinition<CR>", "Definition" },
+			s = { "<CMD>:vs<CR>:LspDefinition<CR>", "Vertical Split Definition" },
+			S = { "<CMD>:sp<CR>:LspDefinition<CR>", "Split Definition" },
+
 			d = { ":lua require('goto-preview').goto_preview_definition()<CR>", "Preview definition" },
 			t = { ":LspTypeDefinition<CR>", "Type Definition" },
 		},
