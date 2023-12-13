@@ -22,6 +22,7 @@ telescope.setup({
 			-- TS
 			".next/",
 			"%.lock",
+      "index.d.ts",
 			"node_modules/",
 			"%.tsbuildinfo",
 			"npm-debug.log",
@@ -64,7 +65,6 @@ telescope.setup({
 })
 
 telescope.load_extension("file_browser")
-
 -- ---------------------------------
 -- ----------- REMAPS --------------
 -- ---------------------------------

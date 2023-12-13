@@ -30,6 +30,7 @@ wk.register({
   b = {
     name = "Harpoon",
     a = { "<cmd>lua require('harpoon.mark').add_file()<CR>", "Add file to Harpoon" },
+    b = { "<cmd>lua require('harpoon.ui').nav_next()<CR>", "Navigate to next file" },
     s = { "<cmd>lua require('harpoon.ui').toggle_quick_menu()<CR>", "Toggle menu" },
     d = { "<cmd>Telescope harpoon marks<CR>", "Toggle Telescope menu" },
   }

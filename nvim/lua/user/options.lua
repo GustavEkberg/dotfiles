@@ -3,8 +3,8 @@ vim.opt.fileencoding = "utf-8" -- the encoding written to a file
 vim.opt.mouse = "a" -- allow the mouse to be used in neovim
 vim.opt.termguicolors = true -- set term gui colors (most terminals support this)
 vim.opt.smartcase = true
+vim.opt.ignorecase = true
 vim.opt.relativenumber = true
-
 -- Lines
 vim.opt.number = true -- set numbered lines
 -- vim.opt.cursorline = true -- highlight the current line

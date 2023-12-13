@@ -126,29 +126,7 @@ end
 local augroup = vim.api.nvim_create_augroup("LspFormatting", {})
 
 M.on_attach = function(client, bufnr)
-	-- if client.name == "tsserver" then
-	-- 	client.server_capabilities.documentFormattingProvider = false
-	-- end
-	--
-	-- if client.name == "sumneko_lua" then
-	-- 	client.server_capabilities.documentFormattingProvider = false
-	-- end
-
-	-- keymaps
 	lsp_keymaps(bufnr)
-
-	-- Format on save
-	-- https://github.com/jose-elias-alvarez/null-ls.nvim/wiki/Formatting-on-save
-	if client.supports_method("textDocument/formatting") then
-		vim.api.nvim_clear_autocmds({ group = augroup, buffer = bufnr })
-		vim.api.nvim_create_autocmd("BufWritePre", {
-			group = augroup,
-			buffer = bufnr,
-			callback = function()
-				lsp_formatting(bufnr)
-			end,
-		})
-	end
 end
 
 return M

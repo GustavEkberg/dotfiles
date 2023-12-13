@@ -47,9 +47,9 @@ if [ -z $TMUX_POWERLINE_RIGHT_STATUS_SEGMENTS ]; then
 		# "cpu 240 136" \
 		#"load 239 136" \
 		#"battery 237 136" \
-	#	"rainbarf 0 ${TMUX_POWERLINE_DEFAULT_FOREGROUND_COLOR}" \
+		#"rainbarf 0 ${TMUX_POWERLINE_DEFAULT_FOREGROUND_COLOR}" \
 		#"xkb_layout 125 117" \
-		"weather 232 221 ${TMUX_POWERLINE_SEPARATOR_LEFT_THIN}" \
+		#"weather 232 221 ${TMUX_POWERLINE_SEPARATOR_LEFT_THIN}" \
 		#"date_day 235 136" \
 		#"date 232 136" \
 		#"time 232 136 ${TMUX_POWERLINE_SEPARATOR_LEFT_THIN}" \
