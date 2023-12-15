@@ -62,7 +62,7 @@ startup.setup({
         icon = " ",
         desc = "Search files",
         key = "f",
-        action = ":Telescope find_files hidden=true no_ignore=true",
+        action = ":Telescope find_files",
       },
       {
 	      icon = " ",

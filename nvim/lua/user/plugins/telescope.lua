@@ -5,8 +5,6 @@ local telescope = utils.call_plugin("telescope")
 
 local actions = require("telescope.actions")
 
-telescope.load_extension('harpoon')
-
 telescope.setup({
 	defaults = {
 
@@ -62,16 +60,28 @@ telescope.setup({
 			},
 		},
 	},
+  extensions = {
+    fzf = {
+      fuzzy = true,                    -- false will only do exact matching
+      override_generic_sorter = true,  -- override the generic sorter
+      override_file_sorter = true,     -- override the file sorter
+      case_mode = "smart_case",        -- or "ignore_case" or "respect_case"
+    }
+  }
 })
 
 telescope.load_extension("file_browser")
+telescope.load_extension("fzf")
+telescope.load_extension('harpoon')
+
+
 -- ---------------------------------
 -- ----------- REMAPS --------------
 -- ---------------------------------
 wk.register({
 	f = {
 		name = "Telescope", -- group name
-		f = { ":Telescope find_files hidden=true no_ignore=true<CR>", "Search files" },
+		f = { ":Telescope find_files<CR>", "Search files" },
 		d = { ":Telescope keymaps<CR>", "Search keymaps" },
 		c = { ":Telescope live_grep<CR>", "Search files contents" },
 		b = { ":Telescope buffers<CR>", "Search Buffers" },

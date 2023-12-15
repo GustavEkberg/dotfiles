@@ -132,7 +132,6 @@ local function filter_definitions(err, result, ctx, config)
         return
     end
 
-    -- If the result is a single location (not a list), make it a list for consistency
     if not vim.tbl_islist(result) then
         result = { result }
     end
@@ -141,7 +140,7 @@ local function filter_definitions(err, result, ctx, config)
     for _, location in ipairs(result) do
         if location.targetUri then
             local filename = vim.uri_to_fname(location.targetUri)
-            if not string.match(filename, 'node_modules') then
+            if not (string.match(filename, 'node_modules') or string.match(filename, '.next')) then
                 table.insert(filtered_results, location)
             else
                 print('Filtered out definition from:', filename)
