@@ -7,7 +7,6 @@ local servers = {
 	"cssmodules_ls",
 	"html",
 	"prismals",
-	"tsserver",
 	"bashls",
 	"jsonls",
 	"yamlls",

@@ -33,3 +33,8 @@ vim.opt.swapfile = false -- creates a swapfile
 -- Performance
 vim.opt.timeoutlen = 1000 -- time to wait for a mapped sequence to complete (in milliseconds)
 vim.opt.updatetime = 300 -- faster completion (4000ms default)
+
+-- Spelling
+vim.opt.spell = true
+vim.opt.spelllang = {"en_gb"}
+vim.opt.spelloptions = "camel"
