@@ -1,4 +1,3 @@
--- local colorscheme = "tokyonight-night"
 local colorscheme = "bluloco-dark"
 local status_ok, _ = pcall(vim.cmd, "colorscheme " .. colorscheme)
 if not status_ok then
@@ -6,12 +5,11 @@ if not status_ok then
 end
 
 vim.cmd("highlight Normal guibg=#000000")
-vim.api.nvim_set_hl(0, 'SpellBad', { fg="#FF0000", undercurl=true })
+vim.cmd("highlight Visual guibg=#232323 guifg=reverse")
+vim.cmd("highlight NvimTreeNormal guibg=#000000")
+vim.cmd("highlight NvimTreeNormalNC guibg=#000000")
+vim.cmd("highlight TelescopeNormal guibg=#000000")
+vim.cmd("highlight TroubleNormal guibg=#000000")
+vim.cmd("highlight TelescopeBorder guibg=#000000")
 
-vim.cmd("hi Visual guibg=#F1F1F1")
--- vim.cmd("highlight NonText guibg=none")
--- vim.cmd("highlight Normal guibg=none")
--- require(colorscheme).setup({
--- 	style = "darker",
--- })
--- require(colorscheme).load()
+vim.api.nvim_set_hl(0, 'SpellBad', { fg="#FF0000", undercurl=true })
