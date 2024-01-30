@@ -30,7 +30,7 @@ lualine.setup({
 			path = 3,
         color = { fg = "#8583ab" },
 		} },
-		lualine_x = { "encoding", "fileformat", "filetype" },
+		lualine_x = {"fileformat", "filetype" },
 		lualine_y = {},
 		lualine_z = {},
 	},
