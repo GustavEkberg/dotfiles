@@ -30,6 +30,7 @@ local wk = utils.call_plugin("which-key")
 wk.register({
 	q = { "<cmd>bp<CR>", "Remove file from buffer" },
 	r = { "<cmd>e!<CR>", "Reload buffer" },
+	R = { "<cmd>LspRestart<CR>", "Restart LSP" },
 	W = { "<C-w>W", "Focus Previous window" },
 	w = { "<C-w>w", "Focus next window" },
 	s = { "<cmd>w!<CR>", "Save buffer" },
