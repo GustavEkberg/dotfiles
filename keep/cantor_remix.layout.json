@@ -15,9 +15,9 @@
     "{KC_LCTL,KC_LSFT,KC_LALT,KC_F14}",
     "{KC_LCTL,KC_LSFT,KC_LALT,KC_F15}",
     "{KC_LCTL,KC_LSFT,KC_LALT,KC_F16}",
-    "",
-    "",
-    ""
+    "{KC_LCTL,KC_LSFT,KC_LALT,KC_F17}",
+    "{KC_LCTL,KC_LSFT,KC_LALT,KC_F18}",
+    "{KC_LCTL,KC_LSFT,KC_LALT,KC_F19}"
   ],
   "layers": [
     [
@@ -55,7 +55,7 @@
       "KC_J",
       "KC_K",
       "KC_L",
-      "KC_RSFT",
+      "OSM(MOD_LSFT | MOD_RSFT)",
       "KC_QUOT",
       "KC_N",
       "KC_M",
@@ -189,9 +189,9 @@
       "MACRO(8)",
       "MACRO(9)",
       "MACRO(10)",
-      "KC_NO",
-      "KC_NO",
-      "KC_NO",
+      "MACRO(13)",
+      "MACRO(14)",
+      "MACRO(15)",
       "KC_NO",
       "C(KC_LNUM)",
       "KC_NO",
