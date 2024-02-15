@@ -51,7 +51,7 @@ wk.register({
   c = {
     name = "Copilot",
     e = { '<cmd>:lua require("copilot.suggestion").toggle_auto_trigger()<CR>', "Enable/Disable" },
-    c = { '<cmd>Copilot<CR>', "Panel" },
+    c = { '<cmd>Copilot<CR>', "Copilot" },
   },
 }, { prefix = "<leader>" })
 

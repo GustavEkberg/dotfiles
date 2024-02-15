@@ -5,7 +5,7 @@ if not status_ok then
 end
 
 vim.cmd("highlight Normal guibg=#000000")
-vim.cmd("highlight Visual guibg=#232323 guifg=reverse")
+vim.cmd("highlight Visual guibg=#632363 guifg=reverse")
 vim.cmd("highlight NvimTreeNormal guibg=#000000")
 vim.cmd("highlight NvimTreeNormalNC guibg=#000000")
 vim.cmd("highlight TelescopeNormal guibg=#000000")
