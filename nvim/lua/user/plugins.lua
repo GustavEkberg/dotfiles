@@ -50,7 +50,11 @@ return packer.startup({
 		use({ "stevearc/dressing.nvim" })
 		use({ "rmagatti/goto-preview" })
 
+    use({ "rcarriga/nvim-notify"})
+    use({ "MunifTanjim/nui.nvim"})
+    
 		use({ "folke/zen-mode.nvim" })
+		use({ "folke/noice.nvim" })
 
     use({ "glepnir/dashboard-nvim" }) -- startup
 
@@ -78,7 +82,6 @@ return packer.startup({
 		use({ "L3MON4D3/LuaSnip" }) --snippet engine
 		use({ "honza/vim-snippets" })
 
-		use({ "MunifTanjim/nui.nvim" })
 		use({ "jackMort/ChatGPT.nvim" })
 
 		-- Telescope
@@ -98,7 +101,7 @@ return packer.startup({
 		use({ "b0o/schemastore.nvim" }) -- import json schemas from SchemaStore catalog
 		use({ "folke/trouble.nvim" }) -- show diagnostics
 		use({ "folke/neodev.nvim" }) -- previously named lua-dev
-		use({ "j-hui/fidget.nvim", tag = "legacy" }) -- lsp status
+		use({ "j-hui/fidget.nvim" }) -- lsp status
 
 		use({ "zbirenbaum/copilot.lua" }) -- github copilot
 		-- use({ "zbirenbaum/copilot-cmp" }) 

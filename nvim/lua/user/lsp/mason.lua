@@ -1,13 +1,13 @@
 local servers = {
-	"rust_analyzer",
   "pyright",
   "tailwindcss",
-	"cssls",
-	"cssmodules_ls",
 	"html",
+  "tsserver",
+  "tailwindcss",
 	"prismals",
 	"bashls",
 	"jsonls",
+  "eslint",
 	"yamlls",
 }
 
