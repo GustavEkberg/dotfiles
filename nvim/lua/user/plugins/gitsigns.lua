@@ -45,12 +45,5 @@ gitsigns.setup({
 
 local wk = utils.call_plugin("which-key")
 
-vim.keymap.set("v", "<C-S>", function() gitsigns.stage_hunk {vim.fn.line('.'), vim.fn.line('v')} end)
-vim.keymap.set("n", "<C-w>", gitsigns.reset_hunk)
-
-wk.register({
-	m = {
-		name = "Gitsigns",
-		w = { "<cmd>Gitsigns toggle_current_line_blame<CR>", "Toggle line blame" },
-	},
-}, { prefix = "<leader>" })
+-- vim.keymap.set("v", "<C-S>", function() gitsigns.stage_hunk {vim.fn.line('.'), vim.fn.line('v')} end)
+-- vim.keymap.set("n", "<C-w>", gitsigns.reset_hunk)

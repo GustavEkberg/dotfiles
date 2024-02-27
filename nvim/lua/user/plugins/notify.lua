@@ -13,7 +13,7 @@ notify.setup({
     },
     level = 2,
     minimum_width = 50,
-    render = "compact",
+    render = "minimal",
     stages = "fade",
     time_formats = {
       notification = "%T",

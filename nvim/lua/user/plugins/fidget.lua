@@ -112,3 +112,5 @@ fidget.setup({
       string.format("%s/fidget.nvim.log", vim.fn.stdpath("cache")),
   }
 })
+vim.cmd("Fidget lsp_suppress")
+
