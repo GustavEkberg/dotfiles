@@ -36,7 +36,7 @@ return packer.startup({
 
 		use({ "windwp/nvim-autopairs" }) -- Autopairs, integrates with both cmp and treesitter
 
-		use({ "kyazdani42/nvim-tree.lua" })
+		use({ "nvim-neo-tree/neo-tree.nvim" })
 		use({ "folke/which-key.nvim" }) -- show shortcuts
 		use({ "tpope/vim-surround" })
 

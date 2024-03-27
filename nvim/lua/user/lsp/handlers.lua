@@ -84,13 +84,13 @@ local function lsp_keymaps(bufnr)
 		j = {
 			name = "Jump to..", -- group name
 			i = { ":LspImplementation<CR>", "Implementation" },
-			R = { ":Telescope lsp_references<CR>", "References" },
-			r = { ":lua require('goto-preview').goto_preview_references()<CR>", "Preview references" },
-			D = { ":LspDefinition<CR>", "Definition" },
+			r = { ":Telescope lsp_references<CR>", "References" },
+			R = { ":lua require('goto-preview').goto_preview_references()<CR>", "Preview references" },
+			d = { ":LspDefinition<CR>", "Definition" },
 			s = { "<CMD>:vs<CR>:LspDefinition<CR>", "Vertical Split Definition" },
 			S = { "<CMD>:sp<CR>:LspDefinition<CR>", "Split Definition" },
 
-			d = { ":lua require('goto-preview').goto_preview_definition()<CR>", "Preview definition" },
+			D = { ":lua require('goto-preview').goto_preview_definition()<CR>", "Preview definition" },
 			t = { ":LspTypeDefinition<CR>", "Type Definition" },
 		},
 		a = {

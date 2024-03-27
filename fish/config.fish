@@ -8,11 +8,16 @@ alias vi='nvim'
 alias v='nvim'
 alias vv='nvim .'
 alias ll='ls -lah'
-alias wttr='curl wttr.in'
+alias wttr='curl wttr.in/Gothenburg'
 alias nn='cd /Users/abraxas/Dropbox/Notes/kkdvr && vim'
+alias python='python3'
 
 set -x PATH $PATH $HOME/.cargo/bin
 set -x PATH $PATH /opt/homebrew/bin
+set -gx PATH (yarn global bin) $PATH
+
+set -Ux PYENV_ROOT $HOME/.pyenv
+fish_add_path $PYENV_ROOT/bin
 
 set -x EDITOR /opt/homebrew/bin/nvim
 
@@ -38,3 +43,5 @@ end
 # bun
 set --export BUN_INSTALL "$HOME/.bun"
 set --export PATH $BUN_INSTALL/bin $PATH
+
+pyenv init - | source
