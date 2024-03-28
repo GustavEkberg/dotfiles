@@ -2,6 +2,8 @@ starship init fish | source
 fish_vi_key_bindings
 
 source $HOME/.config/fish/connections.sh
+set -g fish_greeting
+
 
 alias vim='nvim'
 alias vi='nvim'
@@ -20,6 +22,7 @@ set -Ux PYENV_ROOT $HOME/.pyenv
 fish_add_path $PYENV_ROOT/bin
 
 set -x EDITOR /opt/homebrew/bin/nvim
+set -x SAM_CLI_TELEMETRY 0
 
 if type -q prettyping
   alias ping='prettyping'
