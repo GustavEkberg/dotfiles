@@ -109,19 +109,6 @@ local function lsp_keymaps(bufnr)
 	}, { prefix = "<leader>" })
 end
 
--- Format on save
--- Avoiding LSP formatting conflicts
--- https://github.com/jose-elias-alvarez/null-ls.nvim/wiki/Avoiding-LSP-formatting-conflicts
-local lsp_formatting = function(bufnr)
-	vim.lsp.buf.format({
-		filter = function(client)
-			-- apply whatever logic you want (in this example, we'll only use null-ls)
-			return client.name == "null-ls"
-		end,
-		bufnr = bufnr,
-	})
-end
-
 local function filter_definitions(err, result, ctx, config)
     if err then
         print('LSP Error:', err)
@@ -161,7 +148,6 @@ M.on_attach = function(client, bufnr)
       if client.name == "tsserver" then
         client.handlers['textDocument/definition'] = filter_definitions
     end
-
 	lsp_keymaps(bufnr)
 end
 

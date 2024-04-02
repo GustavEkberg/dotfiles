@@ -60,4 +60,3 @@ for _, server in pairs(servers) do
 
 	lspconfig[server].setup(opts)
 end
-require("user.lsp.servers.tsserver").setup(on_attach, capabilities)

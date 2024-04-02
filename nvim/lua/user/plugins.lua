@@ -70,14 +70,6 @@ return packer.startup({
 		use({ "preservim/vim-colors-pencil" })
 		use({ "rktjmp/lush.nvim" })
 
-		-- cmp plugins
-		use({ "hrsh7th/nvim-cmp" }) -- The completion plugin
-		use({ "hrsh7th/cmp-buffer" }) -- buffer completions
-		use({ "saadparwaiz1/cmp_luasnip" }) -- snippet completions
-		use({ "hrsh7th/cmp-path" }) -- path completions
-		use({ "hrsh7th/cmp-nvim-lsp" })
-		use({ "hrsh7th/cmp-nvim-lua" })
-
 		-- Snippets
 		use({ "L3MON4D3/LuaSnip" }) --snippet engine
 		use({ "honza/vim-snippets" })
@@ -96,12 +88,19 @@ return packer.startup({
 		use({ "neovim/nvim-lspconfig" }) -- enable LSP
 		use({ "williamboman/mason.nvim" })
 		use({ "williamboman/mason-lspconfig.nvim" })
-		use({ "jose-elias-alvarez/null-ls.nvim" }) -- for formatters and linters
 		use({ "jose-elias-alvarez/typescript.nvim" }) -- Import all missing imports, refactor on move, etc.
 		use({ "b0o/schemastore.nvim" }) -- import json schemas from SchemaStore catalog
 		use({ "folke/trouble.nvim" }) -- show diagnostics
 		use({ "folke/neodev.nvim" }) -- previously named lua-dev
 		use({ "j-hui/fidget.nvim" }) -- lsp status
+
+		-- cmp plugins
+		use({ "hrsh7th/nvim-cmp" }) -- The completion plugin
+		use({ "hrsh7th/cmp-buffer" }) -- buffer completions
+		use({ "hrsh7th/cmp-path" }) -- path completions
+		use({ "hrsh7th/cmp-nvim-lsp" })
+		use({ "hrsh7th/cmp-nvim-lua" })
+		use({ "prettier/vim-prettier" })
 
 		use({ "zbirenbaum/copilot.lua" }) -- github copilot
 		-- use({ "zbirenbaum/copilot-cmp" }) 
