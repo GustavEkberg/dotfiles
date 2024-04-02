@@ -109,46 +109,4 @@ local function lsp_keymaps(bufnr)
 	}, { prefix = "<leader>" })
 end
 
-local function filter_definitions(err, result, ctx, config)
-    if err then
-        print('LSP Error:', err)
-        return
-    end
-    if not result or vim.tbl_isempty(result) then
-        print('No LSP result returned or result is empty.')
-        return
-    end
-
-    if not vim.tbl_islist(result) then
-        result = { result }
-    end
-
-    local filtered_results = {}
-    for _, location in ipairs(result) do
-        if location.targetUri then
-            local filename = vim.uri_to_fname(location.targetUri)
-            if not (string.match(filename, 'node_modules') or string.match(filename, '.next')) then
-                table.insert(filtered_results, location)
-            else
-                print('Filtered out definition from:', filename)
-            end
-        end
-    end
-
-    if #filtered_results > 0 then
-        vim.lsp.handlers['textDocument/definition'](err, filtered_results, ctx, config)
-    end
-end
-
-
--- if you want to set up formatting on save, you can use this as a callback
-local augroup = vim.api.nvim_create_augroup("LspFormatting", {})
-
-M.on_attach = function(client, bufnr)
-      if client.name == "tsserver" then
-        client.handlers['textDocument/definition'] = filter_definitions
-    end
-	lsp_keymaps(bufnr)
-end
-
 return M

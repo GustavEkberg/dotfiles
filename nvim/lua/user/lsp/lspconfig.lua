@@ -1,6 +1,5 @@
 local lspconfig = require('lspconfig')
 lspconfig.pyright.setup {}
-lspconfig.tsserver.setup {}
 lspconfig.eslint.setup {
   settings = {
     format = {
@@ -56,3 +55,40 @@ vim.api.nvim_create_autocmd("BufWritePre", {
   end,
 })
 
+local function filter_definitions(err, result, ctx, config)
+    if err then
+        print('LSP Error:', err)
+        return
+    end
+    if not result or vim.tbl_isempty(result) then
+        print('No LSP result returned or result is empty.')
+        return
+    end
+
+    if not vim.tbl_islist(result) then
+        result = { result }
+    end
+
+    local filtered_results = {}
+    for _, location in ipairs(result) do
+        if location.targetUri then
+            local filename = vim.uri_to_fname(location.targetUri)
+            if not (string.match(filename, 'node_modules') or string.match(filename, '.next')) then
+                table.insert(filtered_results, location)
+            else
+                print('Filtered out definition from:', filename)
+            end
+        end
+    end
+
+    if #filtered_results > 0 then
+        vim.lsp.handlers['textDocument/definition'](err, filtered_results, ctx, config)
+    end
+end
+
+
+lspconfig.tsserver.setup {
+  on_attach = function(client, bufnr)
+    client.handlers['textDocument/definition'] = filter_definitions
+  end
+}

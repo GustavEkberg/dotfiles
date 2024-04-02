@@ -5,5 +5,5 @@ end
 
 require("user.lsp.neodev") -- IMPORTANT: make sure to setup neodev BEFORE lspconfig (called by mason)
 require("user.lsp.mason")
-require("user.lsp.handlers").setup()
 require("user.lsp.lspconfig")
+require("user.lsp.handlers").setup()
