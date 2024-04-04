@@ -47,7 +47,7 @@ TMUX_POWERLINE_DEFAULT_RIGHTSIDE_SEPARATOR=${TMUX_POWERLINE_DEFAULT_RIGHTSIDE_SE
 # 		" #W "
 # 	)
 # fi
-#
+
 # Format: segment_name background_color foreground_color [non_default_separator] [separator_background_color] [separator_foreground_color] [spacing_disable] [separator_disable]
 #
 # * background_color and foreground_color. Formats:
@@ -77,13 +77,13 @@ TMUX_POWERLINE_DEFAULT_RIGHTSIDE_SEPARATOR=${TMUX_POWERLINE_DEFAULT_RIGHTSIDE_SE
 
 if [ -z $TMUX_POWERLINE_LEFT_STATUS_SEGMENTS ]; then
 	TMUX_POWERLINE_LEFT_STATUS_SEGMENTS=(
-		# "tmux_session_info 148 234" \
+		"tmux_session_info 148 234" \
 		# "hostname 33 0" \
 		#"ifstat 30 255" \
 		#"ifstat_sys 30 255" \
 		# "lan_ip 24 250 ${TMUX_POWERLINE_SEPARATOR_RIGHT_THIN}" \
 		"wan_ip 24 250" \
-		 "pwd 89 250" \
+		 "pwd 250 60 ${TMUX_POWERLINE_SEPARATOR_RIGHT_BOLD} 60 default" \
 		# "vcs_branch 24 250" \
 		#"vcs_compare 60 255" \
 		# "vcs_staged 24 250" \
@@ -101,8 +101,8 @@ if [ -z $TMUX_POWERLINE_RIGHT_STATUS_SEGMENTS ]; then
 		# "now_playing 234 37" \
 		# "cpu 240 136" \
 		# "tmux_mem_cpu_load 237 167" \
-    "network_bandwidth 243" \
-		"tmux_mem_cpu_load 234 136" \
+    # "network_bandwidth 243" \
+		"tmux_mem_cpu_load 234 136 ${TMUX_POWERLINE_SEPARATOR_LEFT_THIN}" \
 		#"battery 137 127" \
 		# "weather 37 255" \
 		# "rainbarf 0 ${TMUX_POWERLINE_DEFAULT_FOREGROUND_COLOR}" \
@@ -113,4 +113,3 @@ if [ -z $TMUX_POWERLINE_RIGHT_STATUS_SEGMENTS ]; then
 		#"utc_time 235 136 ${TMUX_POWERLINE_SEPARATOR_LEFT_THIN}" \
 	)
 fi
-
