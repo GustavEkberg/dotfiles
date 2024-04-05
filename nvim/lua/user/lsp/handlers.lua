@@ -109,4 +109,10 @@ local function lsp_keymaps(bufnr)
 	}, { prefix = "<leader>" })
 end
 
+local augroup = vim.api.nvim_create_augroup("LspFormatting", {})
+
+M.on_attach = function(client, bufnr)
+	lsp_keymaps(bufnr)
+end
+
 return M
