@@ -80,15 +80,14 @@ if [ -z $TMUX_POWERLINE_LEFT_STATUS_SEGMENTS ]; then
 		"tmux_session_info 148 234" \
 		# "hostname 33 0" \
 		#"ifstat 30 255" \
-		#"ifstat_sys 30 255" \
 		# "lan_ip 24 250 ${TMUX_POWERLINE_SEPARATOR_RIGHT_THIN}" \
 		"wan_ip 24 250" \
-		 "pwd 250 60 ${TMUX_POWERLINE_SEPARATOR_RIGHT_BOLD} 60 default" \
+		 "pwd 250 60 ${TMUX_POWERLINE_SEPARATOR_RIGHT_BOLD} 60" \
 		# "vcs_branch 24 250" \
 		#"vcs_compare 60 255" \
 		# "vcs_staged 24 250" \
 		# "vcs_modified 24 250" \
-		#"vcs_others 245 0" \
+		# "vcs_others 245 0" \
 	)
 fi
 
@@ -97,19 +96,20 @@ if [ -z $TMUX_POWERLINE_RIGHT_STATUS_SEGMENTS ]; then
 		#"earthquake 3 0" \
 		# "pwd 89 250" \
 		#"macos_notification_count 29 255" \
-		#"mailcount 9 255" \
+		# "mailcount 9 255" \
 		# "now_playing 234 37" \
 		# "cpu 240 136" \
 		# "tmux_mem_cpu_load 237 167" \
     # "network_bandwidth 243" \
-		"tmux_mem_cpu_load 234 136 ${TMUX_POWERLINE_SEPARATOR_LEFT_THIN}" \
+		"tmux_mem_cpu_load default 136 ${TMUX_POWERLINE_SEPARATOR_LEFT_THIN} 33 0 right_disable separator_disable" \
+		"ifstat_sys 234 136 ${TMUX_POWERLINE_SEPARATOR_LEFT_BOLD} default 136" \
 		#"battery 137 127" \
 		# "weather 37 255" \
 		# "rainbarf 0 ${TMUX_POWERLINE_DEFAULT_FOREGROUND_COLOR}" \
 		#"xkb_layout 125 117" \
 		# "date_day 235 136" \
-		# "date 235 136 ${TMUX_POWERLINE_SEPARATOR_LEFT_THIN}" \
-		# "time 235 136 ${TMUX_POWERLINE_SEPARATOR_LEFT_THIN}" \
+		"date 235 136 ${TMUX_POWERLINE_SEPARATOR_LEFT_BOLD}" \
+		"time 235 136 ${TMUX_POWERLINE_SEPARATOR_LEFT_BOLD}" \
 		#"utc_time 235 136 ${TMUX_POWERLINE_SEPARATOR_LEFT_THIN}" \
 	)
 fi
