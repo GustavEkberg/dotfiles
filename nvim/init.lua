@@ -6,6 +6,7 @@ require("user.options")
 require("user.plugins")
 
 require("user.plugins.autopairs")
+require("user.plugins.indent-blankline")
 require("user.plugins.chatgpt")
 require("user.plugins.cmp")
 require("user.plugins.comment")
