@@ -1,4 +1,3 @@
-starship init fish | source
 fish_vi_key_bindings
 
 source $HOME/.config/fish/connections.sh
@@ -13,6 +12,7 @@ alias ll='ls -lah'
 alias wttr='curl wttr.in/Gothenburg'
 alias nn='cd /Users/abraxas/Dropbox/Notes/kkdvr && vim'
 alias python='python3'
+alias yd='yarn dev'
 
 set -x PATH $PATH $HOME/.cargo/bin
 set -x PATH $PATH /opt/homebrew/bin
@@ -48,3 +48,4 @@ set --export BUN_INSTALL "$HOME/.bun"
 set --export PATH $BUN_INSTALL/bin $PATH
 
 pyenv init - | source
+starship init fish | source
