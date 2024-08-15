@@ -43,6 +43,6 @@ vim.api.nvim_create_autocmd("BufWritePre", {
   group = vim.api.nvim_create_augroup('UserLspConfig', {}),
   pattern = {"*js","*.ts", "*.tsx"},
   callback = function()
-    vim.api.nvim_command("PrettierAsync")
+    vim.api.nvim_command("EslintFixAll")
   end,
 })
