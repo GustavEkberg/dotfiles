@@ -40,29 +40,29 @@ local lazygit = Terminal:new({
 	},
 })
 
-local cargo_run = Terminal:new({
-	cmd = "cargo run",
-	close_on_exit = false,
-	hidden = false,
-	direction = "float",
-	float_opts = {
-		width = function()
-			return math.ceil(vim.o.columns * 0.95)
-		end,
-	},
-})
-
-local cargo_test = Terminal:new({
-	cmd = "cargo test -- --show-output",
-	close_on_exit = false,
-	hidden = false,
-	direction = "float",
-	float_opts = {
-		width = function()
-			return math.ceil(vim.o.columns * 0.95)
-		end,
-	},
-})
+-- local cargo_run = Terminal:new({
+-- 	cmd = "cargo run",
+-- 	close_on_exit = false,
+-- 	hidden = false,
+-- 	direction = "float",
+-- 	float_opts = {
+-- 		width = function()
+-- 			return math.ceil(vim.o.columns * 0.95)
+-- 		end,
+-- 	},
+-- })
+--
+-- local cargo_test = Terminal:new({
+-- 	cmd = "cargo test -- --show-output",
+-- 	close_on_exit = false,
+-- 	hidden = false,
+-- 	direction = "float",
+-- 	float_opts = {
+-- 		width = function()
+-- 			return math.ceil(vim.o.columns * 0.95)
+-- 		end,
+-- 	},
+-- })
 
 local tsc = Terminal:new({
 	cmd = "./node_modules/.bin/tsc --noEmit",
@@ -84,13 +84,13 @@ function _TSC_TOGGLE()
 	tsc:toggle()
 end
 
-function _CARGO_RUN_TOGGLE()
-	cargo_run:toggle()
-end
-
-function _CARGO_TEST_TOGGLE()
-	cargo_test:toggle()
-end
+-- function _CARGO_RUN_TOGGLE()
+-- 	cargo_run:toggle()
+-- end
+--
+-- function _CARGO_TEST_TOGGLE()
+-- 	cargo_test:toggle()
+-- end
 
 -- ---------------------------------
 -- ----------- REMAPS --------------
@@ -102,7 +102,7 @@ wk.register({
 		name = "Toggleterm",
 		o = { "<cmd>lua _LAZYGIT_TOGGLE()<CR>", "Lazy Git" },
 		h = { "<cmd>lua _TSC_TOGGLE()<CR>", "TSC noEmit" },
-		c = { "<cmd>:w<CR><cmd>lua _CARGO_RUN_TOGGLE()<CR>", "Cargo run" },
-		v = { "<cmd>:w<CR><cmd>lua _CARGO_TEST_TOGGLE()<CR>", "Cargo test" },
+		-- c = { "<cmd>:w<CR><cmd>lua _CARGO_RUN_TOGGLE()<CR>", "Cargo run" },
+		-- v = { "<cmd>:w<CR><cmd>lua _CARGO_TEST_TOGGLE()<CR>", "Cargo test" },
 	},
 }, { prefix = "<leader>" })

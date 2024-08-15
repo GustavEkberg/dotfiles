@@ -101,10 +101,10 @@ if [ -z $TMUX_POWERLINE_RIGHT_STATUS_SEGMENTS ]; then
 		# "cpu 240 136" \
 		# "tmux_mem_cpu_load 237 167" \
     # "network_bandwidth 243" \
-		"tmux_mem_cpu_load default 136 ${TMUX_POWERLINE_SEPARATOR_LEFT_THIN} 33 0 right_disable separator_disable" \
-		"ifstat_sys 234 136 ${TMUX_POWERLINE_SEPARATOR_LEFT_BOLD} default 136" \
+		"tmux_mem_cpu_load default 136 ${TMUX_POWERLINE_SEPARATOR_LEFT_THIN} 33 0 right_disable separator_disable " \
+		"ifstat_sys 234 136 ${TMUX_POWERLINE_SEPARATOR_LEFT_BOLD} default 136 right_disable separator_disable " \
 		#"battery 137 127" \
-		# "weather 37 255" \
+		"weather 234 136 ${TMUX_POWERLINE_SEPARATOR_LEFT_BOLD} default 136 right_disable separator_disable " \
 		# "rainbarf 0 ${TMUX_POWERLINE_DEFAULT_FOREGROUND_COLOR}" \
 		#"xkb_layout 125 117" \
 		# "date_day 235 136" \

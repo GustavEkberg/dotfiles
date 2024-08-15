@@ -100,9 +100,8 @@ cmp.setup({
 			vim_item.menu = ({
 				nvim_lsp = "LSP",
 				luasnip = "Snippet",
-				-- buffer = "Buffer",
+				buffer = "Buffer",
 				path = "Path",
-				-- emoji = "Emoji",
 			})[entry.source.name]
 			return vim_item
 		end,
@@ -110,8 +109,8 @@ cmp.setup({
 	sources = {
 		{ name = "nvim_lsp" },
 		{ name = "nvim_lua" },
-		{ name = "luasnip" },
-		-- { name = "buffer" },
+		-- { name = "luasnip" },
+		{ name = "buffer" },
 		{ name = "path" },
 	},
 	confirm_opts = {

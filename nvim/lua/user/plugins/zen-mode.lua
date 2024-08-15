@@ -3,7 +3,7 @@ local zen = utils.call_plugin("zen-mode")
 
 zen.setup({
 	window = {
-		backdrop = 0.95, -- shade the backdrop of the Zen window. Set to 1 to keep the same as Normal
+		backdrop = 0.85, -- shade the backdrop of the Zen window. Set to 1 to keep the same as Normal
 		-- height and width can be:
 		-- * an absolute number of cells when > 1
 		-- * a percentage of the width / height of the editor when <= 1
@@ -15,11 +15,11 @@ zen.setup({
 		options = {
 			signcolumn = "yes", -- disable signcolumn
 			number = false, -- disable number column
-			-- relativenumber = false, -- disable relative numbers
-			-- cursorline = false, -- disable cursorline
-			-- cursorcolumn = false, -- disable cursor column
-			-- foldcolumn = "0", -- disable fold column
-			-- list = false, -- disable whitespace characters
+			relativenumber = false, -- disable relative numbers
+			cursorline = false, -- disable cursorline
+			cursorcolumn = false, -- disable cursor column
+			foldcolumn = "0", -- disable fold column
+			list = false, -- disable whitespace characters
 		},
 	},
 	plugins = {
@@ -27,7 +27,7 @@ zen.setup({
 		-- comment the lines to not apply the options
 		options = {
 			enabled = true,
-			ruler = false, -- disables the ruler text in the cmd line area
+			ruler = true, -- disables the ruler text in the cmd line area
 			showcmd = false, -- disables the command in the last line of the screen
 		},
 		twilight = { enabled = true }, -- enable to start Twilight when zen mode opens
@@ -38,13 +38,13 @@ zen.setup({
 		-- - allow_remote_control socket-only
 		-- - listen_on unix:/tmp/kitty
 		kitty = {
-			enabled = false,
+			enabled = true,
 			font = "+4", -- font size increment
 		},
 	},
 	-- callback where you can add custom code when the Zen window opens
 	on_open = function(win)
-		vim.cmd("colorscheme pencil")
+		-- vim.cmd("colorscheme pencil")
 	end,
 	-- callback where you can add custom code when the Zen window closes
 	on_close = function() end,
