@@ -62,10 +62,11 @@ telescope.setup({
 	},
   extensions = {
     fzf = {
+      hidden = true,                   -- show hidden files
       fuzzy = true,                    -- false will only do exact matching
       override_generic_sorter = true,  -- override the generic sorter
       override_file_sorter = true,     -- override the file sorter
-      case_mode = "smart_case",        -- or "ignore_case" or "respect_case"
+      case_mode = "ignore_case",        -- or "ignore_case" or "respect_case"
     }
   }
 })
@@ -82,7 +83,7 @@ telescope.load_extension('notify')
 wk.register({
 	f = {
 		name = "Telescope", -- group name
-		f = { ":Telescope find_files<CR>", "Search files" },
+    f = { function() require('telescope.builtin').find_files({hidden = true}) end, "Search files" },
 		d = { ":Telescope keymaps<CR>", "Search keymaps" },
 		c = { ":Telescope live_grep<CR>", "Search files contents" },
 		b = { ":Telescope buffers<CR>", "Search Buffers" },
