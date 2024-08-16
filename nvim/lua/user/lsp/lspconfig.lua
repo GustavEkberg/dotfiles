@@ -1,15 +1,23 @@
 local lspconfig = require('lspconfig')
-lspconfig.pyright.setup {}
+lspconfig.pyright.setup{
+  settings = {
+    python = {
+      analysis = {
+        typeCheckingMode = "off"
+      }
+    }
+  }
+}
 lspconfig.rust_analyzer.setup {
   -- Server-specific settings. See `:help lspconfig-setup`
   settings = {
     ['rust-analyzer'] = {
-        check = {
-            command = "clippy";
-        },
-        diagnostics = {
-            enable = true;
-        }
+      check = {
+        command = "clippy",
+      },
+      diagnostics = {
+        enable = true,
+      }
     },
   },
 }
@@ -21,7 +29,6 @@ vim.api.nvim_create_autocmd('LspAttach', {
   callback = function(ev)
     -- Enable completion triggered by <c-x><c-o>
     vim.bo[ev.buf].omnifunc = 'v:lua.vim.lsp.omnifunc'
-
   end,
 })
 
@@ -41,7 +48,7 @@ vim.api.nvim_create_autocmd("BufWritePre", {
 
 vim.api.nvim_create_autocmd("BufWritePre", {
   group = vim.api.nvim_create_augroup('UserLspConfig', {}),
-  pattern = {"*js","*.ts", "*.tsx"},
+  pattern = { "*js", "*.ts", "*.tsx" },
   callback = function()
     vim.api.nvim_command("EslintFixAll")
   end,
