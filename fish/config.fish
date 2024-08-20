@@ -13,6 +13,8 @@ alias wttr='curl wttr.in/Gothenburg'
 alias nn='cd /Users/abraxas/Dropbox/Notes/kkdvr && vim'
 alias python='python3'
 alias yd='yarn dev'
+alias tt='tmux attach -t vim || tmux new -s vim' 
+alias tp='tmux attach -t primary || tmux new -s primary' 
 
 set -x PATH $PATH $HOME/.cargo/bin
 set -x PATH $PATH /opt/homebrew/bin
