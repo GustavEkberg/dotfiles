@@ -84,6 +84,7 @@ return packer.startup({
 
 		-- Treesitter
 		use({ "nvim-treesitter/nvim-treesitter" })
+		use({ "nvim-treesitter/nvim-treesitter-context" })
 
 		-- LSP
 		use({ "neovim/nvim-lspconfig" }) -- enable LSP
