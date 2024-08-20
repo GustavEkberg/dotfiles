@@ -5,15 +5,20 @@ local act = wezterm.action
 
 local config = wezterm.config_builder()
 
-config.front_end = "WebGpu"
-
 -- Window configuration
-config.color_scheme = 'Tokyo Night'
-config.hide_tab_bar_if_only_one_tab = true
+-- config.color_scheme = 'Tokyo Night'
+config.font = wezterm.font('JetBrains Mono')
+config.enable_tab_bar = false
 
 config.window_decorations = "RESIZE"
 config.window_background_opacity = 0.9
 config.macos_window_background_blur = 30
+config.freetype_load_target = "Normal"
+
+config.inactive_pane_hsb = {
+  saturation = 0.6,
+  brightness = 0.6
+}
 
 -- Font configuration
 config.font_size = 13
@@ -49,28 +54,28 @@ wezterm.on('trigger-vim-with-scrollback', function(window, pane)
 end)
 
 -- Keybindings
-config.leader = { key = 'a', mods = 'CTRL' }
+config.leader = { key = 'x', mods = 'CTRL' }
 config.keys = {
   {
-    key="n", 
-    mods="LEADER", 
-    action=act.ActivateTabRelative(1)
+    key = "n",
+    mods = "LEADER",
+    action = act.ActivateTabRelative(1)
   },
-  {
-    key="v", 
-    mods="LEADER", 
-    action=act{SplitVertical={domain="CurrentPaneDomain"}}
-  },
-  {
-    key="s", 
-    mods="LEADER", 
-    action=act{SplitHorizontal={domain="CurrentPaneDomain"}}
-  },
-  {
-    key = 'p',
-    mods = 'LEADER',
-    action = act.ActivateCommandPalette,
-  },
+  -- {
+  --   key="v",
+  --   mods="LEADER",
+  --   action=act{SplitVertical={domain="CurrentPaneDomain"}}
+  -- },
+  -- {
+  --   key="h",
+  --   mods="LEADER",
+  --   action=act{SplitHorizontal={domain="CurrentPaneDomain"}}
+  -- },
+  -- {
+  --   key = 'p',
+  --   mods = 'LEADER',
+  --   action = act.ActivateCommandPalette,
+  -- },
   {
     key = 'e',
     mods = 'LEADER',
