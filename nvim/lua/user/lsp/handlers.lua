@@ -98,7 +98,7 @@ local function lsp_keymaps(bufnr)
 			h = { ":LspHover<CR>", "Hover" },
 			f = { "<cmd>lua vim.lsp.buf.format({ async = true })<cr>", "Format code" },
 			r = { ":LspRename<CR>", "Rename Variable" },
-			s = { ":lua vim.lsp.buf.code_action()<CR>", "Show Actions (extract code, move to file, etc)" },
+			a = { ":lua vim.lsp.buf.code_action()<CR>", "Show Actions (extract code, move to file, etc)" },
 		},
 		i = {
 			name = "Issues", -- group name
