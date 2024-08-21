@@ -14,12 +14,6 @@ config.window_decorations = "RESIZE"
 config.window_background_opacity = 0.8
 config.macos_window_background_blur = 30
 config.freetype_load_target = "Normal"
--- config.disable_default_key_bindings = true
-
-config.inactive_pane_hsb = {
-  saturation = 0.6,
-  brightness = 0.6
-}
 
 -- Font configuration
 config.font_size = 13
