@@ -6,7 +6,7 @@ local act = wezterm.action
 local config = wezterm.config_builder()
 
 -- Window configuration
--- config.color_scheme = 'Tokyo Night'
+config.color_scheme = 'deep'
 config.font = wezterm.font('JetBrains Mono')
 config.enable_tab_bar = false
 
@@ -18,15 +18,6 @@ config.freetype_load_target = "Normal"
 -- Font configuration
 config.font_size = 13
 
-config.mouse_bindings = {
-	-- CMD-click will open the link under the mouse cursor
-	{
-		event = { Up = { streak = 1, button = "Left" } },
-		mods = "NONE",
-		action = act.OpenLinkAtMouseCursor,
-	},
-}
-
 -- Events
 wezterm.on('trigger-vim-with-scrollback', function(window, pane)
   -- Retrieve the text from the pane
@@ -35,6 +26,9 @@ wezterm.on('trigger-vim-with-scrollback', function(window, pane)
   -- Create a temporary file to pass to vim
   local name = os.tmpname()
   local f = io.open(name, 'w+')
+  if f == nil then
+    return
+  end
   f:write(text)
   f:flush()
   f:close()

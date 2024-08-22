@@ -4,7 +4,9 @@
 add_newline = true
 
 [character] 
-success_symbol = '[➜](bold green)'
+success_symbol = '[→](bold green)'
+vimcmd_symbol = '[←](bold gray)' 
+error_symbol = '[✗](bold red)'
 
 [aws]
 disabled = true
@@ -21,11 +23,11 @@ disabled = true
 [nodejs]
 disabled = true
 
-[git_status]
-disabled = true
-
 [git_metrics]
 disabled = false
 added_style = 'bold blue'
 format = '(([+$added]($added_style))/[-$deleted]($deleted_style) )'
-only_nonzero_diffs = false
+only_nonzero_diffs = true
+
+[git_status]
+disabled = true
