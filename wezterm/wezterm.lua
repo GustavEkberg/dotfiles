@@ -18,6 +18,15 @@ config.freetype_load_target = "Normal"
 -- Font configuration
 config.font_size = 13
 
+config.mouse_bindings = {
+	-- CMD-click will open the link under the mouse cursor
+	{
+		event = { Up = { streak = 1, button = "Left" } },
+		mods = "NONE",
+		action = act.OpenLinkAtMouseCursor,
+	},
+}
+
 -- Events
 wezterm.on('trigger-vim-with-scrollback', function(window, pane)
   -- Retrieve the text from the pane
@@ -51,26 +60,6 @@ end)
 -- Keybindings
 config.leader = { key = 'x', mods = 'CTRL' }
 config.keys = {
-  {
-    key = "n",
-    mods = "LEADER",
-    action = act.ActivateTabRelative(1)
-  },
-  -- {
-  --   key="v",
-  --   mods="LEADER",
-  --   action=act{SplitVertical={domain="CurrentPaneDomain"}}
-  -- },
-  -- {
-  --   key="h",
-  --   mods="LEADER",
-  --   action=act{SplitHorizontal={domain="CurrentPaneDomain"}}
-  -- },
-  -- {
-  --   key = 'p',
-  --   mods = 'LEADER',
-  --   action = act.ActivateCommandPalette,
-  -- },
   {
     key = 'e',
     mods = 'LEADER',

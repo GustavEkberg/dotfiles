@@ -9,7 +9,10 @@ after-login-command = []
 # You can use it to add commands that run after AeroSpace startup.
 # 'after-startup-command' is run after 'after-login-command'
 # Available commands : https://nikitabobko.github.io/AeroSpace/commands
-after-startup-command = []
+after-startup-command = [
+    'exec-and-forget borders active_color=0xffe78a4e inactive_color=0xff404344 width=5.0',
+    'workspace 1'
+]
 
 # Start AeroSpace at login
 start-at-login = true
@@ -110,6 +113,8 @@ alt-shift-l = 'move right'
 alt-ctrl-shift-f18 = 'resize smart -50'
 alt-ctrl-shift-f19 = 'resize smart +50'
 
+alt-ctrl-shift-h = 'balance-sizes'
+
 
 # See: https://nikitabobko.github.io/AeroSpace/commands#workspace
 alt-f1 = 'workspace 1'
@@ -179,3 +184,47 @@ alt-shift-j = ['join-with down', 'mode main']
 alt-shift-k = ['join-with up', 'mode main']
 alt-shift-l = ['join-with right', 'mode main']
 
+# Specific applications configuration
+[[on-window-detected]]
+if.app-name-regex-substring = 'Finder'
+run = 'layout floating'
+
+[[on-window-detected]]
+if.app-name-regex-substring = '1Password'
+run = 'layout floating'
+
+[[on-window-detected]]
+if.app-name-regex-substring = 'Telegram'
+run = 'move-node-to-workspace S'
+
+[[on-window-detected]]
+if.app-name-regex-substring = 'Slack'
+run = 'move-node-to-workspace W'
+
+[[on-window-detected]]
+if.app-name-regex-substring = 'Mail'
+run = 'move-node-to-workspace C'
+
+[[on-window-detected]]
+if.app-name-regex-substring = 'Calendar'
+run = 'move-node-to-workspace C'
+
+[[on-window-detected]]
+if.app-name-regex-substring = 'Keyboard Maestro'
+run = 'move-node-to-workspace K'
+
+[[on-window-detected]]
+if.app-name-regex-substring = 'Vial'
+run = 'move-node-to-workspace K'
+
+[[on-window-detected]]
+if.app-name-regex-substring = 'Postico'
+run = 'move-node-to-workspace D'
+
+[[on-window-detected]]
+if.app-name-regex-substring = 'Bruno'
+run = 'move-node-to-workspace D'
+
+[[on-window-detected]]
+if.app-name-regex-substring = 'Spotify'
+run = 'move-node-to-workspace M'
