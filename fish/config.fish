@@ -2,6 +2,8 @@ fish_vi_key_bindings
 
 source $HOME/.config/fish/connections.sh
 set -g fish_greeting
+set -x LANG en_US.UTF-8
+
 
 
 alias vim='nvim'

@@ -80,33 +80,26 @@ local function lsp_keymaps(bufnr)
 	u.buf_command(bufnr, "LspDiagNext", vim.diagnostic.goto_next)
 	u.buf_command(bufnr, "LspDiagQuickfix", vim.diagnostic.setqflist)
 
-	wk.register({
-		j = {
-			name = "Jump to..", -- group name
-			i = { ":LspImplementation<CR>", "Implementation" },
-			r = { ":Telescope lsp_references<CR>", "References" },
-			R = { ":lua require('goto-preview').goto_preview_references()<CR>", "Preview references" },
-			d = { ":LspDefinition<CR>", "Definition" },
-			s = { "<CMD>:vs<CR>:LspDefinition<CR>", "Vertical Split Definition" },
-			S = { "<CMD>:sp<CR>:LspDefinition<CR>", "Split Definition" },
-
-			D = { ":lua require('goto-preview').goto_preview_definition()<CR>", "Preview definition" },
-			t = { ":LspTypeDefinition<CR>", "Type Definition" },
-		},
-		a = {
-			name = "Actions", -- group name
-			h = { ":LspHover<CR>", "Hover" },
-			f = { "<cmd>lua vim.lsp.buf.format({ async = true })<cr>", "Format code" },
-			r = { ":LspRename<CR>", "Rename Variable" },
-			a = { ":lua vim.lsp.buf.code_action()<CR>", "Show Actions (extract code, move to file, etc)" },
-		},
-		i = {
-			name = "Issues", -- group name
-			d = { ":LspDiagLine<CR>", "Show Diagnostics" },
-			N = { ":LspDiagPrev<CR>", "Show Previous Diagnostic" },
-			n = { ":LspDiagNext<CR>", "Show Next Diagnostic" },
-		},
-	}, { prefix = "<leader>" })
+	wk.add({
+      { "<leader>a", group = "Actions" },
+    { "<leader>aa", ":lua vim.lsp.buf.code_action()<CR>", desc = "Show Actions (extract code, move to file, etc)" },
+    { "<leader>af", "<cmd>lua vim.lsp.buf.format({ async = true })<cr>", desc = "Format code" },
+    { "<leader>ah", ":LspHover<CR>", desc = "Hover" },
+    { "<leader>ar", ":LspRename<CR>", desc = "Rename Variable" },
+    { "<leader>i", group = "Issues" },
+    { "<leader>iN", ":LspDiagPrev<CR>", desc = "Show Previous Diagnostic" },
+    { "<leader>id", ":LspDiagLine<CR>", desc = "Show Diagnostics" },
+    { "<leader>in", ":LspDiagNext<CR>", desc = "Show Next Diagnostic" },
+    { "<leader>j", group = "Jump to.." },
+    { "<leader>jD", ":lua require('goto-preview').goto_preview_definition()<CR>", desc = "Preview definition" },
+    { "<leader>jR", ":lua require('goto-preview').goto_preview_references()<CR>", desc = "Preview references" },
+    { "<leader>jS", "<CMD>:sp<CR>:LspDefinition<CR>", desc = "Split Definition" },
+    { "<leader>jd", ":LspDefinition<CR>", desc = "Definition" },
+    { "<leader>ji", ":LspImplementation<CR>", desc = "Implementation" },
+    { "<leader>jr", ":Telescope lsp_references<CR>", desc = "References" },
+    { "<leader>js", "<CMD>:vs<CR>:LspDefinition<CR>", desc = "Vertical Split Definition" },
+    { "<leader>jt", ":LspTypeDefinition<CR>", desc = "Type Definition" },
+  })
 end
 
 local augroup = vim.api.nvim_create_augroup("LspFormatting", {})
