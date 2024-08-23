@@ -15,6 +15,8 @@ config.window_background_opacity = 0.8
 config.macos_window_background_blur = 30
 config.freetype_load_target = "Normal"
 
+-- config.default_cursor_style = "BlinkingBlock"
+
 -- Font configuration
 config.font_size = 13
 

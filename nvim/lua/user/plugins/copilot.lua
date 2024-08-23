@@ -47,12 +47,10 @@ copilot.setup({
 
 local wk = require("which-key")
 
-wk.register({
-  c = {
-    name = "Copilot",
-    e = { '<cmd>:lua require("copilot.suggestion").toggle_auto_trigger()<CR>', "Enable/Disable" },
-    c = { '<cmd>Copilot<CR>', "Copilot" },
-  },
+wk.add({
+  { "<leader>c",  group = "Copilot" },
+  { "<leader>cc", "<cmd>Copilot<CR>",                                                  desc = "Copilot" },
+  { "<leader>ce", '<cmd>:lua require("copilot.suggestion").toggle_auto_trigger()<CR>', desc = "Enable/Disable" },
 }, { prefix = "<leader>" })
 
 -- require("copilot_cmp").setup()

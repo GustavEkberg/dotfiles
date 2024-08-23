@@ -199,11 +199,10 @@ trouble.setup({
 -- ----------- REMAPS --------------
 -- ---------------------------------
 local wk = require("which-key")
-wk.register({
-	i = {
-		name = "Issues",
-		i = { "<cmd>Trouble diagnostics toggle<CR>", "Show issues via Trouble" },
-		a = { "<cmd>Trouble workspace_diagnostics<CR>", "Trouble all files" },
-		f = { "<cmd>Trouble quickfix<CR>", "Trouble quickfix" },
-	},
-}, { prefix = "<leader>" })
+wk.add({
+      { "<leader>i", group = "Issues" },
+    { "<leader>ia", "<cmd>Trouble workspace_diagnostics<CR>", desc = "Trouble all files" },
+    { "<leader>if", "<cmd>Trouble quickfix<CR>", desc = "Trouble quickfix" },
+    { "<leader>ii", "<cmd>Trouble diagnostics toggle<CR>", desc = "Show issues via Trouble" },
+
+})
