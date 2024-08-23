@@ -1,6 +1,5 @@
 local servers = {
   "pyright",
-  "tailwindcss",
 	"html",
   "tailwindcss",
 	"prismals",

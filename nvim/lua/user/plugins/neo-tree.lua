@@ -269,8 +269,8 @@ neo_tree.setup({
   }
 })
 
-wk = require("which-key")
+local wk = utils.call_plugin("which-key")
 
 wk.add({
-  { "<leader>e", desc = "<cmd>Neotree toggle float reveal<CR>" },
+  { "<leader>e", "<cmd>Neotree toggle float reveal<cr>", desc ="Neotree" },
 })

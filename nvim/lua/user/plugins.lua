@@ -75,8 +75,6 @@ return packer.startup({
 		use({ "L3MON4D3/LuaSnip" }) --snippet engine
 		use({ "honza/vim-snippets" })
 
-		use({ "jackMort/ChatGPT.nvim" })
-
 		-- Telescope
 		use({ "nvim-telescope/telescope.nvim" })
 		use({ "nvim-telescope/telescope-file-browser.nvim" })
@@ -102,7 +100,6 @@ return packer.startup({
 		use({ "hrsh7th/cmp-path" }) -- path completions
 		use({ "hrsh7th/cmp-nvim-lsp" })
 		use({ "hrsh7th/cmp-nvim-lua" })
-		use({ "prettier/vim-prettier" })
 
 		use({ "zbirenbaum/copilot.lua" }) -- github copilot
 		-- use({ "zbirenbaum/copilot-cmp" }) 
