@@ -39,3 +39,10 @@ gitsigns.setup({
     col = 1,
   }
 })
+
+local wk = require("which-key")
+wk.add({
+  { "<leader>g",  group = "Git" },
+  { "<leader>gf", "<cmd>Gitsigns blame<CR>", desc = "Blame file" },
+  { "<leader>gb", "<cmd>Gitsigns blame_line<CR>", desc = "Blame line" },
+})

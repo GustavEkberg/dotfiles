@@ -94,6 +94,7 @@ outer.right =      7
 # alt-comma = 'layout accordion horizontal'
 
 alt-ctrl-shift-f15 = 'layout tiles accordion horizontal'
+alt-ctrl-shift-f20 = 'layout tiles vertical'
 alt-ctrl-shift-f16 = 'fullscreen'
 
 # See: https://nikitabobko.github.io/AeroSpace/commands#focus

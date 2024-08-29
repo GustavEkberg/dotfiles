@@ -74,6 +74,5 @@ end
 local wk = require("which-key")
 
 wk.add({
-  { "<leader>g",  group = "Toggleterm" },
   { "<leader>go", "<cmd>lua _LAZYGIT_TOGGLE()<CR>", desc = "Lazygit" },
 })

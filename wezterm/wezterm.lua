@@ -19,6 +19,7 @@ config.freetype_load_target = "Normal"
 
 -- Font configuration
 config.font_size = 13
+config.harfbuzz_features = { 'calt=0', 'clig=0', 'liga=0' }
 
 -- Events
 wezterm.on('trigger-vim-with-scrollback', function(window, pane)
