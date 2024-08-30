@@ -1,5 +1,6 @@
 local lspconfig = require('lspconfig')
-lspconfig.pyright.setup{
+local wk = require('which-key')
+lspconfig.pyright.setup {
   settings = {
     python = {
       analysis = {
@@ -21,6 +22,14 @@ lspconfig.rust_analyzer.setup {
     },
   },
 }
+lspconfig.eslint.setup({
+  on_attach = function(client, bufnr)
+    wk.add({
+      { "<leader>af", "<cmd>EslintFixAll<cr>", desc = "Format code with eslint" },
+    })
+  end,
+})
+
 
 -- Use LspAttach autocommand to only map the following keys
 -- after the language server attaches to the current buffer
