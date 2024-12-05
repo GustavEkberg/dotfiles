@@ -1,35 +1,32 @@
 local utils = require("user.utils")
-local harpoon = utils.call_plugin("harpoon")
-harpoon.setup({
-    -- sets the marks upon calling `toggle` on the ui, instead of require `:w`.
-    save_on_toggle = false,
 
-    -- saves the harpoon file upon every change. disabling is unrecommended.
-    save_on_change = true,
+local harpoon = require("harpoon")
 
-    -- sets harpoon to run the command immediately as it's passed to the terminal when calling `sendCommand`.
-    enter_on_sendcmd = false,
-
-    -- closes any tmux windows harpoon that harpoon creates when you close Neovim.
-    tmux_autoclose_windows = false,
-
-    -- filetypes that you want to prevent from adding to the harpoon list menu.
-    excluded_filetypes = { "harpoon" },
-
-    -- set marks specific to each git branch inside git repository
-    mark_branch = false,
-
-    -- enable tabline with harpoon marks
-    tabline = false,
-    tabline_prefix = "   ",
-    tabline_suffix = "   ",
+-- Ensure to include the proper parameters in the setup call:
+harpoon:setup({
+    settings = {
+        -- These should be booleans inside the settings table
+        save_on_toggle = true,
+        sync_on_ui_close = true,
+    },
 })
+vim.keymap.set("n", "<S-F1>", function() harpoon:list():select(1) end, { noremap = true, silent = true })
+vim.keymap.set("n", "<S-F2>", function() harpoon:list():select(2) end, { noremap = true, silent = true })
+vim.keymap.set("n", "<S-F3>", function() harpoon:list():select(3) end, { noremap = true, silent = true })
+vim.keymap.set("n", "<S-F4>", function() harpoon:list():select(4) end, { noremap = true, silent = true })
+vim.keymap.set("n", "<S-F5>", function() harpoon:list():select(5) end, { noremap = true, silent = true })
+vim.keymap.set("n", "<S-F6>", function() harpoon:list():select(6) end, { noremap = true, silent = true })
+vim.keymap.set("n", "<S-F7>", function() harpoon:list():select(7) end, { noremap = true, silent = true })
+vim.keymap.set("n", "<S-F8>", function() harpoon:list():select(8) end, { noremap = true, silent = true })
+vim.keymap.set("n", "<S-F9>", function() harpoon:list():select(9) end, { noremap = true, silent = true })
 
 local wk = utils.call_plugin("which-key")
-wk.add({
+if (wk == nil) then
+    return
+end
+  wk.add({
     { "<leader>b", group = "Harpoon" },
-    { "<leader>ba", "<cmd>lua require('harpoon.mark').add_file()<CR>", desc = "Add file to Harpoon" },
-    { "<leader>bb", "<cmd>lua require('harpoon.ui').nav_next()<CR>", desc = "Navigate to next file" },
-    { "<leader>bd", "<cmd>Telescope harpoon marks<CR>", desc = "Toggle Telescope menu" },
-    { "<leader>bs", "<cmd>lua require('harpoon.ui').toggle_quick_menu()<CR>", desc = "Toggle menu" },
+    { "<leader>ba", function() harpoon:list():add() end, desc = "Add file to Harpoon" },
+    { "<leader>bb", function() harpoon:list():next() end, desc = "Navigate to next file" },
+    { "<leader>bs", function() harpoon.ui:toggle_quick_menu(harpoon:list()) end, desc = "Toggle menu" },
 })

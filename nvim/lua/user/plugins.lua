@@ -42,7 +42,7 @@ return packer.startup({
 
 		use({ "numToStr/Comment.nvim" }) -- Comment lines
 
-    use({ "ThePrimeagen/harpoon"})
+    use({ "ThePrimeagen/harpoon", branch="harpoon2"})
     use({ "lukas-reineke/indent-blankline.nvim"})
 
 		use({ "akinsho/toggleterm.nvim" })
