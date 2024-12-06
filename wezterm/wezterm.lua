@@ -14,7 +14,19 @@ config.window_decorations = "RESIZE"
 config.window_background_opacity = 0.8
 config.macos_window_background_blur = 30
 config.freetype_load_target = "Normal"
-
+config.mouse_bindings = {
+	-- CMD-click will open the link under the mouse cursor
+	{
+		event = { Up = { streak = 1, button = "Left" } },
+		mods = "SUPER",
+		action = wezterm.action.OpenLinkAtMouseCursor,
+	},
+}
+wezterm.on("open-uri", function(window, pane, uri)
+	wezterm.log_info(window)
+	wezterm.log_info(pane)
+	wezterm.log_info(uri)
+end)
 -- config.default_cursor_style = "BlinkingBlock"
 
 -- Font configuration
