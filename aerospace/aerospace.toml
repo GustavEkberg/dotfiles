@@ -154,8 +154,8 @@ alt-shift-s = 'move-node-to-workspace S'
 alt-shift-t = 'move-node-to-workspace T'
 alt-shift-u = 'move-node-to-workspace U'
 alt-shift-v = 'move-node-to-workspace V'
-alt-shift-w = 'move-node-to-workspace W'
 alt-shift-x = 'move-node-to-workspace X'
+alt-shift-w = 'move-node-to-workspace W'
 alt-shift-y = 'move-node-to-workspace Y'
 alt-shift-z = 'move-node-to-workspace Z'
 
@@ -198,6 +198,10 @@ if.app-name-regex-substring = 'Telegram'
 run = 'move-node-to-workspace S'
 
 [[on-window-detected]]
+if.app-name-regex-substring = 'WezTerm'
+run = 'move-node-to-workspace 1'
+
+[[on-window-detected]]
 if.app-name-regex-substring = 'Slack'
 run = 'move-node-to-workspace W'
 
@@ -216,6 +220,10 @@ run = 'move-node-to-workspace K'
 [[on-window-detected]]
 if.app-name-regex-substring = 'Vial'
 run = 'move-node-to-workspace K'
+
+[[on-window-detected]]
+if.app-name-regex-substring = 'Obsidian'
+run = 'move-node-to-workspace N'
 
 [[on-window-detected]]
 if.app-name-regex-substring = 'Postico'

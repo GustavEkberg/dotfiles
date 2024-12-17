@@ -53,7 +53,6 @@ return packer.startup({
 
     use({ "rcarriga/nvim-notify"})
     use({ "MunifTanjim/nui.nvim"})
-    
 		use({ "folke/zen-mode.nvim" })
 		use({ "folke/noice.nvim" })
 
@@ -107,6 +106,7 @@ return packer.startup({
 
     use({ "ggandor/leap.nvim" }) -- jump to any character
 
+    use({ "iamcco/markdown-preview.nvim", run = "cd app && npm install", setup = function() vim.g.mkdp_filetypes = { "markdown" } end, ft = { "markdown" }, })
 	end,
 	config = {
 		display = {

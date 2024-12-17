@@ -7,8 +7,9 @@ local config = wezterm.config_builder()
 
 -- Window configuration
 config.color_scheme = 'deep'
-config.font = wezterm.font('JetBrains Mono')
+config.font = wezterm.font('MesloLGS Nerd Font Mono')
 config.enable_tab_bar = false
+config.font_size = 14
 
 config.window_decorations = "RESIZE"
 config.window_background_opacity = 0.8
@@ -30,7 +31,6 @@ end)
 -- config.default_cursor_style = "BlinkingBlock"
 
 -- Font configuration
-config.font_size = 13
 config.harfbuzz_features = { 'calt=0', 'clig=0', 'liga=0' }
 
 -- Events

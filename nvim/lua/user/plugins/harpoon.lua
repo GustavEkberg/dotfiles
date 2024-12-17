@@ -27,6 +27,6 @@ end
   wk.add({
     { "<leader>b", group = "Harpoon" },
     { "<leader>ba", function() harpoon:list():add() end, desc = "Add file to Harpoon" },
-    { "<leader>bb", function() harpoon:list():next() end, desc = "Navigate to next file" },
-    { "<leader>bs", function() harpoon.ui:toggle_quick_menu(harpoon:list()) end, desc = "Toggle menu" },
+    { "<leader>bs", function() harpoon:list():next() end, desc = "Navigate to next file" },
+    { "<leader>bb", function() harpoon.ui:toggle_quick_menu(harpoon:list()) end, desc = "Toggle menu" },
 })
