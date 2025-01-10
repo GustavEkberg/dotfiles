@@ -198,16 +198,16 @@ if.app-name-regex-substring = 'Telegram'
 run = 'move-node-to-workspace S'
 
 [[on-window-detected]]
-if.app-name-regex-substring = 'WezTerm'
-run = 'move-node-to-workspace 1'
-
-[[on-window-detected]]
 if.app-name-regex-substring = 'Slack'
 run = 'move-node-to-workspace W'
 
 [[on-window-detected]]
 if.app-name-regex-substring = 'Mail'
 run = 'move-node-to-workspace C'
+
+[[on-window-detected]]
+if.app-name-regex-substring = 'Raycast'
+run = 'move-node-to-workspace I'
 
 [[on-window-detected]]
 if.app-name-regex-substring = 'Calendar'
