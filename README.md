@@ -3,4 +3,4 @@ My config files for:
 - [fish](https://fishshell.com/)
 - [starship](https://starship.rs/)
 - tmux & powerline
-- [planck](https://olkb.com/collections/planck) keeb layout
+- [corne-w](https://github.com/foostan/crkbd) keeb layout
