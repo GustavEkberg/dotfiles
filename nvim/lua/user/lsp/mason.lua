@@ -33,9 +33,6 @@ require("mason-lspconfig").setup({
 	ensure_installed = servers,
 	automatic_installation = true,
 })
-local on_attach = require("user.lsp.handlers").on_attach
-local capabilities = require("user.lsp.handlers").capabilities
-
 
 local lspconfig_status_ok, lspconfig = pcall(require, "lspconfig")
 if not lspconfig_status_ok then
