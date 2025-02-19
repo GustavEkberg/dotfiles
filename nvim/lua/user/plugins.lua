@@ -58,6 +58,15 @@ return packer.startup({
 
     use({ "glepnir/dashboard-nvim" }) -- startup
 
+    -- Avante
+    use({ "MeanderingProgrammer/render-markdown.nvim"})
+		use({ "zbirenbaum/copilot.lua" }) -- github copilot
+    use({ "HakonHarnes/img-clip.nvim"})
+    use({ "yetone/avante.nvim",
+      branch = 'main',
+      run = 'make',
+    })
+
 		-- Git
 		use({ "kdheepak/lazygit.nvim" })
 		use({ "lewis6991/gitsigns.nvim" })
@@ -100,7 +109,6 @@ return packer.startup({
 		use({ "hrsh7th/cmp-nvim-lsp" })
 		use({ "hrsh7th/cmp-nvim-lua" })
 
-		use({ "zbirenbaum/copilot.lua" }) -- github copilot
 		-- use({ "zbirenbaum/copilot-cmp" }) 
 		-- use({ "github/copilot.vim" }) 
 

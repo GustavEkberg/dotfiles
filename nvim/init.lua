@@ -6,6 +6,7 @@ require("user.options")
 require("user.plugins")
 
 require("user.plugins.autopairs")
+require("user.plugins.avante")
 require("user.plugins.indent-blankline")
 require("user.plugins.cmp")
 require("user.plugins.typescript-tools")

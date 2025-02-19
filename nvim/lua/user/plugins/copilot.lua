@@ -44,13 +44,3 @@ copilot.setup({
   copilot_node_command = 'node', -- Node.js version must be > 16.x
   server_opts_overrides = {},
 })
-
-local wk = require("which-key")
-
-wk.add({
-  { "<leader>c",  group = "Copilot" },
-  { "<leader>cc", "<cmd>Copilot<CR>",                                                  desc = "Copilot" },
-  { "<leader>ce", '<cmd>:lua require("copilot.suggestion").toggle_auto_trigger()<CR>', desc = "Enable/Disable" },
-}, { prefix = "<leader>" })
-
--- require("copilot_cmp").setup()
