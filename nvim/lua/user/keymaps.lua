@@ -32,6 +32,11 @@ keymap("v", "U", "<nop>")
 local utils = require("user.utils")
 local wk = utils.call_plugin("which-key")
 
+-- Registers
+local esc = vim.api.nvim_replace_termcodes("<Esc>", true,true, true)
+vim.fn.setreg("l","yoconsole.log('" .. esc .. "pa:'," .. esc .. "pa)" .. esc)
+vim.fn.setreg("k","yoconsole.log('" .. esc .. "pa:'," .. esc .. "pa)" .. esc .. "dd" .. esc)
+
 
 -- UUIDs
 local insert_lowercase_uuid = function()
