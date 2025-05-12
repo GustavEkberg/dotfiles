@@ -1,5 +1,7 @@
 local lspconfig = require('lspconfig')
 local wk = require('which-key')
+
+-- Configure LSP servers using the traditional lspconfig approach
 lspconfig.pyright.setup {
   settings = {
     python = {
@@ -9,6 +11,7 @@ lspconfig.pyright.setup {
     }
   }
 }
+
 lspconfig.rust_analyzer.setup {
   -- Server-specific settings. See `:help lspconfig-setup`
   settings = {
@@ -22,6 +25,7 @@ lspconfig.rust_analyzer.setup {
     },
   },
 }
+
 lspconfig.eslint.setup({
   on_attach = function(client, bufnr)
     wk.add({

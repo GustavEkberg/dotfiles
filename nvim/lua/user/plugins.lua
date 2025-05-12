@@ -58,7 +58,7 @@ return packer.startup({
 
     -- use({ "glepnir/dashboard-nvim" }) -- startup
 
-    
+
     use({ "augmentcode/augment.vim"})
 
     -- Avante
@@ -97,8 +97,8 @@ return packer.startup({
 
 		-- LSP
 		use({ "neovim/nvim-lspconfig" }) -- enable LSP
-		use({ "williamboman/mason.nvim" })
-		use({ "williamboman/mason-lspconfig.nvim" })
+		use({ "mason-org/mason.nvim" })
+		use({ "mason-org/mason-lspconfig.nvim" })
 		use({ "pmizio/typescript-tools.nvim" }) -- Import all missing imports, refactor on move, etc.
 		use({ "b0o/schemastore.nvim" }) -- import json schemas from SchemaStore catalog
 		use({ "folke/trouble.nvim" }) -- show diagnostics
@@ -112,8 +112,8 @@ return packer.startup({
 		use({ "hrsh7th/cmp-nvim-lsp" })
 		use({ "hrsh7th/cmp-nvim-lua" })
 
-		-- use({ "zbirenbaum/copilot-cmp" }) 
-		-- use({ "github/copilot.vim" }) 
+		-- use({ "zbirenbaum/copilot-cmp" })
+		-- use({ "github/copilot.vim" })
 
     use({ "ggandor/leap.nvim" }) -- jump to any character
 
