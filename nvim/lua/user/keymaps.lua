@@ -62,4 +62,7 @@ wk.add({
     { "<leader>md", insert_lowercase_uuid, desc = "Insert UUID" },
     { "<leader>mm", "<cmd>wincmd =<CR>", desc = "Resize windows" },
     { "<leader>mz", "<cmd>ZenMode<CR>", desc = "Zen Mode" },
+    { "<leader>mp", "<cmd>OptimizeBuffer<CR>", desc = "Performance mode (optimize)" },
+    { "<leader>mr", "<cmd>RestoreBuffer<CR>", desc = "Restore normal mode" },
+    { "<leader>mc", "<cmd>ToggleCompletion<CR>", desc = "Toggle completion" },
 })

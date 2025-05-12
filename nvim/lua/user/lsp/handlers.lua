@@ -25,14 +25,24 @@ M.setup = function()
 		{ name = "DiagnosticSignInfo", text = "" },
 	}
 
-	for _, sign in ipairs(signs) do
-		vim.fn.sign_define(sign.name, { texthl = sign.name, text = sign.text, numhl = "" })
-	end
+	-- Set up diagnostic signs using the modern approach
+	local diagnostic_icons = {
+		[vim.diagnostic.severity.ERROR] = signs[1].text,
+		[vim.diagnostic.severity.WARN] = signs[2].text,
+		[vim.diagnostic.severity.HINT] = signs[3].text,
+		[vim.diagnostic.severity.INFO] = signs[4].text,
+	}
 
 	local config = {
 		virtual_text = true, -- disable virtual text
 		signs = {
-			active = signs, -- show signs
+			text = diagnostic_icons,
+			texthl = {
+				[vim.diagnostic.severity.ERROR] = "DiagnosticSignError",
+				[vim.diagnostic.severity.WARN] = "DiagnosticSignWarn",
+				[vim.diagnostic.severity.HINT] = "DiagnosticSignHint",
+				[vim.diagnostic.severity.INFO] = "DiagnosticSignInfo",
+			},
 		},
 		update_in_insert = true,
 		underline = true,
