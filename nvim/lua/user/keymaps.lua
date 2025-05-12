@@ -44,6 +44,11 @@ local insert_lowercase_uuid = function()
   vim.api.nvim_put({uuid}, 'c', true, true)
 end
 
+-- Augment
+keymap('i', '<C-l>', function() vim.api.nvim_call_function('augment#Accept', {}) end, { noremap = true })
+
+
+
 wk.add({
     { "<leader>R", "<cmd>LspRestart<CR>", desc = "Restart LSP" },
     { "<leader>W", "<C-w>W", desc = "Focus Previous window" },
@@ -52,6 +57,8 @@ wk.add({
     { "<leader>w", "<C-w>w", desc = "Focus next window" },
 
     { "<leader>m", group = "Homemade" },
+    { "<leader>ms", "<cmd>Augment chat-toggle<CR>", desc="Augment chat"},
+    { "<leader>ma", "<cmd>Augment chat<CR>", desc="Augment message"},
     { "<leader>md", insert_lowercase_uuid, desc = "Insert UUID" },
     { "<leader>mm", "<cmd>wincmd =<CR>", desc = "Resize windows" },
     { "<leader>mz", "<cmd>ZenMode<CR>", desc = "Zen Mode" },

@@ -39,3 +39,7 @@ vim.opt.updatetime = 300 -- faster completion (4000ms default)
 vim.opt.spell = true
 vim.opt.spelllang = {"en_gb"}
 vim.opt.spelloptions = "camel"
+
+-- Augmented
+vim.g.augment_workspace_folders = {"/Users/abraxas/code/sl/australis"}
+

@@ -56,16 +56,19 @@ return packer.startup({
 		use({ "folke/zen-mode.nvim" })
 		use({ "folke/noice.nvim" })
 
-    use({ "glepnir/dashboard-nvim" }) -- startup
+    -- use({ "glepnir/dashboard-nvim" }) -- startup
+
+    
+    use({ "augmentcode/augment.vim"})
 
     -- Avante
     use({ "MeanderingProgrammer/render-markdown.nvim"})
-		use({ "zbirenbaum/copilot.lua" }) -- github copilot
-    use({ "HakonHarnes/img-clip.nvim"})
-    use({ "yetone/avante.nvim",
-      branch = 'main',
-      run = 'make',
-    })
+		-- use({ "zbirenbaum/copilot.lua" }) -- github copilot
+  --   use({ "HakonHarnes/img-clip.nvim"})
+  --   use({ "yetone/avante.nvim",
+  --     branch = 'main',
+  --     run = 'make',
+  --   })
 
 		-- Git
 		use({ "kdheepak/lazygit.nvim" })
