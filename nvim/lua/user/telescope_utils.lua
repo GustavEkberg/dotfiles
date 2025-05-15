@@ -19,9 +19,29 @@ end
 -- Smart find_files function that uses git if available
 function M.smart_find_files()
   local opts = {}
-  
+
   if M.is_git_repo() then
     -- Use git_files which is much faster in git repos
+    opts.show_untracked = true -- Show untracked files too
+    require("telescope.builtin").git_files(opts)
+  else
+    -- Fall back to find_files for non-git repos
+    opts.hidden = true
+    require("telescope.builtin").find_files(opts)
+  end
+end
+
+-- Fuzzy find files with better performance
+function M.fuzzy_find_files()
+  local opts = {
+    fuzzy = true,
+    previewer = false, -- No previewer for speed
+    shorten_path = true,
+  }
+
+  if M.is_git_repo() then
+    -- Use git_files which is much faster in git repos
+    opts.show_untracked = true -- Show untracked files too
     require("telescope.builtin").git_files(opts)
   else
     -- Fall back to find_files for non-git repos
@@ -32,14 +52,36 @@ end
 
 -- Live grep with smart root directory detection
 function M.smart_live_grep()
-  local opts = {}
-  
+  local opts = {
+    -- Enable fuzzy matching for live_grep
+    fuzzy = true,
+    only_sort_text = true,
+  }
+
   -- If in a git repo, search from git root
   local git_root = M.get_git_root()
   if git_root then
     opts.cwd = git_root
   end
-  
+
+  require("telescope.builtin").live_grep(opts)
+end
+
+-- Fuzzy live grep with optimized settings
+function M.fuzzy_live_grep()
+  local opts = {
+    fuzzy = true,
+    only_sort_text = true,
+    prompt_title = "Fuzzy Grep",
+    path_display = { "smart" },
+  }
+
+  -- If in a git repo, search from git root
+  local git_root = M.get_git_root()
+  if git_root then
+    opts.cwd = git_root
+  end
+
   require("telescope.builtin").live_grep(opts)
 end
 
@@ -50,13 +92,13 @@ function M.fast_grep_string()
     only_sort_text = true,
     search = vim.fn.expand("<cword>"),
   }
-  
+
   -- If in a git repo, search from git root
   local git_root = M.get_git_root()
   if git_root then
     opts.cwd = git_root
   end
-  
+
   require("telescope.builtin").grep_string(opts)
 end
 
@@ -79,11 +121,11 @@ end
 function M.toggle_telescope_preview()
   local action_state = require("telescope.actions.state")
   local actions = require("telescope.actions")
-  
+
   return function(prompt_bufnr)
     local current_picker = action_state.get_current_picker(prompt_bufnr)
     current_picker.previewer.state.previewing = not current_picker.previewer.state.previewing
-    
+
     -- Refresh the picker to apply the change
     actions.refresh(prompt_bufnr)
   end

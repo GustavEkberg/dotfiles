@@ -140,10 +140,20 @@ return {
 
         extensions = {
           fzf = {
-            fuzzy = true,
-            override_generic_sorter = true,
-            override_file_sorter = true,
-            case_mode = "smart_case",
+            fuzzy = true,                   -- Enable fuzzy search
+            override_generic_sorter = true, -- Override the generic sorter
+            override_file_sorter = true,    -- Override the file sorter
+            case_mode = "smart_case",       -- or "ignore_case" or "respect_case"
+            -- The below options improve fuzzy search performance
+            fzf_opts = {
+              -- options passed to the fzf executable
+              ['--exact'] = false,          -- Exact matching off for fuzzy search
+              ['--no-sort'] = false,        -- Let fzf do the sorting (faster)
+              ['--tiebreak'] = 'score',     -- Sort by score when tied
+              ['--ansi'] = true,            -- Support ANSI color codes
+              ['--height'] = '100%',        -- Use full height
+              ['--bind'] = 'ctrl-d:half-page-down,ctrl-u:half-page-up', -- Add keybindings
+            },
           },
         },
       })
@@ -163,11 +173,21 @@ return {
           function() telescope_utils.smart_live_grep() end,
           desc = "Search files contents (smart)"
         },
+        {
+          "<leader>fv",
+          function() telescope_utils.fuzzy_live_grep() end,
+          desc = "Fuzzy search file contents"
+        },
         { "<leader>fd", ":Telescope keymaps<CR>", desc = "Search keymaps" },
         {
           "<leader>ff",
           function() telescope_utils.smart_find_files() end,
           desc = "Search files (smart)"
+        },
+        {
+          "<leader>fz",
+          function() telescope_utils.fuzzy_find_files() end,
+          desc = "Fuzzy find files (fast)"
         },
         {
           "<leader>fg",

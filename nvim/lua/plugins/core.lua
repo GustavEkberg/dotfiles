@@ -267,10 +267,6 @@ return {
     "augmentcode/augment.vim",
   },
 
-  {
-    "MeanderingProgrammer/render-markdown.nvim",
-  },
-
   -- Dashboard
   {
     "glepnir/dashboard-nvim",
