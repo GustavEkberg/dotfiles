@@ -25,7 +25,6 @@ vim.api.nvim_set_keymap('v', '<C-k>', ":m '<-2<CR>gv=gv", { noremap = true, sile
 keymap("n", "Q", "<cmd>:q<CR>")
 
 -- Remove defaults from normal mode
-keymap("n", "s", "<nop>")
 keymap("v", "u", "<nop>")
 keymap("v", "U", "<nop>")
 
