@@ -357,14 +357,5 @@ return {
       "LazyGitConfig",
       "LazyGitCurrentFile",
     },
-    keys = {
-      { "<leader>go", "<cmd>LazyGit<CR>", desc = "Open LazyGit" },
-    },
-    config = function()
-      local wk = require("which-key")
-      wk.add({
-        { "<leader>go", "<cmd>LazyGit<CR>", desc = "Open LazyGit" },
-      })
-    end,
   },
 }

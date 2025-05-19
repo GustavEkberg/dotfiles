@@ -28,6 +28,9 @@ keymap("n", "Q", "<cmd>:q<CR>")
 keymap("v", "u", "<nop>")
 keymap("v", "U", "<nop>")
 
+keymap('n', '<C-s>', '<cmd>lua _G._LAZYGIT_TOGGLE()<CR>', { noremap = true, silent = true })
+keymap('t', '<C-s>', '<cmd>lua _G._LAZYGIT_TOGGLE()<CR>', { noremap = true, silent = true })
+
 local utils = require("user.utils")
 local wk = utils.call_plugin("which-key")
 

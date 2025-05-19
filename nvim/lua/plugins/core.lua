@@ -281,23 +281,7 @@ return {
         return vim.api.nvim_command_output("!basename $PWD"):gsub("[\r,\n]",""):gsub(":!basename $PWD","")
       end
 
-      -- Set up lazygit terminal
-      local Terminal = require("toggleterm.terminal").Terminal
-      local lazygit = Terminal:new({
-        cmd = "lazygit",
-        hidden = false,
-        direction = "float",
-        float_opts = {
-          width = function()
-            return math.ceil(vim.o.columns * 0.95)
-          end,
-        },
-      })
-
-      -- Define the toggle function
-      _G._LAZYGIT_TOGGLE = function()
-        lazygit:toggle()
-      end
+      -- Dashboard configuration
 
       -- Configure dashboard
       require("dashboard").setup({
