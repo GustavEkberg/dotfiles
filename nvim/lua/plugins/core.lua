@@ -139,7 +139,11 @@ return {
       "rcarriga/nvim-notify",
     },
     config = function()
-      require("noice").setup()
+      require("noice").setup({
+        notify = {
+          enabled = false,
+        },
+      })
     end,
   },
 
@@ -338,6 +342,12 @@ return {
               desc = "Lazygit",
               key = "g",
               action = ":lua _G._LAZYGIT_TOGGLE()",
+            },
+            {
+              icon = "󰒲 ",
+              desc = "Lazy",
+              key = "l",
+              action = ":Lazy",
             },
             {
               icon = "✕ ",
