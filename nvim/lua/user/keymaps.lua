@@ -49,6 +49,43 @@ end
 -- Augment
 keymap('i', '<C-l>', function() vim.api.nvim_call_function('augment#Accept', {}) end, { noremap = true })
 
+-- Toggle between implementation and test files
+local toggle_test_file = function()
+  local current_file = vim.fn.expand('%:p')
+
+  -- Check if it's a JavaScript or TypeScript file
+  if not (current_file:match('%.ts$') or current_file:match('%.js$') or
+          current_file:match('%.tsx$') or current_file:match('%.jsx$')) then
+    vim.notify("Not a JavaScript or TypeScript file", vim.log.levels.WARN)
+    return
+  end
+
+  local is_test_file = current_file:match('%.test%.')
+  local target_file
+
+  if is_test_file then
+    -- If current file is a test file, go to the implementation file
+    -- Example: file.test.ts -> file.ts
+    target_file = current_file:gsub('%.test%.', '.')
+  else
+    -- If current file is an implementation file, go to the test file
+    -- Example: file.ts -> file.test.ts
+    local ext = current_file:match('%.([^%.]+)$')
+    target_file = current_file:gsub('%.' .. ext .. '$', '.test.' .. ext)
+  end
+
+  -- Check if the target file exists
+  local f = io.open(target_file, "r")
+  if f then
+    f:close()
+    vim.cmd('edit ' .. vim.fn.fnameescape(target_file))
+  else
+    vim.notify("Target file does not exist: " .. target_file, vim.log.levels.WARN)
+  end
+end
+
+-- Set up the keymapping for Ctrl+V
+keymap('n', '<C-v>', toggle_test_file, { noremap = true, silent = true, desc = "Toggle between file and test file" })
 
 
 wk.add({
@@ -57,6 +94,7 @@ wk.add({
     { "<leader>r", "<cmd>e!<CR>", desc = "Reload buffer" },
     { "<leader>s", "<cmd>w!<CR>", desc = "Save buffer" },
     { "<leader>w", "<C-w>w", desc = "Focus next window" },
+    { "<C-v>", toggle_test_file, desc = "Toggle between file and test file" },
 
     { "<leader>m", group = "Homemade" },
     { "<leader>ms", "<cmd>Augment chat-toggle<CR>", desc="Augment chat"},
