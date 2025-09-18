@@ -42,7 +42,7 @@ return {
     "astro",
   },
   -- Use the local ESLint version rather than the global one
-  root_dir = require("lspconfig").util.root_pattern(
+  root_dir = vim.fs.root(0, {
     ".eslintrc",
     ".eslintrc.js",
     ".eslintrc.cjs",
@@ -51,5 +51,5 @@ return {
     ".eslintrc.json",
     "eslint.config.js",
     "eslint.config.mjs"
-  ),
+  }),
 }
