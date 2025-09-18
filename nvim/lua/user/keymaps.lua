@@ -84,8 +84,42 @@ local toggle_test_file = function()
   end
 end
 
--- Set up the keymapping for Ctrl+V
-keymap('n', '<C-v>', toggle_test_file, { noremap = true, silent = true, desc = "Toggle between file and test file" })
+-- Set up the keymapping for Ctrl+g
+keymap('n', '<C-g>', toggle_test_file, { noremap = true, silent = true, desc = "Toggle between file and test file" })
+
+-- ESLint fix function
+local eslint_fix = function()
+  -- Find project root by looking for package.json
+  local project_root = vim.fn.findfile('package.json', '.;')
+  if project_root == '' then
+    vim.notify("No package.json found - not a Node.js project", vim.log.levels.WARN)
+    return
+  end
+
+  project_root = vim.fn.fnamemodify(project_root, ':h')
+  local eslint_path = project_root .. '/node_modules/.bin/eslint'
+
+  -- Check if ESLint exists
+  if vim.fn.executable(eslint_path) == 0 then
+    vim.notify("ESLint not found in node_modules/.bin/", vim.log.levels.WARN)
+    return
+  end
+
+  vim.notify("Running ESLint fix...", vim.log.levels.INFO)
+
+  -- Run ESLint fix from project root
+  local cmd = 'cd ' .. vim.fn.shellescape(project_root) .. ' && ./node_modules/.bin/eslint --fix'
+  local result = vim.fn.system(cmd)
+
+  -- Reload all open buffers to show changes
+  vim.cmd('bufdo e!')
+
+  if vim.v.shell_error == 0 then
+    vim.notify("ESLint fix completed successfully", vim.log.levels.INFO)
+  else
+    vim.notify("ESLint fix completed with warnings/errors", vim.log.levels.WARN)
+  end
+end
 
 
 wk.add({
@@ -94,15 +128,14 @@ wk.add({
     { "<leader>r", "<cmd>e!<CR>", desc = "Reload buffer" },
     { "<leader>s", "<cmd>w!<CR>", desc = "Save buffer" },
     { "<leader>w", "<C-w>w", desc = "Focus next window" },
-    { "<C-v>", toggle_test_file, desc = "Toggle between file and test file" },
+    { "<C-g>", toggle_test_file, desc = "Toggle between file and test file" },
 
     { "<leader>m", group = "Homemade" },
-    { "<leader>ms", "<cmd>Augment chat-toggle<CR>", desc="Augment chat"},
-    { "<leader>ma", "<cmd>Augment chat<CR>", desc="Augment message"},
     { "<leader>md", insert_lowercase_uuid, desc = "Insert UUID" },
     { "<leader>mm", "<cmd>wincmd =<CR>", desc = "Resize windows" },
     { "<leader>mz", "<cmd>ZenMode<CR>", desc = "Zen Mode" },
     { "<leader>mp", "<cmd>OptimizeBuffer<CR>", desc = "Performance mode (optimize)" },
     { "<leader>mr", "<cmd>RestoreBuffer<CR>", desc = "Restore normal mode" },
     { "<leader>mc", "<cmd>ToggleCompletion<CR>", desc = "Toggle completion" },
+    { "<leader>mf", eslint_fix, desc = "ESLint fix" },
 })

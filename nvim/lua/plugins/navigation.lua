@@ -342,6 +342,9 @@ return {
         { "<leader>g",  group = "Git" },
         { "<leader>gf", "<cmd>Gitsigns blame<CR>",      desc = "Blame file" },
         { "<leader>gb", "<cmd>Gitsigns blame_line<CR>", desc = "Blame line" },
+        { "<leader>gd", "<cmd>Gitsigns diffthis<CR>",   desc = "Diff current file" },
+        { "<leader>gs", "<cmd>Gitsigns stage_buffer<CR>", desc = "Stage current file" },
+        { "<leader>gh", "<cmd>Gitsigns stage_hunk<CR>", desc = "Stage current hunk" },
       })
     end,
   },

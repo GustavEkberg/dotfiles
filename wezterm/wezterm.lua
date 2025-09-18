@@ -16,24 +16,20 @@ config.window_background_opacity = 0.8
 config.macos_window_background_blur = 30
 config.freetype_load_target = "Normal"
 config.mouse_bindings = {
-	-- CMD-click will open the link under the mouse cursor
+	-- CMD-click to open links
 	{
 		event = { Up = { streak = 1, button = "Left" } },
 		mods = "SUPER",
 		action = wezterm.action.OpenLinkAtMouseCursor,
 	},
 }
-wezterm.on("open-uri", function(window, pane, uri)
-	wezterm.log_info(window)
-	wezterm.log_info(pane)
-	wezterm.log_info(uri)
-end)
 -- config.default_cursor_style = "BlinkingBlock"
 
 -- Font configuration
 config.harfbuzz_features = { 'calt=0', 'clig=0', 'liga=0' }
 
 -- Events
+
 wezterm.on('trigger-vim-with-scrollback', function(window, pane)
   -- Retrieve the text from the pane
   local text = pane:get_lines_as_text(pane:get_dimensions().scrollback_rows)
@@ -73,6 +69,12 @@ config.keys = {
     key = 'e',
     mods = 'LEADER',
     action = act.EmitEvent 'trigger-vim-with-scrollback',
+  },
+  -- Test link opening with keyboard shortcut
+  {
+    key = 'o',
+    mods = 'LEADER',
+    action = wezterm.action.OpenLinkAtMouseCursor,
   }
 }
 

@@ -15,7 +15,16 @@ return {
         defaults = {
           prompt_prefix = " ",
           selection_caret = " ",
-          path_display = { "smart" },
+          path_display = { "short" },
+          
+            layout_strategy = "vertical",
+  layout_config = {
+    vertical = {
+      width = 0.9,
+      height = 0.9,
+      preview_height = 0.6,
+    },
+  },
 
           -- Performance optimizations
           vimgrep_arguments = {
@@ -26,7 +35,6 @@ return {
             "--line-number",
             "--column",
             "--smart-case",
-            "--hidden",
           },
 
           -- Use faster sorter
