@@ -1,7 +1,8 @@
+local lspconfig = require('lspconfig')
 local wk = require('which-key')
 
--- Configure LSP servers using vim.lsp.config
-vim.lsp.config.pyright = {
+-- Configure LSP servers using the traditional lspconfig approach
+lspconfig.pyright.setup {
   settings = {
     python = {
       analysis = {
@@ -11,7 +12,7 @@ vim.lsp.config.pyright = {
   }
 }
 
-vim.lsp.config.rust_analyzer = {
+lspconfig.rust_analyzer.setup {
   -- Server-specific settings. See `:help lspconfig-setup`
   settings = {
     ['rust-analyzer'] = {
@@ -25,13 +26,13 @@ vim.lsp.config.rust_analyzer = {
   },
 }
 
-vim.lsp.config.eslint = {
+lspconfig.eslint.setup({
   on_attach = function(client, bufnr)
     wk.add({
       { "<leader>af", "<cmd>EslintFixAll<cr>", desc = "Format code with eslint" },
     })
   end,
-}
+})
 
 
 -- Use LspAttach autocommand to only map the following keys

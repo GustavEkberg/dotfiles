@@ -38,7 +38,12 @@ require("mason-lspconfig").setup({
   automatic_enable = false
 })
 
--- Configure LSP servers using vim.lsp.config
+-- Configure LSP servers using the traditional lspconfig approach
+local lspconfig_status_ok, lspconfig = pcall(require, "lspconfig")
+if not lspconfig_status_ok then
+  return
+end
+
 local opts = {}
 
 for _, server in pairs(servers) do
@@ -54,6 +59,5 @@ for _, server in pairs(servers) do
     opts = vim.tbl_deep_extend("force", conf_opts, opts)
   end
 
-  -- Use vim.lsp.config instead of lspconfig
-  vim.lsp.config[server] = opts
+  lspconfig[server].setup(opts)
 end

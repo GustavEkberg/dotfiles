@@ -48,7 +48,8 @@ return {
         automatic_enable = false,
       })
 
-      -- Configure LSP servers using vim.lsp.config
+      -- Configure LSP servers
+      local lspconfig = require("lspconfig")
       local on_attach = require("user.lsp.handlers").on_attach
       local capabilities = require("user.lsp.handlers").capabilities
 
@@ -78,8 +79,7 @@ return {
           opts = vim.tbl_deep_extend("force", conf_opts, opts)
         end
 
-        -- Use vim.lsp.config instead of lspconfig
-        vim.lsp.config[server] = opts
+        lspconfig[server].setup(opts)
       end
     end,
   },
