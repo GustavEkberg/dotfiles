@@ -12,7 +12,7 @@ config.enable_tab_bar = false
 config.font_size = 14
 
 config.window_decorations = "RESIZE"
-config.window_background_opacity = 0.8
+config.window_background_opacity = 1
 config.macos_window_background_blur = 30
 config.freetype_load_target = "Normal"
 config.mouse_bindings = {
