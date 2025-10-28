@@ -45,23 +45,10 @@ vim.api.nvim_create_autocmd('LspAttach', {
   end,
 })
 
+-- ESLint format on save for JS/TS files
 vim.api.nvim_create_autocmd("BufWritePre", {
   group = vim.api.nvim_create_augroup('UserLspConfig', {}),
-  callback = function()
-    -- Get the current buffer's name (file path)
-    local bufname = vim.api.nvim_buf_get_name(0)
-    -- Check if the file ends in .js, and return early if so
-    if bufname:match("%.(js|jsx|ts|tsx)$") then
-      return
-    end
-
-    vim.lsp.buf.format { async = true }
-  end,
-})
-
-vim.api.nvim_create_autocmd("BufWritePre", {
-  group = vim.api.nvim_create_augroup('UserLspConfig', {}),
-  pattern = { "*js", "*.ts", "*.tsx" },
+  pattern = { "*.js", "*.ts", "*.tsx", "*.jsx" },
   callback = function()
     vim.api.nvim_command("EslintFixAll")
   end,

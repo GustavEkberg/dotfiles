@@ -138,4 +138,15 @@ wk.add({
     { "<leader>mr", "<cmd>RestoreBuffer<CR>", desc = "Restore normal mode" },
     { "<leader>mc", "<cmd>ToggleCompletion<CR>", desc = "Toggle completion" },
     { "<leader>mf", eslint_fix, desc = "ESLint fix" },
+
+    { "<leader>a", group = "Actions" },
+    { "<leader>af", function() require("conform").format({ async = true, lsp_fallback = true }) end, desc = "Format buffer" },
+
+    { "<leader>i", group = "Issues (Trouble)" },
+    { "<leader>ii", "<cmd>Trouble diagnostics toggle<CR>", desc = "Toggle diagnostics" },
+    { "<leader>iI", "<cmd>Trouble diagnostics toggle filter.buf=0<CR>", desc = "Toggle buffer diagnostics" },
+    { "<leader>ir", "<cmd>Trouble lsp toggle focus=false<CR>", desc = "LSP references/definitions" },
+    { "<leader>is", "<cmd>Trouble symbols toggle focus=false<CR>", desc = "Document symbols" },
+    { "<leader>il", "<cmd>Trouble loclist toggle<CR>", desc = "Location list" },
+    { "<leader>iq", "<cmd>Trouble qflist toggle<CR>", desc = "Quickfix list" },
 })

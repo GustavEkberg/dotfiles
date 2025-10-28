@@ -247,5 +247,5 @@ if.app-name-regex-substring = 'Meet'
 run = 'move-node-to-workspace P'
 
 [[on-window-detected]]
-if.app-name-regex-substring = 'Google Chrome'
-run = 'move-node-to-workspace 1'
+if.app-name-regex-substring = 'WezTerm'
+run = 'move-node-to-workspace A'

@@ -84,6 +84,89 @@ return {
     end,
   },
 
+  -- Install formatters, linters, and other tools
+  {
+    "WhoIsSethDaniel/mason-tool-installer.nvim",
+    dependencies = {
+      "mason.nvim",
+    },
+    config = function()
+      require("mason-tool-installer").setup({
+        ensure_installed = {
+          "ruff",  -- Python formatter and linter (replaces black, isort, flake8)
+          "mypy",  -- Python type checker
+        },
+        auto_update = false,
+        run_on_start = true,
+      })
+    end,
+  },
+
+  -- Formatting plugin
+  {
+    "stevearc/conform.nvim",
+    event = { "BufWritePre" },
+    cmd = { "ConformInfo" },
+    config = function()
+      require("conform").setup({
+        formatters_by_ft = {
+          python = { "ruff_format", "ruff_organize_imports" },
+        },
+        -- Format on save
+        format_on_save = function(bufnr)
+          -- Get the current buffer's name (file path)
+          local bufname = vim.api.nvim_buf_get_name(bufnr)
+
+          -- Don't format JS/TS files (handled by ESLint)
+          if bufname:match("%.(js|jsx|ts|tsx)$") then
+            return nil
+          end
+
+          -- Format Python and other files
+          return {
+            timeout_ms = 500,
+            lsp_fallback = true,
+          }
+        end,
+      })
+    end,
+  },
+
+  -- Linting plugin for mypy
+  {
+    "mfussenegger/nvim-lint",
+    event = { "BufReadPre", "BufNewFile" },
+    config = function()
+      local lint = require("lint")
+
+      -- Configure linters by filetype
+      lint.linters_by_ft = {
+        python = { "mypy" },
+      }
+
+      -- Set a shorter delay for linting
+      vim.g.lint_delay = 100
+
+      -- Create autocommand to run linters
+      local lint_augroup = vim.api.nvim_create_augroup("lint", { clear = true })
+
+      vim.api.nvim_create_autocmd({ "BufEnter", "BufWritePost", "InsertLeave", "TextChanged" }, {
+        group = lint_augroup,
+        callback = function()
+          lint.try_lint()
+        end,
+      })
+
+      -- Also run on CursorHold for real-time feedback
+      vim.api.nvim_create_autocmd("CursorHold", {
+        group = lint_augroup,
+        callback = function()
+          lint.try_lint()
+        end,
+      })
+    end,
+  },
+
   {
     "folke/neodev.nvim",
     config = function()
