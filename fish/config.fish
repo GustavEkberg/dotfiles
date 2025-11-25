@@ -1,6 +1,8 @@
 fish_vi_key_bindings
 
-source $HOME/.config/fish/connections.sh
+if test -f $HOME/.config/fish/connections.sh
+    source $HOME/.config/fish/connections.sh
+end
 set -g fish_greeting
 set -x LANG en_US.UTF-8
 
@@ -14,14 +16,21 @@ alias ll='ls -lah'
 alias wttr='curl wttr.in/Gothenburg'
 alias nn='cd /Users/abraxas/Dropbox/Notes/kkdvr && vim'
 alias python='python3'
-alias yd='yarn dev'
+alias yd='pnpm dev'
 alias yi='yarn install'
 alias tt='tmux attach -t vim || tmux new -s vim' 
 alias tp='tmux attach -t primary || tmux new -s primary' 
 
 set -x PATH $PATH $HOME/.cargo/bin
 set -x PATH $PATH /opt/homebrew/bin
-set -gx PATH (yarn global bin) $PATH
+
+# Only add yarn global bin to PATH if it exists and returns a valid path
+if type -q yarn
+    set -l yarn_bin (yarn global bin 2>/dev/null)
+    if test -d "$yarn_bin"
+        set -gx PATH $yarn_bin $PATH
+    end
+end
 
 set -Ux PYENV_ROOT $HOME/.pyenv
 fish_add_path $PYENV_ROOT/bin
@@ -55,3 +64,10 @@ set --export PATH $BUN_INSTALL/bin $PATH
 
 pyenv init - | source
 starship init fish | source
+
+# pnpm
+set -gx PNPM_HOME "/Users/abraxas/Library/pnpm"
+if not string match -q -- $PNPM_HOME $PATH
+  set -gx PATH "$PNPM_HOME" $PATH
+end
+# pnpm end

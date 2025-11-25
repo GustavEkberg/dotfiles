@@ -249,3 +249,9 @@ run = 'move-node-to-workspace P'
 [[on-window-detected]]
 if.app-name-regex-substring = 'WezTerm'
 run = 'move-node-to-workspace A'
+
+[[on-window-detected]]
+if.app-name-regex-substring = 'Scrivener'
+run = 'move-node-to-workspace T'
+
+
