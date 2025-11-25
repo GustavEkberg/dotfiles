@@ -166,18 +166,6 @@ return {
 
   -- Navigation and Editing
   {
-    "nvim-neo-tree/neo-tree.nvim",
-    dependencies = {
-      "nvim-lua/plenary.nvim",
-      "kyazdani42/nvim-web-devicons",
-      "MunifTanjim/nui.nvim",
-    },
-    config = function()
-      require("neo-tree").setup()
-    end,
-  },
-
-  {
     "ThePrimeagen/harpoon",
     branch = "harpoon2",
     dependencies = { "nvim-lua/plenary.nvim" },
@@ -235,7 +223,11 @@ return {
   {
     "ggandor/leap.nvim",
     config = function()
-      require("leap").add_default_mappings()
+      local leap = require("leap")
+      -- Set up leap with manual mappings (replaces deprecated add_default_mappings)
+      vim.keymap.set({'n', 'x', 'o'}, 's', '<Plug>(leap-forward)')
+      vim.keymap.set({'n', 'x', 'o'}, 'S', '<Plug>(leap-backward)')
+      vim.keymap.set({'n', 'x', 'o'}, 'gs', '<Plug>(leap-from-window)')
     end,
   },
 
@@ -251,21 +243,6 @@ return {
     config = function()
       require("goto-preview").setup()
     end,
-  },
-
-  -- Git
-  {
-    "lewis6991/gitsigns.nvim",
-    config = function()
-      require("gitsigns").setup()
-    end,
-  },
-
-  {
-    "kdheepak/lazygit.nvim",
-    dependencies = {
-      "nvim-lua/plenary.nvim",
-    },
   },
 
   -- Augment

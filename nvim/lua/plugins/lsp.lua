@@ -33,6 +33,9 @@ return {
       "mason.nvim",
     },
     config = function()
+      local on_attach = require("user.lsp.handlers").on_attach
+      local capabilities = require("user.lsp.handlers").capabilities
+
       require("mason-lspconfig").setup({
         ensure_installed = {
           "pyright",
@@ -45,42 +48,25 @@ return {
           "eslint",
           "yamlls",
         },
-        automatic_enable = false,
+        automatic_installation = true,
+        handlers = {
+          -- Default handler for all servers
+          function(server_name)
+            local opts = {
+              on_attach = on_attach,
+              capabilities = capabilities,
+            }
+
+            -- Check if there's a custom config for this server
+            local require_ok, conf_opts = pcall(require, "user.lsp.servers." .. server_name)
+            if require_ok then
+              opts = vim.tbl_deep_extend("force", conf_opts, opts)
+            end
+
+            require("lspconfig")[server_name].setup(opts)
+          end,
+        },
       })
-
-      -- Configure LSP servers
-      local lspconfig = require("lspconfig")
-      local on_attach = require("user.lsp.handlers").on_attach
-      local capabilities = require("user.lsp.handlers").capabilities
-
-      -- Setup all servers
-      local servers = {
-        "pyright",
-        "html",
-        "tailwindcss",
-        "prismals",
-        "lua_ls",
-        "bashls",
-        "jsonls",
-        "eslint",
-        "yamlls",
-      }
-
-      for _, server in pairs(servers) do
-        local opts = {
-          on_attach = on_attach,
-          capabilities = capabilities,
-        }
-
-        server = vim.split(server, "@", {})[1]
-
-        local require_ok, conf_opts = pcall(require, "user.lsp.servers." .. server)
-        if require_ok then
-          opts = vim.tbl_deep_extend("force", conf_opts, opts)
-        end
-
-        lspconfig[server].setup(opts)
-      end
     end,
   },
 

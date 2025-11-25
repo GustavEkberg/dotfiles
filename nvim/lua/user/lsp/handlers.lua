@@ -126,27 +126,20 @@ M.on_attach = function(client, bufnr)
 			group = augroup,
 			buffer = bufnr,
 			callback = function()
-				-- Check if eslint is attached to this buffer
-				local eslint_client = nil
-				-- Use vim.lsp.get_clients() instead of deprecated vim.lsp.get_active_clients()
-				for _, c in pairs(vim.lsp.get_clients({ bufnr = bufnr })) do
-					if c.name == "eslint" then
-						eslint_client = c
-						break
-					end
-				end
-
-				if eslint_client then
-					-- Use ESLint for formatting
-					vim.cmd("EslintFixAll")
-				elseif client.supports_method("textDocument/formatting") then
-					-- Fallback to regular formatting if ESLint is not available
-					vim.lsp.buf.format({
-						bufnr = bufnr,
-						timeout_ms = 2000,
-						async = false
-					})
-				end
+				-- Format using LSP (ESLint if available, otherwise other formatters)
+				vim.lsp.buf.format({
+					bufnr = bufnr,
+					timeout_ms = 2000,
+					async = false,
+					filter = function(c)
+						-- Prefer ESLint for formatting if available
+						if c.name == "eslint" then
+							return true
+						end
+						-- Otherwise use any formatter that supports it
+						return c.supports_method("textDocument/formatting")
+					end,
+				})
 			end,
 		})
 	end

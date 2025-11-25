@@ -41,15 +41,9 @@ return {
     "svelte",
     "astro",
   },
-  -- Use the local ESLint version rather than the global one
-  root_dir = require("lspconfig").util.root_pattern(
-    ".eslintrc",
-    ".eslintrc.js",
-    ".eslintrc.cjs",
-    ".eslintrc.yaml",
-    ".eslintrc.yml",
-    ".eslintrc.json",
-    "eslint.config.js",
-    "eslint.config.mjs"
-  ),
+  -- on_attach will be set by the handler in lsp.lua
+  on_attach = function(client, bufnr)
+    -- Enable formatting via ESLint
+    client.server_capabilities.documentFormattingProvider = true
+  end,
 }
