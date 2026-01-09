@@ -318,9 +318,9 @@ return {
             },
             {
               icon = "★ ",
-              desc = "Lazygit",
+              desc = "Neogit",
               key = "g",
-              action = ":lua _G._LAZYGIT_TOGGLE()",
+              action = ":Neogit",
             },
             {
               icon = "󰒲 ",
