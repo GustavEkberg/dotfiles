@@ -236,31 +236,67 @@ const getUser = (id: string): Effect.Effect<User, DatabaseError> =>
   )
 ```
 
+## UI/UX & Aesthetics
+
+### Design Philosophy
+- **Minimal, clean design** inspired by Vercel's aesthetic
+- Use whitespace generously, focus on typography and subtle details
+- Sleek, modern interfaces with refined polish
+
+### Component Library
+- **Always use shadcn/ui** for UI components
+- Customize with Tailwind classes when needed
+- Don't build custom components when shadcn provides them
+
+### Color & Theme
+- **Start with dark mode** by default
+- Use subtle grays and muted colors (Vercel-style palette)
+- Accent colors used sparingly, maintain high contrast
+
+```typescript
+<div className="bg-black text-white">
+  <h1 className="text-white/90">Heading</h1>
+  <p className="text-white/60">Secondary text</p>
+  <div className="border border-white/10">Content</div>
+</div>
+```
+
+### Transitions & Animation
+- **Add subtle animations** to all interactive elements (150-300ms)
+- Use Tailwind's transition utilities for opacity, scale, position changes
+
+```typescript
+<button className="transition-all duration-200 hover:scale-105 hover:opacity-80">
+  Click me
+</button>
+```
+
+### Responsive Design Strategy
+- **Desktop-first by default** - optimize for desktop screens first
+- Only implement responsive design when explicitly requested
+- When starting a new project, ask: "Should this be responsive?"
+- If responsive is needed, use Tailwind's breakpoint prefixes (sm:, md:, lg:)
+
+### Interactive States
+- Always define hover, active, and focus states
+- Use subtle scale or opacity changes on hover
+- Clear focus indicators, obvious disable states
+- Use shadcn's skeleton/spinner for loading states
+
+```typescript
+<button className="bg-white text-black hover:bg-white/90 active:scale-95 
+  focus-visible:ring-2 disabled:opacity-50 transition-all duration-200">
+  Button
+</button>
+```
+
 ## Styling Guidelines
 
 ### Tailwind CSS
 - **Use inline classes only** - no component variants or CSS-in-JS
 - Apply Tailwind classes directly in JSX/TSX
 - Group related classes logically (layout, spacing, colors, typography)
-- Use Tailwind's responsive modifiers (sm:, md:, lg:, etc.)
 - Leverage Tailwind's design tokens (colors, spacing, etc.)
-
-```typescript
-// Good: Inline classes
-<div className="flex items-center justify-between p-4 bg-white rounded-lg shadow-md">
-  <h2 className="text-xl font-semibold text-gray-900">Title</h2>
-  <button className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded hover:bg-blue-700">
-    Click me
-  </button>
-</div>
-
-// Avoid: Extracting to CSS or variants
-```
-
-### Responsive Design
-- Mobile-first approach (default styles for mobile, then scale up)
-- Use Tailwind's breakpoint prefixes appropriately
-- Test layouts at different screen sizes
 
 ## Forms & Validation
 
@@ -297,6 +333,7 @@ const handleSubmit = (data: unknown) =>
 - Show success/error feedback after submission
 - Support keyboard navigation
 - Handle both client and server validation
+- Use loading states during submission (shadcn skeleton/spinner)
 
 ## Environment & Configuration
 
