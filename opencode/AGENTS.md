@@ -12,6 +12,7 @@ I build full-stack web applications with a pragmatic, balanced approach. Write c
 - **Next.js** (App Router) with Vercel deployment
 - **TypeScript** (strict mode, no compromises)
 - **Tailwind CSS v4** for styling
+- **PostgreSQL** for database
 - **Drizzle ORM** for database operations
 - **Effect** for functional programming, async operations, and error handling
 - **Better Auth** for authentication
@@ -217,24 +218,39 @@ const operation: Effect.Effect<Result, MyError> = Effect.gen(function* () {
 - Include timestamps (`createdAt`, `updatedAt`) on relevant tables
 - Use appropriate column types and constraints
 
+### Effect Integration with Drizzle
+- **Use `@effect/sql` and `@effect/sql-drizzle`** for Effect-based database operations
+- Leverage Effect's built-in Drizzle integration for proper dependency injection via Layers
+- All database operations should return Effect types
+- Use Effect's SQL layer for connection management and query execution
+
+```typescript
+import { Effect } from "effect"
+import * as SqlDrizzle from "@effect/sql-drizzle/Pg"
+import * as Sql from "@effect/sql"
+
+// Define database operations with Effect
+const getUser = (id: string) =>
+  Effect.gen(function* () {
+    const sql = yield* Sql.client.PgClient
+    const db = yield* SqlDrizzle.makeService(sql, schema)
+    
+    const user = yield* Effect.tryPromise({
+      try: () => db.query.users.findFirst({ where: eq(users.id, id) }),
+      catch: (error) => new DatabaseError("Failed to fetch user", error)
+    })
+    
+    return yield* Effect.fromNullable(user, 
+      () => new DatabaseError("User not found")
+    )
+  })
+```
+
 ### Schema Management
 - **Update schema files only** - I will handle migrations manually
 - Document breaking schema changes clearly
-- Use Effect for all database operations
-- Wrap database queries in Effect for proper error handling
-
-```typescript
-// Example database operation
-const getUser = (id: string): Effect.Effect<User, DatabaseError> =>
-  Effect.tryPromise({
-    try: () => db.query.users.findFirst({ where: eq(users.id, id) }),
-    catch: (error) => new DatabaseError("Failed to fetch user", error)
-  }).pipe(
-    Effect.flatMap(
-      Effect.fromNullable(new DatabaseError("User not found"))
-    )
-  )
-```
+- All database queries must use Effect's SQL integration
+- Provide proper error types for database failures
 
 ## UI/UX & Aesthetics
 
@@ -242,6 +258,7 @@ const getUser = (id: string): Effect.Effect<User, DatabaseError> =>
 - **Minimal, clean design** inspired by Vercel's aesthetic
 - Use whitespace generously, focus on typography and subtle details
 - Sleek, modern interfaces with refined polish
+- Never use emojis in the UI
 
 ### Component Library
 - **Always use shadcn/ui** for UI components
