@@ -9,7 +9,7 @@ return {
       enable = true,
       mode = "all",
     },
-    format = true,
+    format = false,
     quiet = false,
     onIgnoredFiles = "off",
     rulesCustomizations = {},
@@ -43,7 +43,7 @@ return {
   },
   -- on_attach will be set by the handler in lsp.lua
   on_attach = function(client, bufnr)
-    -- Enable formatting via ESLint
-    client.server_capabilities.documentFormattingProvider = true
+    -- Disable formatting via ESLint (use Prettier instead)
+    client.server_capabilities.documentFormattingProvider = false
   end,
 }

@@ -81,6 +81,7 @@ return {
         ensure_installed = {
           "ruff",  -- Python formatter and linter (replaces black, isort, flake8)
           "mypy",  -- Python type checker
+          "prettier", -- JS/TS/CSS/HTML/JSON/YAML/MD formatter
         },
         auto_update = false,
         run_on_start = true,
@@ -97,15 +98,31 @@ return {
       require("conform").setup({
         formatters_by_ft = {
           python = { "ruff_format", "ruff_organize_imports" },
+          javascript = { "prettier" },
+          javascriptreact = { "prettier" },
+          typescript = { "prettier" },
+          typescriptreact = { "prettier" },
+          css = { "prettier" },
+          html = { "prettier" },
+          json = { "prettier" },
+          jsonc = { "prettier" },
+          yaml = { "prettier" },
+          markdown = { "prettier" },
+          graphql = { "prettier" },
         },
         -- Format on save
         format_on_save = function(bufnr)
           -- Get the current buffer's name (file path)
           local bufname = vim.api.nvim_buf_get_name(bufnr)
 
-          -- Don't format JS/TS files (handled by ESLint)
-          if bufname:match("%.(js|jsx|ts|tsx)$") then
-            return nil
+          -- Don't format JS/TS files if ESLint is handling it
+          -- Remove this check if you want Prettier to handle all JS/TS formatting
+          if bufname:match("%.jsx?$") or bufname:match("%.tsx?$") then
+            -- Use Prettier for JS/TS files
+            return {
+              timeout_ms = 1000,
+              lsp_fallback = false,
+            }
           end
 
           -- Format Python and other files

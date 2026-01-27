@@ -6,8 +6,7 @@ end
 set -g fish_greeting
 set -x LANG en_US.UTF-8
 
-
-
+alias o='opencode'
 alias vim='nvim'
 alias vi='nvim'
 alias v='nvim'
@@ -20,6 +19,7 @@ alias yd='pnpm dev'
 alias yi='yarn install'
 alias tt='tmux attach -t vim || tmux new -s vim' 
 alias tp='tmux attach -t primary || tmux new -s primary' 
+alias o='opencode'
 
 function cpcp
     cat $argv | pbcopy

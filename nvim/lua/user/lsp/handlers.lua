@@ -112,37 +112,9 @@ local function lsp_keymaps(bufnr)
   })
 end
 
-local augroup = vim.api.nvim_create_augroup("LspFormatting", {})
-
 M.on_attach = function(client, bufnr)
 	lsp_keymaps(bufnr)
-
-	-- Enable format on save for JavaScript and TypeScript files
-	local file_type = vim.api.nvim_buf_get_option(bufnr, "filetype")
-	if file_type == "javascript" or file_type == "typescript" or
-	   file_type == "javascriptreact" or file_type == "typescriptreact" then
-		vim.api.nvim_clear_autocmds({ group = augroup, buffer = bufnr })
-		vim.api.nvim_create_autocmd("BufWritePre", {
-			group = augroup,
-			buffer = bufnr,
-			callback = function()
-				-- Format using LSP (ESLint if available, otherwise other formatters)
-				vim.lsp.buf.format({
-					bufnr = bufnr,
-					timeout_ms = 2000,
-					async = false,
-					filter = function(c)
-						-- Prefer ESLint for formatting if available
-						if c.name == "eslint" then
-							return true
-						end
-						-- Otherwise use any formatter that supports it
-						return c.supports_method("textDocument/formatting")
-					end,
-				})
-			end,
-		})
-	end
+	-- JS/TS formatting handled by conform.nvim + Prettier
 end
 
 return M

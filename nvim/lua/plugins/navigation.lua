@@ -288,19 +288,4 @@ return {
       })
     end,
   },
-
-
-
-  -- LazyGit integration
-  {
-    "kdheepak/lazygit.nvim",
-    dependencies = {
-      "nvim-lua/plenary.nvim",
-    },
-    cmd = {
-      "LazyGit",
-      "LazyGitConfig",
-      "LazyGitCurrentFile",
-    },
-  },
 }
