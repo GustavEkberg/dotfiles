@@ -7,11 +7,9 @@ return {
       "hrsh7th/cmp-path",
       "hrsh7th/cmp-nvim-lsp",
       "hrsh7th/cmp-nvim-lua",
-      "L3MON4D3/LuaSnip",
     },
     config = function()
       local cmp = require("cmp")
-      local luasnip = require("luasnip")
       local cmp_utils = require("user.cmp_utils")
 
       -- Set up large file detection and commands
@@ -28,12 +26,6 @@ return {
         },
 
         preselect = cmp.PreselectMode.None, -- Don't preselect items
-
-        snippet = {
-          expand = function(args)
-            luasnip.lsp_expand(args.body)
-          end,
-        },
 
         mapping = cmp.mapping.preset.insert({
           ["<C-k>"] = cmp.mapping.select_prev_item(),
@@ -69,11 +61,6 @@ return {
             name = "nvim_lua",
             priority = 900,
             max_item_count = 10
-          },
-          {
-            name = "luasnip",
-            priority = 800,
-            max_item_count = 5
           },
           {
             name = "buffer",
@@ -116,7 +103,6 @@ return {
             vim_item.menu = ({
               nvim_lsp = "[LSP]",
               nvim_lua = "[Lua]",
-              luasnip = "[Snip]",
               buffer = "[Buf]",
               path = "[Path]",
             })[entry.source.name]
@@ -154,18 +140,4 @@ return {
     "hrsh7th/cmp-nvim-lua",
   },
 
-  -- Snippets
-  {
-    "L3MON4D3/LuaSnip",
-    dependencies = {
-      "honza/vim-snippets",
-    },
-    config = function()
-      require("luasnip.loaders.from_snipmate").lazy_load()
-    end,
-  },
-
-  {
-    "honza/vim-snippets",
-  },
 }

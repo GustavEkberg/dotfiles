@@ -55,26 +55,22 @@ return {
     "sindrets/diffview.nvim",
   },
   {
-    "NeogitOrg/neogit",
+    "kdheepak/lazygit.nvim",
     dependencies = { "nvim-lua/plenary.nvim" },
+    cmd = { "LazyGit", "LazyGitConfig", "LazyGitCurrentFile", "LazyGitFilter", "LazyGitFilterCurrentFile" },
+    keys = {
+      { "<leader>go", "<cmd>lua _G._LAZYGIT_TOGGLE()<CR>", desc = "Open LazyGit" },
+      { "<leader>gl", ":LazyGitFilter<CR>",                desc = "Git log" },
+      { "<leader>gf", ":LazyGitFilterCurrentFile<CR>",     desc = "File commits" },
+    },
     config = function()
-      require('neogit').setup({
-        kind = "floating",
-        integrations = {
-          diffview = true,
-        },
-      })
+      require("user.lazygit").setup()
 
-      -- Set up which-key integration for Neogit and diffview
+      -- Set up which-key integration for diffview
       local ok, wk = pcall(require, "which-key")
       if ok then
         wk.add({
           { "<leader>g",  group = "Git" },
-          { "<leader>go", ":Neogit<CR>",                desc = "Open Neogit" },
-          { "<leader>gl", ":Neogit kind=log<CR>",       desc = "Git log" },
-          { "<leader>gb", ":Neogit kind=branching<CR>", desc = "Branches" },
-          { "<leader>gc", ":Neogit kind=commit<CR>",    desc = "Commit" },
-          { "<leader>gs", ":Neogit kind=stash<CR>",     desc = "Stash" },
           { "<leader>gv", ":DiffviewOpen<CR>",          desc = "Toggle diffview" },
           { "<leader>gh", ":DiffviewFileHistory<CR>",   desc = "File history" },
         })

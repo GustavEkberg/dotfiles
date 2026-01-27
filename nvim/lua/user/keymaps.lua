@@ -123,6 +123,7 @@ end
 
 
 wk.add({
+    { "<leader>g", group = "Git" },
     { "<leader>R", "<cmd>LspRestart<CR>", desc = "Restart LSP" },
     { "<leader>W", "<C-w>W", desc = "Focus Previous window" },
     { "<leader>r", "<cmd>e!<CR>", desc = "Reload buffer" },
