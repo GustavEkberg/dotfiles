@@ -7,6 +7,7 @@ set -g fish_greeting
 set -x LANG en_US.UTF-8
 
 alias o='opencode'
+alias oc='opencode --continue'
 alias vim='nvim'
 alias vi='nvim'
 alias v='nvim'
