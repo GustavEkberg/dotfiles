@@ -221,7 +221,7 @@ return {
   },
 
   {
-    "ggandor/leap.nvim",
+    url = "https://codeberg.org/andyg/leap.nvim",
     config = function()
       local leap = require("leap")
       -- Set up leap with manual mappings (replaces deprecated add_default_mappings)
@@ -318,9 +318,9 @@ return {
             },
             {
               icon = "★ ",
-              desc = "Neogit",
+              desc = "Lazygit",
               key = "g",
-              action = ":Neogit",
+              action = ":LazyGit",
             },
             {
               icon = "󰒲 ",
