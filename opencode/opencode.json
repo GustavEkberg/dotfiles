@@ -1,17 +1,21 @@
-  {
-    "$schema": "https://opencode.ai/config.json",
-    "autoupdate": true,
-    "model": "anthropic/claude-opus-4-5-20251101",
-    "permission": {
-      "read": {
-        "*": "allow",
-        "*.env": "deny",
-        "*.env.*": "deny",
-        "*.envrc": "deny",
-        "secrets/*": "deny"
-      },
+{
+  "$schema": "https://opencode.ai/config.json",
+  "autoupdate": true,
+  "model": "anthropic/claude-opus-4-5-20251101",
+  "permission": {
+    "read": {
+      "*": "allow",
+      "*.env": "deny",
+      "*.env.*": "deny",
+      "*.envrc": "deny",
+      "secrets/*": "deny"
     },
-    "plugin": [
-      "opencode-anthropic-auth@0.0.9"
-    ],
-  }
+    "bash": {
+      "supabase reset": "deny",
+      "supabase reset *": "deny",
+      "supabase db reset": "deny",
+      "supabase db reset *": "deny"
+    }
+  },
+  "plugin": ["opencode-anthropic-auth@0.0.13"]
+}
