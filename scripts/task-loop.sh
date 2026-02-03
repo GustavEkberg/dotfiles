@@ -2,9 +2,10 @@
 set -euo pipefail
 
 # task-loop: Run complete-next-task in loop until PRD complete
-# Usage: task-loop <feature> [--max-iterations=N]
+# Usage: task-loop <feature> [--max-iterations=N] [--model=MODEL]
 
 MAX_ITERATIONS=25
+MODEL="anthropic/claude-opus-4-5"
 
 # Parse args
 while [[ $# -gt 0 ]]; do
@@ -15,6 +16,14 @@ while [[ $# -gt 0 ]]; do
             ;;
         --max-iterations)
             MAX_ITERATIONS="$2"
+            shift 2
+            ;;
+        --model=*)
+            MODEL="${1#*=}"
+            shift
+            ;;
+        --model)
+            MODEL="$2"
             shift 2
             ;;
         -*)
@@ -29,21 +38,22 @@ while [[ $# -gt 0 ]]; do
 done
 
 if [[ -z "${FEATURE:-}" ]]; then
-    echo "Usage: task-loop <feature> [--max-iterations=N]"
+    echo "Usage: task-loop <feature> [--max-iterations=N] [--model=MODEL]"
+    echo "  Default model: anthropic/claude-opus-4-5"
     exit 1
 fi
 
 COMPLETE_MARKER="<tasks>COMPLETE</tasks>"
 
 for ((i=1; i<=MAX_ITERATIONS; i++)); do
-    echo "=== Iteration $i/$MAX_ITERATIONS ==="
+    echo "=== Iteration $i/$MAX_ITERATIONS (model: $MODEL) ==="
 
     # Stream output and check for completion marker
     found=false
     while IFS= read -r line; do
         printf '%s\n' "$line"
         [[ "$line" == *"$COMPLETE_MARKER"* ]] && found=true
-    done < <(opencode run --command complete-next-task "$FEATURE" 2>&1)
+    done < <(opencode run --model "$MODEL" --command complete-next-task "$FEATURE" 2>&1)
 
     if $found; then
         echo "PRD complete, exiting."

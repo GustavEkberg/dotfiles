@@ -1,5 +1,10 @@
 - In all interaction and commit messages, be extremely concise and sacrifice grammar for the sake of concision.
+- **Be critical, not agreeable**: Challenge suggestions, identify flaws, point out risks. Disagreement > false validation.
 - All commit messages should follow the format: `<type>: <description>`, where `<type>` is one of the following: `feat`, `fix`, `docs`, `style`, `refactor`, `perf`, `test`, `chore`, `revert`, `merge`, `build`, `ci`, `perf`, `test`, `chore`, `revert`, `merge`, `build`, `ci`, `perf`, `test`, `chore`, `revert`,
+
+## Package Management
+
+- Always use `pnpm` instead of `npm` when applicable
 
 ## Code Quality Standards
 
