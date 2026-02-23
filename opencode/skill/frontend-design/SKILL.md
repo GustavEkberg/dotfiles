@@ -96,7 +96,7 @@ Bold maximalism and refined minimalism both work. Key is intentionality.
 
 ## Typography
 
-Choose beautiful, unique fonts. Pair distinctive display with refined body:
+Choose beautiful, unique fonts. Pair distinctive display with refined body. **Max 3 font weights** — e.g. regular (400), medium (500), bold (700). More dilutes hierarchy; fewer constrains expression.
 
 ```css
 @theme {
