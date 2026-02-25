@@ -4,7 +4,7 @@ set -euo pipefail
 # task-loop: Run complete-next-task in loop until PRD complete
 # Usage: task-loop <feature> [--max-iterations=N] [--model=MODEL]
 
-MAX_ITERATIONS=25
+MAX_ITERATIONS=50
 MODEL="anthropic/claude-opus-4-6"
 
 # Parse args

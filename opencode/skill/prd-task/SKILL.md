@@ -132,7 +132,7 @@ Keep tasks small and focused:
 - One logical change per task
 - If a PRD section feels too large, break it into multiple tasks
 - Prefer many small tasks over few large ones
-- Each task should be completable in one commit
+- Each task should be completable in one commit on the shared PRD branch
 
 Quality over speed. Small steps compound into big progress.
 
@@ -191,9 +191,10 @@ To complete tasks:
 
 This will:
 1. Get bearings (read progress, check history, verify environment)
-2. Choose a task to implement
-3. Implement until all verification steps pass
-4. Commit and update progress
+2. Switch to the PRD branch (one branch per PRD, all tasks commit there)
+3. Choose a task to implement
+4. Implement until all verification steps pass
+5. Commit and update progress
 ```
 
 ## Example

@@ -91,10 +91,12 @@ Started: <YYYY-MM-DD>
 
 ### 3. Branch Setup
 
+**One branch per PRD.** All tasks commit to the same branch. Do NOT create a new branch per task.
+
 Extract `prdName` from PRD, then:
 
-- jj: `jj new -m '<prdName>'`
-- git: `git checkout -b <prdName>` (or checkout if exists)
+- jj: Check if already on a change for this PRD (`jj log --limit 1`). If not, `jj new -m '<prdName>'`
+- git: `git checkout <prdName> 2>/dev/null || git checkout -b <prdName>` — switch to existing branch, only create if it doesn't exist
 
 ### 4. Implement Task
 
@@ -131,10 +133,10 @@ If you discover a **reusable pattern**, also add to `## Codebase Patterns` at th
 
 ### 8. Commit
 
-- jj: `jj describe -m 'feat(<scope>): <description>' && jj bookmark create <prdName>/<task-id> && jj new`
+- jj: `jj describe -m 'feat(<scope>): <description>' && jj new`
 - git: `git add -A && git commit -m 'feat(<scope>): <description>'`
 
-Bookmark format: `<prdName>/<task-id>` (e.g., `lib-relay-implementation/types-2`)
+All commits land on the single PRD branch. One branch, many commits.
 
 ## Completion
 
