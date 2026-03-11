@@ -100,7 +100,8 @@ if [ -z $TMUX_POWERLINE_RIGHT_STATUS_SEGMENTS ]; then
 		# "now_playing 234 37" \
 		# "cpu 240 136" \
 		# "tmux_mem_cpu_load 237 167" \
-    # "network_bandwidth 243" \
+		# "network_bandwidth 243" \
+		"disk_free 234 136 ${TMUX_POWERLINE_SEPARATOR_LEFT_BOLD}" \
 		"tmux_mem_cpu_load default 136 ${TMUX_POWERLINE_SEPARATOR_LEFT_THIN} 33 0 right_disable separator_disable " \
 		"ifstat_sys 234 136 ${TMUX_POWERLINE_SEPARATOR_LEFT_BOLD} default 136 right_disable separator_disable " \
 		#"battery 137 127" \
