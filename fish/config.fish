@@ -18,7 +18,6 @@ alias nn='cd /Users/abraxas/Dropbox/Notes/kkdvr && vim'
 alias python='python3'
 alias yd='pnpm dev'
 alias yi='yarn install'
-alias tt='tmux attach -t vim || tmux new -s vim' 
 alias tp='tmux attach -t primary || tmux new -s primary' 
 alias o='opencode'
 
