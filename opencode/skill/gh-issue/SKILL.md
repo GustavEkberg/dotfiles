@@ -60,6 +60,16 @@ gh issue view <number> --json title,body,labels,assignees,state,comments
 3. **Check discussion** - Review comments for clarifications or changes
 4. **Note labels** - Labels often indicate priority, type (bug/feature), area
 
+## Commit Footer
+
+When committing changes related to an issue, append `Addresses #<number>` to the commit message footer. Example:
+
+```
+feat: add retry logic for failed API calls
+
+Addresses #42
+```
+
 ## Tips
 
 - Look for linked PRs: `gh issue view <n> --json linkedPullRequests`
