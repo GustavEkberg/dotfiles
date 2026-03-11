@@ -2,7 +2,7 @@
 description: Fetch GitHub issue and start working on it
 ---
 
-Fetch GitHub issue #$1 and begin addressing it.
+Fetch a GitHub issue and begin addressing it.
 
 ## Step 1: Load skill
 
@@ -12,9 +12,19 @@ skill({ name: 'gh-issue' })
 
 ## Step 2: Fetch issue
 
+If an issue number was provided (`$1`), fetch it directly:
+
 ```bash
 GH_TOKEN=$GH_AGENT_TOKEN gh issue view $1 --json title,body,state,labels,assignees,comments,milestone
 ```
+
+If NO issue number was provided (i.e. `$1` is empty), list recent open issues and ask the user which one to work on:
+
+```bash
+GH_TOKEN=$GH_AGENT_TOKEN gh issue list --limit 10 --json number,title,labels,state,updatedAt
+```
+
+Present the list and ask the user to pick an issue before continuing.
 
 ## Step 3: Analyze and clarify
 
@@ -32,5 +42,3 @@ Then identify any ambiguities, gaps, or unknowns. Ask clarifying questions befor
 - Dependencies or blockers?
 
 Do NOT start implementation until clarifying questions are answered.
-
-<issue-number>$1</issue-number>

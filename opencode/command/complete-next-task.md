@@ -117,6 +117,48 @@ Before committing, run ALL applicable:
 
 Set the task's `passes` field to `true` in the PRD file.
 
+Also capture session metrics and write a `completedAt` object on the task. Query the opencode SQLite DB to get stats for the current session (including subagent sessions):
+
+```bash
+OPENCODE_DB="$HOME/.local/share/opencode/opencode.db"
+CURRENT_SESSION=$(sqlite3 "$OPENCODE_DB" "SELECT id FROM session WHERE parent_id IS NULL ORDER BY time_created DESC LIMIT 1")
+sqlite3 "$OPENCODE_DB" "
+  WITH session_tree AS (
+    SELECT id FROM session WHERE id = '$CURRENT_SESSION'
+    UNION ALL
+    SELECT s.id FROM session s
+    JOIN session_tree st ON s.parent_id = st.id
+  )
+  SELECT
+    COUNT(*) as messages,
+    COALESCE(SUM(json_extract(data,'$.tokens.total')), 0) as tokens,
+    MIN(m.time_created) as started,
+    MAX(m.time_created) as ended
+  FROM message m
+  JOIN session_tree st ON m.session_id = st.id
+  WHERE json_extract(data,'$.role') = 'assistant'
+"
+```
+
+Use the query results to add `completedAt` to the task object alongside `passes: true`:
+
+```json
+{
+  "passes": true,
+  "completedAt": {
+    "timestamp": "<ISO 8601 UTC>",
+    "tokens": <total from query>,
+    "messages": <messages from query>,
+    "durationSec": <ended - started>
+  }
+}
+```
+
+- `timestamp`: Current time in ISO 8601 UTC (e.g. `"2026-03-09T12:34:56Z"`)
+- `tokens`: Total tokens consumed across session + subagents (reflects full computational cost)
+- `messages`: Number of assistant messages (turns of work)
+- `durationSec`: Wall-clock seconds from first to last message
+
 ### 7. Update Progress
 
 Append to progress.txt:

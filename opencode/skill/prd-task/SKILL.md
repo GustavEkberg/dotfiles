@@ -161,6 +161,7 @@ Fight entropy. Leave the codebase better than you found it.
 
 **READ-ONLY except:**
 - `passes`: Set to `true` when ALL verification steps pass
+- `completedAt`: System-written when `passes` is set to `true`. Contains session metrics: `timestamp` (ISO 8601 UTC), `tokens` (total tokens consumed including subagents), `messages` (assistant turn count), `durationSec` (wall-clock seconds). **Never manually edit.**
 
 **NEVER edit or remove tasks** - This could lead to missing functionality.
 

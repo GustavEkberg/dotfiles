@@ -47,6 +47,14 @@ gh issue view <number> --json title,body,labels,assignees,state,comments
 
 ## Workflow
 
+### When no issue number is provided
+
+1. **List recent issues** - Run `gh issue list --limit 10 --json number,title,labels,state,updatedAt`
+2. **Present choices** - Show the list to the user and ask which issue they want to work on
+3. **Continue** with the selected issue number below
+
+### When issue number is known
+
 1. **Fetch issue** - Get full issue details including body and comments
 2. **Parse requirements** - Extract acceptance criteria, specs from issue body
 3. **Check discussion** - Review comments for clarifications or changes
