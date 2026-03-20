@@ -21,5 +21,4 @@
       "supabase functions deploy *": "deny"
     }
   },
-  "plugin": ["opencode-anthropic-auth@0.0.13"]
 }

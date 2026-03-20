@@ -6,3 +6,6 @@ fish/connections.sh
 nvim/spell/en.utf-8.add
 nvim/spell/en.utf-8.add.spl
 nvim/lazy-lock.json
+opencode/node_modules/
+opencode/bun.lock
+opencode/bun.lockb
