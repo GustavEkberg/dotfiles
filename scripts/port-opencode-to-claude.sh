@@ -1,16 +1,23 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# port-opencode-to-claude: Port opencode/ config to ~/.claude/ Claude Code format
+# port-opencode-to-claude: Port opencode/ config to claude/ in repo, symlink to ~/.claude/
 #
-# Usage: port-opencode-to-claude [--dry-run] [--source=DIR] [--target=DIR]
+# Usage: port-opencode-to-claude [--dry-run] [--source=DIR] [--target=DIR] [--no-link]
 #
-# Maps:
-#   opencode/skill/<name>/     -> ~/.claude/skills/<name>/    (full dir copy + frontmatter fixup)
-#   opencode/command/<name>.md -> ~/.claude/commands/<name>.md (frontmatter translation)
-#   opencode/agent/<name>.md   -> ~/.claude/agents/<name>.md   (frontmatter translation)
-#   opencode/AGENTS.md         -> ~/.claude/AGENTS.md          (direct copy)
-#   opencode/opencode.json     -> ~/.claude/settings.json      (permission mapping)
+# Ports translated files to <repo>/claude/ then symlinks config items into ~/.claude/:
+#   opencode/skill/<name>/     -> claude/skills/<name>/    (full dir copy + frontmatter fixup)
+#   opencode/command/<name>.md -> claude/commands/<name>.md (frontmatter translation)
+#   opencode/agent/<name>.md   -> claude/agents/<name>.md   (frontmatter translation)
+#   opencode/AGENTS.md         -> claude/AGENTS.md          (direct copy)
+#   opencode/opencode.json     -> claude/settings.json      (permission mapping)
+#
+# Symlinks (into ~/.claude/):
+#   ~/.claude/skills/   -> <repo>/claude/skills/
+#   ~/.claude/commands/ -> <repo>/claude/commands/
+#   ~/.claude/agents/   -> <repo>/claude/agents/
+#   ~/.claude/AGENTS.md -> <repo>/claude/AGENTS.md
+#   ~/.claude/settings.json -> <repo>/claude/settings.json
 #
 # Skips:
 #   opencode/plugins/          (opencode-specific auth plugin)
@@ -20,9 +27,12 @@ set -euo pipefail
 #   opencode/node_modules/     (deps)
 
 DRY_RUN=false
+NO_LINK=false
 SOURCE_DIR=""
-TARGET_DIR="$HOME/.claude"
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+REPO_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
+TARGET_DIR="$REPO_DIR/claude"
+LINK_DIR="$HOME/.claude"
 
 # Parse args
 while [[ $# -gt 0 ]]; do
@@ -39,6 +49,10 @@ while [[ $# -gt 0 ]]; do
       TARGET_DIR="${1#--target=}"
       shift
       ;;
+    --no-link)
+      NO_LINK=true
+      shift
+      ;;
     -h|--help)
       sed -n '3,/^$/s/^# //p' "$0"
       exit 0
@@ -52,7 +66,7 @@ done
 
 # Auto-detect source: look for opencode/ in script's parent (dotfiles repo)
 if [[ -z "$SOURCE_DIR" ]]; then
-  local_candidate="$(cd "$SCRIPT_DIR/.." && pwd)/opencode"
+  local_candidate="$REPO_DIR/opencode"
   if [[ -d "$local_candidate" ]]; then
     SOURCE_DIR="$local_candidate"
   else
@@ -525,13 +539,71 @@ port_permissions() {
   ((ported_other++)) || true
 }
 
+# ─── Symlinks ─────────────────────────────────────────────────────────────────
+
+symlink_item() {
+  local src="$1"
+  local dest="$2"
+
+  if $DRY_RUN; then
+    run "symlink: $dest -> $src"
+    return
+  fi
+
+  if [[ ! -e "$src" ]]; then
+    return
+  fi
+
+  if [[ -L "$dest" ]]; then
+    local current_target
+    current_target=$(readlink "$dest")
+    if [[ "$current_target" == "$src" ]]; then
+      run "symlink: $dest (already correct)"
+      return
+    fi
+    run "symlink: $dest (updating -> $src)"
+    if ! $DRY_RUN; then
+      rm "$dest"
+      ln -s "$src" "$dest"
+    fi
+  elif [[ -e "$dest" ]]; then
+    run "symlink: $dest exists (not a symlink), backing up"
+    if ! $DRY_RUN; then
+      mv "$dest" "$dest.bak"
+      ln -s "$src" "$dest"
+    fi
+  else
+    run "symlink: $dest -> $src"
+    if ! $DRY_RUN; then
+      ln -s "$src" "$dest"
+    fi
+  fi
+}
+
+create_symlinks() {
+  echo ""
+  echo "Symlinks:"
+
+  ensure_dir "$LINK_DIR"
+
+  # Symlink each config item individually (not the whole dir — ~/.claude has runtime state)
+  local -a items=("skills" "commands" "agents" "AGENTS.md" "settings.json")
+  for item in "${items[@]}"; do
+    symlink_item "$TARGET_DIR/$item" "$LINK_DIR/$item"
+  done
+}
+
 # ─── Main ────────────────────────────────────────────────────────────────────
 
 echo "Porting opencode -> Claude Code"
 echo "  source: $SOURCE_DIR"
 echo "  target: $TARGET_DIR"
+echo "  links:  $LINK_DIR"
 if $DRY_RUN; then
   echo "  mode:   DRY RUN"
+fi
+if $NO_LINK; then
+  echo "  links:  DISABLED"
 fi
 
 port_agents_md
@@ -539,6 +611,10 @@ port_skills
 port_commands
 port_agents
 port_permissions
+
+if ! $NO_LINK; then
+  create_symlinks
+fi
 
 echo ""
 echo "Done:"
