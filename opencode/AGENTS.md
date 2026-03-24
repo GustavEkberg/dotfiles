@@ -9,6 +9,8 @@
 ## Code Quality Standards
 
 - Make minimal, surgical changes
+- **No monolithic files**: split large files by concern; extract reusable logic into shared modules/functions; decompose past ~200 lines
+- **Reusable abstractions**: common patterns belong in dedicated modules, not inlined repeatedly
 - **Never compromise type safety**: No `any`, no non-null assertion operator (`!`), no type assertions (`as Type`)
 - **Make illegal states unrepresentable**: Model domain with ADTs/discriminated unions; parse inputs at boundaries into typed structures; if state can't exist, code can't mishandle it
 - **Abstractions**: Consciously constrained, pragmatically parameterised, doggedly documented

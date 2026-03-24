@@ -8,6 +8,7 @@ set -x LANG en_US.UTF-8
 set -x ANTHROPIC_MODEL "claude-opus-4-6"
 
 alias o='opencode'
+alias c='claude'
 alias oc='opencode --continue'
 alias vim='nvim'
 alias vi='nvim'
@@ -15,7 +16,6 @@ alias v='nvim'
 alias vv='nvim .'
 alias ll='ls -lah'
 alias wttr='curl wttr.in/Gothenburg'
-alias nn='cd /Users/abraxas/Dropbox/Notes/kkdvr && vim'
 alias python='python3'
 alias yd='pnpm dev'
 alias yi='yarn install'
@@ -73,11 +73,11 @@ pyenv init - | source
 starship init fish | source
 
 # pnpm
-set -gx PNPM_HOME "/Users/abraxas/Library/pnpm"
+set -gx PNPM_HOME "$HOME/Library/pnpm"
 if not string match -q -- $PNPM_HOME $PATH
   set -gx PATH "$PNPM_HOME" $PATH
 end
 # pnpm end
 
 # opencode
-fish_add_path /Users/abraxas/.opencode/bin
+fish_add_path $HOME/.opencode/bin

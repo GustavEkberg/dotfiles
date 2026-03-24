@@ -41,5 +41,5 @@ vim.opt.spelllang = {"en_gb"}
 vim.opt.spelloptions = "camel"
 
 -- Augmented
-vim.g.augment_workspace_folders = {"/Users/abraxas/code/sl/australis"}
+vim.g.augment_workspace_folders = {vim.fn.expand("~") .. "/code/sl/australis"}
 

@@ -87,7 +87,6 @@ except tmux (`prefix + r` reloads `tmux.conf`).
 - **Performance-conscious**: nvim has large-file detection (>1MB / >10K lines / >1000 char lines)
   that disables syntax, treesitter, LSP, spell. See `lua/user/large_file.lua`
 - **Minimal changes**: surgical edits over broad refactors
-- Hardcoded paths exist: `/Users/abraxas/...`, Gothenburg weather coords. Don't "fix" these.
 
 ## Neovim Architecture
 
@@ -138,7 +137,6 @@ From `opencode/AGENTS.md` — these apply to all agent interactions in this repo
 
 - No symlink automation — you cannot "install" configs from this repo programmatically
 - `install.sh` only installs system packages, not configs
-- Some nvim paths are absolute (`/Users/abraxas/code/sl/australis` in options.lua) — leave them
 - Fish sources `connections.sh` at runtime — it's gitignored and may not exist
 - `opencode/` has its own `AGENTS.md` with generic agent instructions (not dotfiles-specific)
 - Keyboard layouts in `keep/` are binary/JSON exports from Vial — not hand-editable

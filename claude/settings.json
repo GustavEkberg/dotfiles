@@ -1,0 +1,36 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(cat *)",
+      "Bash(ls *)",
+      "Bash(ls)",
+      "Bash(head *)",
+      "Bash(tail *)",
+      "Bash(wc *)",
+      "Bash(file *)",
+      "Bash(stat *)",
+      "Bash(du *)",
+      "Bash(tree *)",
+      "Bash(pwd)",
+      "Bash(which *)",
+      "Bash(echo *)",
+      "Read(~/.claude*)"
+    ],
+    "deny": [
+      "Bash(cat *.env*)",
+      "Bash(cat */.env*)",
+      "Bash(head *.env*)",
+      "Bash(head */.env*)",
+      "Bash(tail *.env*)",
+      "Bash(tail */.env*)",
+      "Bash(supabase db reset *)",
+      "Bash(supabase db reset)",
+      "Bash(supabase function deploy *)",
+      "Bash(supabase function deploy)",
+      "Bash(supabase functions deploy *)",
+      "Bash(supabase functions deploy)",
+      "Bash(supabase reset *)",
+      "Bash(supabase reset)"
+    ]
+  }
+}

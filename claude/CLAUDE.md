@@ -1,0 +1,1 @@
+/Users/abraxas/code/dotfiles/opencode/AGENTS.md
