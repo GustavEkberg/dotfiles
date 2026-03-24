@@ -9,14 +9,14 @@ set -euo pipefail
 #   opencode/skill/<name>/     -> claude/skills/<name>/    (full dir copy + frontmatter fixup)
 #   opencode/command/<name>.md -> claude/commands/<name>.md (frontmatter translation)
 #   opencode/agent/<name>.md   -> claude/agents/<name>.md   (frontmatter translation)
-#   opencode/AGENTS.md         -> claude/AGENTS.md          (direct copy)
+#   opencode/AGENTS.md         -> claude/AGENTS.md          (direct copy, + CLAUDE.md symlink)
 #   opencode/opencode.json     -> claude/settings.json      (permission mapping)
 #
 # Symlinks (into ~/.claude/):
 #   ~/.claude/skills/   -> <repo>/claude/skills/
 #   ~/.claude/commands/ -> <repo>/claude/commands/
 #   ~/.claude/agents/   -> <repo>/claude/agents/
-#   ~/.claude/AGENTS.md -> <repo>/claude/AGENTS.md
+#   ~/.claude/CLAUDE.md -> <repo>/claude/CLAUDE.md (-> AGENTS.md)
 #   ~/.claude/settings.json -> <repo>/claude/settings.json
 #
 # Skips:
@@ -429,6 +429,17 @@ port_agents_md() {
     cp "$agents_md" "$dest"
   fi
 
+  # Claude Code reads CLAUDE.md, not AGENTS.md — create symlink
+  local claude_md="$TARGET_DIR/CLAUDE.md"
+  if [[ -L "$claude_md" ]]; then
+    run "CLAUDE.md -> AGENTS.md (already linked)"
+  else
+    run "CLAUDE.md -> AGENTS.md"
+    if ! $DRY_RUN; then
+      ln -sf "AGENTS.md" "$claude_md"
+    fi
+  fi
+
   ((ported_other++)) || true
 }
 
@@ -587,7 +598,7 @@ create_symlinks() {
   ensure_dir "$LINK_DIR"
 
   # Symlink each config item individually (not the whole dir — ~/.claude has runtime state)
-  local -a items=("skills" "commands" "agents" "AGENTS.md" "settings.json")
+  local -a items=("skills" "commands" "agents" "CLAUDE.md" "settings.json")
   for item in "${items[@]}"; do
     symlink_item "$TARGET_DIR/$item" "$LINK_DIR/$item"
   done
