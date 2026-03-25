@@ -9,6 +9,7 @@ set -x ANTHROPIC_MODEL "claude-opus-4-6"
 
 alias o='opencode'
 alias c='claude'
+alias cr='claude --resume'
 alias oc='opencode --continue'
 alias vim='nvim'
 alias vi='nvim'

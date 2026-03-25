@@ -4,6 +4,7 @@
       "Bash(cat *)",
       "Bash(ls *)",
       "Bash(ls)",
+      "Bash(ls -*)",
       "Bash(head *)",
       "Bash(tail *)",
       "Bash(wc *)",
@@ -14,6 +15,10 @@
       "Bash(pwd)",
       "Bash(which *)",
       "Bash(echo *)",
+      "Bash(find *)",
+      "Bash(git add *)",
+      "Bash(git commit *)",
+      "Bash(git show *)",
       "Read(~/.claude*)"
     ],
     "deny": [
