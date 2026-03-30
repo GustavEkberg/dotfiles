@@ -16,20 +16,29 @@ Fetch GitHub issue details for the repository in the current working directory.
 
 ## Prerequisites
 
-- `gh` CLI installed and authenticated
+- `gh` CLI installed
+- `GH_AGENT_TOKEN` env var set (used for auth inside sandboxed environments)
 - Current directory is within a git repo with GitHub remote
+
+## Authentication
+
+**Always** prefix `gh` commands with `GH_TOKEN="$GH_AGENT_TOKEN"` so the CLI picks up the correct token:
+
+```bash
+GH_TOKEN="$GH_AGENT_TOKEN" gh issue view <number>
+```
 
 ## Commands
 
 ```bash
 # View issue with full details
-gh issue view <number>
+GH_TOKEN="$GH_AGENT_TOKEN" gh issue view <number>
 
 # View with comments
-gh issue view <number> --comments
+GH_TOKEN="$GH_AGENT_TOKEN" gh issue view <number> --comments
 
 # JSON output for parsing
-gh issue view <number> --json title,body,labels,assignees,state,comments
+GH_TOKEN="$GH_AGENT_TOKEN" gh issue view <number> --json title,body,labels,assignees,state,comments
 ```
 
 ## Output Fields
@@ -49,7 +58,7 @@ gh issue view <number> --json title,body,labels,assignees,state,comments
 
 ### When no issue number is provided
 
-1. **List recent issues** - Run `gh issue list --limit 10 --json number,title,labels,state,updatedAt`
+1. **List recent issues** - Run `GH_TOKEN="$GH_AGENT_TOKEN" gh issue list --limit 10 --json number,title,labels,state,updatedAt`
 2. **Present choices** - Show the list to the user and ask which issue they want to work on
 3. **Continue** with the selected issue number below
 
@@ -72,4 +81,4 @@ Addresses #42
 
 ## Tips
 
-- Look for linked PRs: `gh issue view <n> --json linkedPullRequests`
+- Look for linked PRs: `GH_TOKEN="$GH_AGENT_TOKEN" gh issue view <n> --json linkedPullRequests`

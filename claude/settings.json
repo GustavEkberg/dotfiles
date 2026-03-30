@@ -20,7 +20,9 @@
       "Bash(git commit *)",
       "Bash(git show *)",
       "Read(~/.claude*)",
-      "Bash(GH_TOKEN=$GH_AGENT_TOKEN gh issue view *)"
+      "Bash(GH_TOKEN=$GH_AGENT_TOKEN gh issue view *)",
+      "Bash(GH_TOKEN=$GH_AGENT_TOKEN gh issue list *)",
+      "Bash(GH_TOKEN=$GH_AGENT_TOKEN gh *)"
     ],
     "deny": [
       "Bash(cat *.env*)",
