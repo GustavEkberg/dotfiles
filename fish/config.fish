@@ -9,6 +9,7 @@ set -x ANTHROPIC_MODEL "claude-opus-4-6"
 
 alias o='opencode'
 alias c='claude'
+alias ch='claude --channels plugin:telegram@claude-plugins-official'
 alias cr='claude --resume'
 alias oc='opencode --continue'
 alias vim='nvim'
@@ -19,7 +20,7 @@ alias ll='ls -lah'
 alias wttr='curl wttr.in/Gothenburg'
 alias python='python3'
 alias yd='pnpm dev'
-alias yi='yarn install'
+alias yi='pnpm install'
 alias tp='tmux attach -t primary || tmux new -s primary' 
 alias o='opencode'
 

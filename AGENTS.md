@@ -140,3 +140,4 @@ From `opencode/AGENTS.md` — these apply to all agent interactions in this repo
 - Fish sources `connections.sh` at runtime — it's gitignored and may not exist
 - `opencode/` has its own `AGENTS.md` with generic agent instructions (not dotfiles-specific)
 - Keyboard layouts in `keep/` are binary/JSON exports from Vial — not hand-editable
+- **Claude Code & OpenCode configs are symlinked from this repo** — all changes to `.claude/` settings, `opencode/` config, and new skills must be created here first, then symlinked to their active locations

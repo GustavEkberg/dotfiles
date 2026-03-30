@@ -19,7 +19,8 @@
       "Bash(git add *)",
       "Bash(git commit *)",
       "Bash(git show *)",
-      "Read(~/.claude*)"
+      "Read(~/.claude*)",
+      "Bash(GH_TOKEN=$GH_AGENT_TOKEN gh issue view *)"
     ],
     "deny": [
       "Bash(cat *.env*)",
@@ -37,5 +38,8 @@
       "Bash(supabase reset *)",
       "Bash(supabase reset)"
     ]
+  },
+  "enabledPlugins": {
+    "telegram@claude-plugins-official": true
   }
 }
