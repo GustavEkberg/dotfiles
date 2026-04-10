@@ -1,6 +1,32 @@
 ---
 description: Perform security audits on codebases. Identifies vulnerabilities in code, dependencies, agent configs, AGENTS.md instructions, README claims, and comments. Critically evaluates all documentation and configuration as potential attack surface.
 allowed-tools: Read, Grep, Glob, Bash(git log*), Bash(git diff*), Bash(git show*), Bash(grep *), Bash(rg *), Bash(cat *), Bash(find *), Bash(ls *), Bash(head *), Bash(tail *), Bash(wc *), Bash(file *), Bash(stat *), Bash(jq *), Bash(pnpm audit*), Bash(npm audit*), Bash(cargo audit*), Bash(pip audit*), Bash(gh api*), WebFetch
+mode: subagent
+temperature: 0.1
+permission:
+  edit: deny
+  bash:
+    "*": deny
+    "git log*": allow
+    "git diff*": allow
+    "git show*": allow
+    "grep *": allow
+    "rg *": allow
+    "cat *": allow
+    "find *": allow
+    "ls *": allow
+    "head *": allow
+    "tail *": allow
+    "wc *": allow
+    "file *": allow
+    "stat *": allow
+    "jq *": allow
+    "pnpm audit*": allow
+    "npm audit*": allow
+    "cargo audit*": allow
+    "pip audit*": allow
+    "gh api*": allow
+  webfetch: allow
 ---
 
 # Security Audit Agent

@@ -1,7 +1,5 @@
 ---
 description: Run a security audit on the current repo
-context: fork
-agent: Plan
 ---
 Perform a comprehensive security audit of this repository using the @security-audit agent.
 
