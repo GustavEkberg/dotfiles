@@ -10,7 +10,7 @@ Complete one task from a PRD file. Pick the next logical task to work on (should
 /complete-next-task <prd-name>
 ```
 
-Where `<prd-name>` matches `.claude/state/<prd-name>/prd.json`
+Where `<prd-name>` matches `.prd/state/<prd-name>/prd.json`
 
 ## Before Starting
 
@@ -24,22 +24,22 @@ Use the detected VCS (jj or git) for all version control operations.
 
 ## File Locations
 
-**IMPORTANT**: The `.claude/state/` directory may not be at cwd. Search for it:
+**IMPORTANT**: The `.prd/state/` directory may not be at cwd. Search for it:
 
 1. Start at cwd
-2. Check if `.claude/state/<prd-name>/prd.json` exists
+2. Check if `.prd/state/<prd-name>/prd.json` exists
 3. If not, go up one directory
 4. Repeat until found or reaching filesystem root
 
 Use this bash to find the state directory:
 
 ```bash
-find_opencode_state() {
+find_prd_state() {
   local prd="$1"
   local dir="$PWD"
   while [[ "$dir" != "/" ]]; do
-    if [[ -f "$dir/.claude/state/$prd/prd.json" ]]; then
-      echo "$dir/.claude/state/$prd"
+    if [[ -f "$dir/.prd/state/$prd/prd.json" ]]; then
+      echo "$dir/.prd/state/$prd"
       return 0
     fi
     dir="$(dirname "$dir")"
@@ -116,44 +116,48 @@ Before committing, run ALL applicable:
 
 Set the task's `passes` field to `true` in the PRD file.
 
-Also capture session metrics and write a `completedAt` object on the task. Query the opencode SQLite DB to get stats for the current session (including subagent sessions):
+Also capture session metrics and write a `completedAt` object on the task. Metrics are best-effort and harness-dependent — only fill fields the current harness exposes.
+
+If running under opencode, query the SQLite DB at `~/.local/share/opencode/storage/db.sqlite` (or `$XDG_DATA_HOME/opencode/storage/db.sqlite`) for session + subagent totals:
 
 ```bash
-OPENCODE_DB="# Claude Code has no equivalent session DB"
-CURRENT_SESSION=$(sqlite3 "$OPENCODE_DB" "SELECT id FROM session WHERE parent_id IS NULL ORDER BY time_created DESC LIMIT 1")
-sqlite3 "$OPENCODE_DB" "
-  WITH session_tree AS (
-    SELECT id FROM session WHERE id = '$CURRENT_SESSION'
-    UNION ALL
-    SELECT s.id FROM session s
-    JOIN session_tree st ON s.parent_id = st.id
-  )
-  SELECT
-    COUNT(*) as messages,
-    COALESCE(SUM(json_extract(data,'$.tokens.total')), 0) as tokens,
-    MIN(m.time_created) as started,
-    MAX(m.time_created) as ended
-  FROM message m
-  JOIN session_tree st ON m.session_id = st.id
-  WHERE json_extract(data,'$.role') = 'assistant'
-"
+OPENCODE_DB="${XDG_DATA_HOME:-$HOME/.local/share}/opencode/storage/db.sqlite"
+if [[ -f "$OPENCODE_DB" ]]; then
+  CURRENT_SESSION=$(sqlite3 "$OPENCODE_DB" "SELECT id FROM session WHERE parent_id IS NULL ORDER BY time_created DESC LIMIT 1")
+  sqlite3 "$OPENCODE_DB" "
+    WITH session_tree AS (
+      SELECT id FROM session WHERE id = '$CURRENT_SESSION'
+      UNION ALL
+      SELECT s.id FROM session s
+      JOIN session_tree st ON s.parent_id = st.id
+    )
+    SELECT
+      COUNT(*) as messages,
+      COALESCE(SUM(json_extract(data,'$.tokens.total')), 0) as tokens,
+      MIN(m.time_created) as started,
+      MAX(m.time_created) as ended
+    FROM message m
+    JOIN session_tree st ON m.session_id = st.id
+    WHERE json_extract(data,'$.role') = 'assistant'
+  "
+fi
 ```
 
-Use the query results to add `completedAt` to the task object alongside `passes: true`:
+For other harnesses (e.g. Claude Code) without an equivalent session DB, skip the query and populate only `timestamp`. Add `completedAt` to the task object alongside `passes: true`:
 
 ```json
 {
   "passes": true,
   "completedAt": {
     "timestamp": "<ISO 8601 UTC>",
-    "tokens": <total from query>,
-    "messages": <messages from query>,
-    "durationSec": <ended - started>
+    "tokens": <total from query, omit if unavailable>,
+    "messages": <messages from query, omit if unavailable>,
+    "durationSec": <ended - started, omit if unavailable>
   }
 }
 ```
 
-- `timestamp`: Current time in ISO 8601 UTC (e.g. `"2026-03-09T12:34:56Z"`)
+- `timestamp`: Current time in ISO 8601 UTC (e.g. `"2026-03-09T12:34:56Z"`) — always required
 - `tokens`: Total tokens consumed across session + subagents (reflects full computational cost)
 - `messages`: Number of assistant messages (turns of work)
 - `durationSec`: Wall-clock seconds from first to last message

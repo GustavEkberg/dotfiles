@@ -16,14 +16,14 @@ Based on [Anthropic's research on long-running agents](https://www.anthropic.com
 1. User requests: "Load the prd-task skill and convert prd-<name>.md"
 2. Read the markdown PRD
 3. Extract tasks with verification steps
-4. Create `.claude/state/<prd-name>/` directory
-5. Move markdown PRD to `.claude/state/<prd-name>/prd.md`
-6. Output JSON to `.claude/state/<prd-name>/prd.json`
-7. Create empty `.claude/state/<prd-name>/progress.txt`
+4. Create `.prd/state/<prd-name>/` directory
+5. Move markdown PRD to `.prd/state/<prd-name>/prd.md`
+6. Output JSON to `.prd/state/<prd-name>/prd.json`
+7. Create empty `.prd/state/<prd-name>/progress.txt`
 
 State folder structure:
 ```
-.claude/state/<prd-name>/
+.prd/state/<prd-name>/
 ├── prd.md       # Original markdown PRD (moved from project root)
 ├── prd.json     # Converted JSON for task execution
 └── progress.txt # Empty file to track progress
@@ -75,7 +75,7 @@ User can log in and receive JWT token.
 
 ## Output Format
 
-Move PRD and generate JSON in `.claude/state/<prd-name>/`:
+Move PRD and generate JSON in `.prd/state/<prd-name>/`:
 - `prd.md` - Original markdown (moved from source location)
 - `prd.json` - Converted JSON:
 
@@ -175,7 +175,7 @@ Derive from PRD title:
 Tell the user:
 
 ```
-PRD converted and moved to .claude/state/<prd-name>/
+PRD converted and moved to .prd/state/<prd-name>/
   - prd.md (moved from <original-path>)
   - prd.json (generated)
   - progress.txt (empty)
@@ -253,7 +253,7 @@ User can retrieve their favorites.
 - Sharing favorites
 ```
 
-### Output: .claude/state/user-favorites/
+### Output: .prd/state/user-favorites/
 
 **prd.md** - Moved from `prd-favorites.md`
 

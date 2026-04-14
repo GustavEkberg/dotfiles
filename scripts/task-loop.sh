@@ -146,7 +146,7 @@ print_final_summary() {
 
     # Re-read task progress for final count
     local tot=0 dn=0 rem=0
-    local prd=".opencode/state/${FEATURE:-}/prd.json"
+    local prd=".prd/state/${FEATURE:-}/prd.json"
     if [[ -f "$prd" ]]; then
         tot=$(grep -c '"passes"' "$prd" || true)
         dn=$(grep -c '"passes": true' "$prd" || true)
@@ -182,7 +182,7 @@ for ((i=1; i<=MAX_ITERATIONS; i++)); do
     ITER_EPOCH=$(now_epoch)
 
     # Count task progress from active prd
-    PRD_FILE=".opencode/state/$FEATURE/prd.json"
+    PRD_FILE=".prd/state/$FEATURE/prd.json"
     CUR_TOTAL=0; CUR_DONE=0
     if [[ -f "$PRD_FILE" ]]; then
         CUR_TOTAL=$(grep -c '"passes"' "$PRD_FILE" || true)
