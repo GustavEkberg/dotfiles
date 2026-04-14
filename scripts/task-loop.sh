@@ -11,7 +11,7 @@ set -euo pipefail
 #   - Auto-adjusts on terminal resize (SIGWINCH)
 
 MAX_ITERATIONS=50
-MODEL="anthropic/claude-opus-4-6"
+MODEL="zen/claude-opus-4-6"
 
 # Parse args
 while [[ $# -gt 0 ]]; do
@@ -45,7 +45,7 @@ done
 
 if [[ -z "${FEATURE:-}" ]]; then
     echo "Usage: task-loop <feature> [--max-iterations=N] [--model=MODEL]"
-    echo "  Default model: anthropic/claude-opus-4-6"
+    echo "  Default model: zen/claude-opus-4-6"
     exit 1
 fi
 

@@ -4,6 +4,22 @@ import { generatePKCE } from "@openauthjs/openauth/pkce";
 
 const CLIENT_ID = "9d1c250a-e61b-44d9-88ed-5944d1962f5e";
 const USER_AGENT = "claude-cli/2.1.2 (external, cli)";
+const TOOL_PREFIX = "mcp_";
+
+function prefixName(name) {
+  return `${TOOL_PREFIX}${name.charAt(0).toUpperCase()}${name.slice(1)}`;
+}
+
+function unprefixName(name) {
+  return `${name.charAt(0).toLowerCase()}${name.slice(1)}`;
+}
+
+function stripToolPrefix(text) {
+  return text.replace(
+    /"name"\s*:\s*"mcp_([^"]+)"/g,
+    (_match, name) => `"name": "${unprefixName(name)}"`,
+  );
+}
 
 /**
  * @param {"max" | "console"} mode
@@ -191,7 +207,6 @@ export async function AnthropicAuthPlugin({ client }) {
               requestHeaders.set("user-agent", USER_AGENT);
               requestHeaders.delete("x-api-key");
 
-              const TOOL_PREFIX = "mcp_";
               let body = requestInit.body;
               if (body && typeof body === "string") {
                 try {
@@ -217,9 +232,7 @@ export async function AnthropicAuthPlugin({ client }) {
                   if (parsed.tools && Array.isArray(parsed.tools)) {
                     parsed.tools = parsed.tools.map((tool) => ({
                       ...tool,
-                      name: tool.name
-                        ? `${TOOL_PREFIX}${tool.name}`
-                        : tool.name,
+                      name: tool.name ? prefixName(tool.name) : tool.name,
                     }));
                   }
                   // Add prefix to tool_use blocks in messages
@@ -230,7 +243,7 @@ export async function AnthropicAuthPlugin({ client }) {
                           if (block.type === "tool_use" && block.name) {
                             return {
                               ...block,
-                              name: `${TOOL_PREFIX}${block.name}`,
+                              name: prefixName(block.name),
                             };
                           }
                           return block;
@@ -290,10 +303,7 @@ export async function AnthropicAuthPlugin({ client }) {
                     }
 
                     let text = decoder.decode(value, { stream: true });
-                    text = text.replace(
-                      /"name"\s*:\s*"mcp_([^"]+)"/g,
-                      '"name": "$1"',
-                    );
+                    text = stripToolPrefix(text);
                     controller.enqueue(encoder.encode(text));
                   },
                 });
