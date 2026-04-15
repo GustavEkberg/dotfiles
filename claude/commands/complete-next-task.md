@@ -12,16 +12,6 @@ Complete one task from a PRD file. Pick the next logical task to work on (should
 
 Where `<prd-name>` matches `.prd/state/<prd-name>/prd.json`
 
-## Before Starting
-
-First, invoke the skill tool to detect the VCS:
-
-```
-skill({ name: 'vcs-detect' })
-```
-
-Use the detected VCS (jj or git) for all version control operations.
-
 ## File Locations
 
 **IMPORTANT**: The `.prd/state/` directory may not be at cwd. Search for it:
@@ -68,7 +58,7 @@ Once found, use **absolute paths** for all file operations:
     3. Spikes/unknowns
     4. Standard features
     5. Polish/cleanup
-- Check recent history (jj: `jj log --limit 10`, git: `git log --oneline -10`)
+- Check recent history: `git log --oneline -10`
 
 ### 2. Initialize Progress (if needed)
 
@@ -94,8 +84,7 @@ Started: <YYYY-MM-DD>
 
 Extract `prdName` from PRD, then:
 
-- jj: Check if already on a change for this PRD (`jj log --limit 1`). If not, `jj new -m '<prdName>'`
-- git: `git checkout <prdName> 2>/dev/null || git checkout -b <prdName>` — switch to existing branch, only create if it doesn't exist
+- `git checkout <prdName> 2>/dev/null || git checkout -b <prdName>` — switch to existing branch, only create if it doesn't exist
 
 ### 4. Implement Task
 
@@ -178,8 +167,7 @@ If you discover a **reusable pattern**, also add to `## Codebase Patterns` at th
 
 ### 8. Commit
 
-- jj: `jj describe -m 'feat(<scope>): <description>' && jj new`
-- git: `git add -A && git commit -m 'feat(<scope>): <description>'`
+- `git add -A && git commit -m 'feat(<scope>): <description>'`
 
 All commits land on the single PRD branch. One branch, many commits.
 
