@@ -8,6 +8,7 @@ set -x LANG en_US.UTF-8
 set -x ANTHROPIC_MODEL "claude-opus-4-6"
 
 alias o='opencode'
+alias la='lazygit'
 alias c='claude'
 alias ch='claude --channels plugin:telegram@claude-plugins-official'
 alias cr='claude --resume'
