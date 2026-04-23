@@ -38,11 +38,18 @@
       "Bash(supabase functions deploy *)",
       "Bash(supabase functions deploy)",
       "Bash(supabase reset *)",
-      "Bash(supabase reset)"
+      "Bash(supabase reset)",
+      "Bash(pnpm db:migrate *)",
+      "Bash(pnpm db:migrate)",
+      "Bash(npm run db:migrate *)",
+      "Bash(npm run db:migrate)",
+      "Bash(npx db:migrate *)",
+      "Bash(npx db:migrate)"
     ]
   },
   "enabledPlugins": {
     "telegram@claude-plugins-official": true
   },
-  "effortLevel": "high"
+  "effortLevel": "high",
+  "skipAutoPermissionPrompt": true
 }

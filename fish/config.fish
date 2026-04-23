@@ -5,7 +5,6 @@ if test -f $HOME/.config/fish/connections.sh
 end
 set -g fish_greeting
 set -x LANG en_US.UTF-8
-set -x ANTHROPIC_MODEL "claude-opus-4-6"
 
 alias o='opencode'
 alias la='lazygit'
@@ -27,6 +26,30 @@ alias o='opencode'
 
 function cpcp
     cat $argv | pbcopy
+end
+
+function clean
+    set -l dir (test -n "$argv[1]"; and echo $argv[1]; or echo .)
+    set -l targets
+    for t in node_modules .next
+        if test -e "$dir/$t"
+            set targets $targets "$dir/$t"
+        end
+    end
+    if test (count $targets) -eq 0
+        echo "nothing to clean in $dir"
+        return 0
+    end
+    printf 'rm -rf:\n'
+    for t in $targets
+        printf '  %s\n' $t
+    end
+    read -l -P 'proceed? [y/N] ' ans
+    if test "$ans" = y -o "$ans" = Y
+        rm -rf $targets
+    else
+        echo aborted
+    end
 end
 
 
