@@ -1,9 +1,17 @@
 // Source: https://github.com/seaweeduk/opencode-anthropic-auth
 // Commit: 072096f0a1dcaac2fd0f0eff611a64982d483e84
+//
+// Local patches (see plugins/AGENTS.md for provenance):
+// 1. Claude identity system prompt
+// 2. System prompt relocation hotfix (griffinmartin/opencode-claude-auth#148)
+// 3. PascalCase mcp_ tool names hotfix (ex-machina-co/opencode-anthropic-auth#81)
 import { generatePKCE } from "@openauthjs/openauth/pkce";
 
 const CLIENT_ID = "9d1c250a-e61b-44d9-88ed-5944d1962f5e";
 const USER_AGENT = "claude-cli/2.1.2 (external, cli)";
+const SYSTEM_IDENTITY =
+  "You are Claude Code, Anthropic's official CLI for Claude.";
+const BILLING_PREFIX = "x-anthropic-billing-header:";
 const TOOL_PREFIX = "mcp_";
 
 function prefixName(name) {
@@ -19,6 +27,88 @@ function stripToolPrefix(text) {
     /"name"\s*:\s*"mcp_([^"]+)"/g,
     (_match, name) => `"name": "${unprefixName(name)}"`,
   );
+}
+
+function getSystemEntryText(entry) {
+  if (typeof entry === "string") return entry;
+  if (entry && typeof entry.text === "string") return entry.text;
+  return "";
+}
+
+function withSystemEntryText(entry, text) {
+  if (typeof entry === "string") return text;
+  return {
+    ...entry,
+    text,
+  };
+}
+
+// System prompt relocation hotfix:
+// Keep only Claude identity + billing header in system[].
+// Move all other system text into the first user message.
+// Avoids Anthropic OAuth fingerprinting that rejects non-Claude-Code prompts.
+function relocateNonCoreSystemEntries(parsed) {
+  if (!Array.isArray(parsed.system) || !Array.isArray(parsed.messages)) return;
+
+  const firstUserMessage = parsed.messages.find(
+    (message) => message?.role === "user",
+  );
+
+  if (!firstUserMessage) return;
+
+  const keptSystemEntries = [];
+  const movedSystemTexts = [];
+
+  for (const entry of parsed.system) {
+    const text = getSystemEntryText(entry);
+
+    if (!text) {
+      keptSystemEntries.push(entry);
+      continue;
+    }
+
+    if (text.startsWith(BILLING_PREFIX)) {
+      keptSystemEntries.push(entry);
+      continue;
+    }
+
+    if (text === SYSTEM_IDENTITY) {
+      keptSystemEntries.push(withSystemEntryText(entry, SYSTEM_IDENTITY));
+      continue;
+    }
+
+    if (text.startsWith(SYSTEM_IDENTITY)) {
+      keptSystemEntries.push(withSystemEntryText(entry, SYSTEM_IDENTITY));
+
+      const remainder = text.slice(SYSTEM_IDENTITY.length).trim();
+      if (remainder) movedSystemTexts.push(remainder);
+
+      continue;
+    }
+
+    movedSystemTexts.push(text);
+  }
+
+  if (movedSystemTexts.length === 0) {
+    parsed.system = keptSystemEntries;
+    return;
+  }
+
+  parsed.system = keptSystemEntries;
+
+  const relocatedText = movedSystemTexts.join("\n\n");
+
+  if (typeof firstUserMessage.content === "string") {
+    firstUserMessage.content = `${relocatedText}\n\n${firstUserMessage.content}`;
+    return;
+  }
+
+  if (Array.isArray(firstUserMessage.content)) {
+    firstUserMessage.content.unshift({
+      type: "text",
+      text: relocatedText,
+    });
+  }
 }
 
 /**
@@ -91,13 +181,14 @@ async function exchange(code, verifier) {
 export async function AnthropicAuthPlugin({ client }) {
   return {
     "experimental.chat.system.transform": (input, output) => {
-      const prefix =
-        "You are Claude Code, Anthropic's official CLI for Claude.";
-      if (input.model?.providerID === "anthropic") {
-        output.system.unshift(prefix);
-        if (output.system[1])
-          output.system[1] = prefix + "\n\n" + output.system[1];
-      }
+      if (input.model?.providerID !== "anthropic") return;
+      if (!Array.isArray(output.system)) output.system = [];
+
+      const hasIdentity = output.system.some((entry) =>
+        getSystemEntryText(entry).startsWith(SYSTEM_IDENTITY),
+      );
+
+      if (!hasIdentity) output.system.unshift(SYSTEM_IDENTITY);
     },
     auth: {
       provider: "anthropic",
@@ -212,21 +303,11 @@ export async function AnthropicAuthPlugin({ client }) {
                 try {
                   const parsed = JSON.parse(body);
 
-                  // Sanitize system prompt - server blocks "OpenCode" string
-                  // Note: (?<!\/) preserves paths like /path/to/opencode-foo
-                  if (parsed.system && Array.isArray(parsed.system)) {
-                    parsed.system = parsed.system.map((item) => {
-                      if (item.type === "text" && item.text) {
-                        return {
-                          ...item,
-                          text: item.text
-                            .replace(/OpenCode/g, "Claude Code")
-                            .replace(/(?<!\/)opencode/gi, "Claude"),
-                        };
-                      }
-                      return item;
-                    });
-                  }
+                  // Anthropic fingerprints OAuth requests by system[]
+                  // content. Keep only Claude identity + billing header in
+                  // system[], move all other system prompt content into the
+                  // first user message.
+                  relocateNonCoreSystemEntries(parsed);
 
                   // Add prefix to tools definitions
                   if (parsed.tools && Array.isArray(parsed.tools)) {
