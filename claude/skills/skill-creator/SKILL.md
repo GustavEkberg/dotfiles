@@ -1,292 +1,322 @@
 ---
 name: skill-creator
 description: Guide for creating effective skills. This skill should be used when users want to create a new skill (or update an existing skill) that extends an agent's capabilities with specialized knowledge, workflows, or tool integrations.
-license: Complete terms in LICENSE.txt
 ---
 
 # Skill Creator
 
-This skill provides guidance for creating effective skills.
+Create custom skills that extend what agents can do in this project. Each skill is a `SKILL.md` with instructions + a companion slash command so users can invoke it via `/<name>`.
 
-> **CRITICAL: YAML FRONTMATTER REQUIRED**
-> Every SKILL.md **MUST** begin with YAML frontmatter on line 1. Without it, the skill will not load.
-> ```yaml
-> ---
-> name: skill-name
-> description: One-line description of what this skill does
-> ---
-> ```
-
-## About Skills
-
-Skills are modular, self-contained packages that extend an agent's capabilities by providing
-specialized knowledge, workflows, and tools. Think of them as "onboarding guides" for specific
-domains or tasks—they transform a general-purpose agent into a specialized agent
-equipped with procedural knowledge that no model can fully possess.
-
-### What Skills Provide
-
-1. Specialized workflows - Multi-step procedures for specific domains
-2. Tool integrations - Instructions for working with specific file formats or APIs
-3. Domain expertise - Company-specific knowledge, schemas, business logic
-4. Bundled resources - Scripts, references, and assets for complex and repetitive tasks
-
-### Anatomy of a Skill
-
-Every skill consists of a required SKILL.md file and optional bundled resources:
+## Skill Type Decision Tree
 
 ```
-skill-name/
-├── SKILL.md (required)
-│   ├── YAML frontmatter metadata (required)
-│   │   ├── name: (required)
-│   │   └── description: (required)
-│   └── Markdown instructions (required)
-└── Bundled Resources (optional)
-    ├── scripts/          - Executable code (Python/Bash/etc.)
-    ├── references/       - Documentation intended to be loaded into context as needed
-    └── assets/           - Files used in output (templates, icons, fonts, etc.)
+What are you building?
+├─ Instructions only → Minimal skill (SKILL.md only)
+│   Example: code review guidelines, commit message format
+│
+├─ Domain knowledge → Reference skill (+ references/)
+│   Example: API docs, database schemas, internal conventions
+│
+├─ Repeatable automation → Script skill (+ scripts/)
+│   Example: data validation, file conversion, test runners
+│
+├─ Complex multi-step workflow → Multi-file skill (all directories)
+│   Example: release process, deployment pipeline
+│
+└─ Large platform/domain → Progressive skill (decision tree + references/)
+    Example: large API surface, many sub-products
 ```
 
-#### Requirements (important)
+## Directory Patterns
 
-- Skill should be combined into specific topics, for example: `cloudflare`, `cloudflare-r2`, `cloudflare-workers`, `docker`, `gcloud` should be combined into `devops`
-- `SKILL.md` should be **less than 200 lines** and include the references of related markdown files and scripts.
-- Each script or referenced markdown file should be also **less than 200 lines**, remember that you can always split them into multiple files (**progressive disclosure** principle).
-- Descriptions in metadata of `SKILL.md` files should be both concise and still contains enough usecases of the references and scripts, this will help skills can be activated automatically during the implementation process.
-- **Referenced markdowns**:
-  - Sacrifice grammar for the sake of concision when writing these files.
-  - Can reference other markdown files or scripts as well.
-- **Referenced scripts**:
-  - Prefer nodejs or python scripts instead of bash script, because bash scripts are not well-supported on Windows.
-  - If you're going to write python scripts, make sure you have `requirements.txt`
-  - Make sure scripts respect `.env` file follow this order: `process.env` > `.claude/skill/${SKILL}/.env` > `.claude/skill/.env` > `.claude/.env` 
-  - Create `.env.example` file to show the required environment variables.
-  - Always write tests for these scripts.
+### Minimal (SKILL.md only)
 
-**Why?**
-Better **context engineering**: inspired from **progressive disclosure** technique of Agent Skills, when agent skills are activated, the agent will consider to load only relevant files into the context, instead of reading all long `SKILL.md` as before.
+```
+my-skill/
+└── SKILL.md          # < 200 lines
+```
 
-#### SKILL.md (required)
+When: instructions fit in one file, no external resources.
 
-**File name:** `SKILL.md` (uppercase)  
-**File size:** Under 200 lines; split to `references/` if needed.
+### With References
 
-**YAML Frontmatter (REQUIRED - DO NOT SKIP)**
+```
+my-skill/
+├── SKILL.md          # Overview + navigation table
+└── references/
+    ├── api.md        # Detailed API docs
+    └── patterns.md   # Best practices
+```
 
-Every SKILL.md **MUST** begin with YAML frontmatter on line 1. No blank lines before it.
+When: content > 200 lines, different tasks need different sections.
+
+### With Scripts
+
+```
+my-skill/
+├── SKILL.md
+└── scripts/
+    └── validate.sh   # Executable automation
+```
+
+When: repeatable operations, deterministic validation/conversion.
+
+### Multi-File
+
+```
+my-skill/
+├── SKILL.md          # Hub: overview + decision tree + navigation
+├── references/
+│   ├── workflow.md
+│   └── troubleshooting.md
+├── scripts/
+│   └── deploy.sh
+└── assets/
+    └── template.yaml # Templates/boilerplate for output
+```
+
+When: complex workflows mixing docs + automation + templates.
+
+## File Size Guidelines
+
+| File Type      | Target        | Max       |
+| -------------- | ------------- | --------- |
+| SKILL.md       | 150-200 lines | 500 lines |
+| Reference file | 100-150 lines | 200 lines |
+
+Large files cause context rot — agent performance degrades. Split content into references/ when SKILL.md exceeds ~200 lines.
+
+## Workflow
+
+### Step 1: Discovery — Ask Questions
+
+**Always ask the user questions before writing anything.** Even if `$ARGUMENTS` provides a clear idea, dig deeper to understand the full picture. Ask about:
+
+- **Goal:** What problem does this skill solve? What's the end result?
+- **Trigger:** When should the agent use this skill? What situation or user request activates it?
+- **Steps:** What does the skill do, step by step? What commands, tools, or files are involved?
+- **Context:** Are there project-specific patterns, MCP tools, or conventions it should follow?
+- **Scope:** Is this a simple set of instructions, or does it need reference docs / scripts?
+
+Don't ask all of these if some are already clear from context — but always ask enough to understand the **why**, not just the **what**.
+
+### Step 2: Confirm the Plan
+
+After gathering answers, present a summary for user approval **before writing any files**:
+
+```
+Proposed skill:
+  Name: <name>
+  Description: <description>
+  Type: <minimal | reference | script | multi-file>
+  Files:
+    - claude/skills/<name>/SKILL.md
+    - claude/commands/<name>.md
+    [- claude/skills/<name>/references/... ]
+    [- claude/skills/<name>/scripts/... ]
+```
+
+Wait for the user to confirm or adjust before proceeding.
+
+**Choosing name and description:**
+
+**Name:** Short, descriptive kebab-case. Must match: `^[a-z0-9]+(-[a-z0-9]+)*$`
+
+- 1-64 chars, lowercase alphanumeric, hyphens only
+- No leading/trailing hyphens, no consecutive hyphens
+- Directory name must match the `name` field
+
+Good: `deploy-preview`, `test-e2e`, `api-client`
+Bad: `Deploy_Preview`, `--test`, `my skill`
+
+**Description:** Answer **"When should the agent use this skill?"** — this is what appears in the skill tool listing. Write in third person. Include what AND when.
+
+Good:
+
+- "Extract text and tables from PDF files. Use when working with PDFs or asked to read/edit them."
+- "Run and fix test failures. Use when tests fail or user asks to fix the test suite."
+
+Bad:
+
+- "A skill for tests" (too vague — agent won't know when to trigger)
+- "I help with PDFs" (wrong POV, no trigger context)
+
+### Step 3: Write the Skill Files
+
+Create at `claude/skills/<name>/SKILL.md`. For multi-file skills, create subdirectories as needed.
+
+**Frontmatter (required, must start at line 1, no blank lines before `---`):**
 
 ```yaml
 ---
 name: skill-name
-description: What this skill does and when to use it. Use third-person.
+description: What it does and when to use it.
 ---
 ```
 
-**Required fields:**
-- `name` — hyphen-case identifier matching directory name
-- `description` — activation trigger; be specific about WHEN to use
+| Field         | Required | Constraints                                                    |
+| ------------- | -------- | -------------------------------------------------------------- |
+| `name`        | Yes      | 1-64 chars, matches directory name, `^[a-z0-9]+(-[a-z0-9]+)*$` |
+| `description` | Yes      | 1-1024 chars, third person, includes when to use               |
 
-**Optional fields** (`references`, `license`, `metadata`):
+**Both fields are required.** Skills with missing or invalid frontmatter are silently ignored.
 
-```yaml
+**Writing effective instructions:**
+
+1. **Start with context** — what the skill does and when it applies
+2. **Step-by-step workflow** — numbered steps the agent should follow
+3. **Be specific** — reference actual commands, file paths, patterns from the project
+4. **Include examples** — expected inputs/outputs, command invocations
+5. **Handle errors** — what to do when things go wrong
+6. **Keep it focused** — one skill, one job
+
+**For multi-file skills, add a navigation table in SKILL.md:**
+
+```markdown
+## In This Skill
+
+| File                                               | Purpose           |
+| -------------------------------------------------- | ----------------- |
+| [references/api.md](./references/api.md)           | API reference     |
+| [references/patterns.md](./references/patterns.md) | Best practices    |
+| [scripts/validate.sh](./scripts/validate.sh)       | Validation script |
+
+## Reading Order
+
+| Task              | Files                           |
+| ----------------- | ------------------------------- |
+| Quick start       | SKILL.md only                   |
+| Implement feature | SKILL.md → api.md → patterns.md |
+| Debug issue       | SKILL.md → gotchas.md           |
+```
+
+This lets the agent load only what's needed for the task, keeping token usage low.
+
+**Minimal skill template:**
+
+```markdown
 ---
-name: skill-name
-description: What this skill does and when to use it.
-references:
-  - references/guide.md
-  - references/api.md
-license: Apache-2.0
+name: <name>
+description: <what + when>
 ---
+
+# <Title>
+
+<Brief overview.>
+
+## Workflow
+
+### Step 1: <First Step>
+
+<Instructions...>
+
+### Step 2: <Second Step>
+
+<Instructions...>
+
+## Important Notes
+
+- <Gotchas, edge cases>
 ```
 
-**INVALID - Do NOT use:**
-- XML-style tags (`<purpose>`, `<references>`, `<description>`)
-- Missing `---` delimiters
-- Frontmatter that doesn't start at line 1
-- Blank lines before frontmatter
+**Reference skill template:**
 
-**Metadata Quality:** `name` and `description` determine skill activation. Be specific; use third-person ("This skill should be used when...").
+```markdown
+---
+name: <name>
+description: <what + when>
+---
 
-#### Bundled Resources (optional)
+# <Title>
 
-##### Scripts (`scripts/`)
+<Brief overview.>
 
-Executable code (Python/Bash/etc.) for tasks that require deterministic reliability or are repeatedly rewritten.
+## In This Skill
 
-- **When to include**: When the same code is being rewritten repeatedly or deterministic reliability is needed
-- **Example**: `scripts/rotate_pdf.py` for PDF rotation tasks
-- **Benefits**: Token efficient, deterministic, may be executed without loading into context
-- **Note**: Scripts may still need to be read by the agent for patching or environment-specific adjustments
+| File                                     | Purpose       |
+| ---------------------------------------- | ------------- |
+| [references/api.md](./references/api.md) | API reference |
 
-##### References (`references/`)
+## Quick Start
 
-Documentation and reference material intended to be loaded as needed into context to inform the agent's process and thinking.
+<Core instructions here, keep under 200 lines.>
 
-- **When to include**: For documentation that the agent should reference while working
-- **Examples**: `references/finance.md` for financial schemas, `references/mnda.md` for company NDA template, `references/policies.md` for company policies, `references/api_docs.md` for API specifications
-- **Use cases**: Database schemas, API documentation, domain knowledge, company policies, detailed workflow guides
-- **Benefits**: Keeps SKILL.md lean, loaded only when agent determines it's needed
-- **Best practice**: If files are large (>10k words), include grep search patterns in SKILL.md
-- **Avoid duplication**: Information should live in either SKILL.md or references files, not both. Prefer references files for detailed information unless it's truly core to the skill—this keeps SKILL.md lean while making information discoverable without hogging the context window. Keep only essential procedural instructions and workflow guidance in SKILL.md; move detailed reference material, schemas, and examples to references files.
+## Important Notes
 
-##### Assets (`assets/`)
+- <Gotchas, edge cases>
+```
 
-Files not intended to be loaded into context, but rather used within the output the agent produces.
+### Step 4: Create the Slash Command
 
-- **When to include**: When the skill needs files that will be used in the final output
-- **Examples**: `assets/logo.png` for brand assets, `assets/slides.pptx` for PowerPoint templates, `assets/frontend-template/` for HTML/React boilerplate, `assets/font.ttf` for typography
-- **Use cases**: Templates, images, icons, boilerplate code, fonts, sample documents that get copied or modified
-- **Benefits**: Separates output resources from documentation, enables agent to use files without loading them into context
+Every skill needs a companion slash command so users can invoke it via `/<name>`. Create `claude/commands/<name>.md`:
 
-### Progressive Disclosure Design Principle
+```markdown
+---
+description: <short description of what the command does>
+---
 
-Skills use a three-level loading system to manage context efficiently:
+<One-line summary of what this does.>
 
-1. **Metadata (name + description)** - Always in context (~100 words)
-2. **SKILL.md body** - When skill triggers (<5k words)
-3. **Bundled resources** - As needed by agent (Unlimited*)
+Load the <name> skill and use it to help the user.
 
-*Unlimited because scripts can be executed without reading into context window.
+<skill>
+$FILE{skill/<name>/SKILL.md}
+</skill>
 
-## Skill Creation Process
+<user-request>
+$ARGUMENTS
+</user-request>
+```
 
-To create a skill, follow the "Skill Creation Process" in order, skipping steps only if there is a clear reason why they are not applicable.
+This pattern:
 
-### Step 1: Understanding the Skill with Concrete Examples
+- `/` prefix makes it a slash command (e.g., `/deploy-preview`)
+- `$FILE{...}` inlines the skill instructions at invocation
+- `$ARGUMENTS` passes whatever the user typed after the command name
 
-Skip this step only when the skill's usage patterns are already clearly understood. It remains valuable even when working with an existing skill.
-
-To create an effective skill, clearly understand concrete examples of how the skill will be used. This understanding can come from either direct user examples or generated examples that are validated with user feedback.
-
-For example, when building an image-editor skill, relevant questions include:
-
-- "What functionality should the image-editor skill support? Editing, rotating, anything else?"
-- "Can you give some examples of how this skill would be used?"
-- "I can imagine users asking for things like 'Remove the red-eye from this image' or 'Rotate this image'. Are there other ways you imagine this skill being used?"
-- "What would a user say that should trigger this skill?"
-
-To avoid overwhelming users, avoid asking too many questions in a single message. Start with the most important questions and follow up as needed for better effectiveness.
-
-Conclude this step when there is a clear sense of the functionality the skill should support.
-
-### Step 2: Planning the Reusable Skill Contents
-
-To turn concrete examples into an effective skill, analyze each example by:
-
-1. Considering how to execute on the example from scratch
-2. Identifying what scripts, references, and assets would be helpful when executing these workflows repeatedly
-
-Example: When building a `pdf-editor` skill to handle queries like "Help me rotate this PDF," the analysis shows:
-
-1. Rotating a PDF requires re-writing the same code each time
-2. A `scripts/rotate_pdf.py` script would be helpful to store in the skill
-
-Example: When designing a `frontend-webapp-builder` skill for queries like "Build me a todo app" or "Build me a dashboard to track my steps," the analysis shows:
-
-1. Writing a frontend webapp requires the same boilerplate HTML/React each time
-2. An `assets/hello-world/` template containing the boilerplate HTML/React project files would be helpful to store in the skill
-
-Example: When building a `big-query` skill to handle queries like "How many users have logged in today?" the analysis shows:
-
-1. Querying BigQuery requires re-discovering the table schemas and relationships each time
-2. A `references/schema.md` file documenting the table schemas would be helpful to store in the skill
-
-To establish the skill's contents, analyze each concrete example to create a list of the reusable resources to include: scripts, references, and assets.
-
-### Step 3: Initializing the Skill
-
-At this point, it is time to actually create the skill.
-
-Skip this step only if the skill being developed already exists, and iteration or packaging is needed. In this case, continue to the next step.
-
-When creating a new skill from scratch, always run the `init_skill.py` script. The script conveniently generates a new template skill directory that automatically includes everything a skill requires, making the skill creation process much more efficient and reliable.
-
-Usage:
+### Step 5: Commit
 
 ```bash
-scripts/init_skill.py <skill-name> --path <output-directory>
+git add claude/skills/<name>/ claude/commands/<name>.md
+git commit -m "feat: add <name> skill"
 ```
 
-The script:
+Note: `claude/skills/` and `claude/commands/` are symlinked to active locations (`~/.claude/skills/`, `~/.claude/commands/`). Changes land in this repo first, then are picked up via existing symlinks — no re-linking needed.
 
-- Creates the skill directory at the specified path
-- Generates a SKILL.md template with proper frontmatter and TODO placeholders
-- Creates example resource directories: `scripts/`, `references/`, and `assets/`
-- Adds example files in each directory that can be customized or deleted
+### Step 6: Verify
 
-After initialization, customize or remove the generated SKILL.md and example files as needed.
+Both the skill and command are available after restarting the agent. Tell the user:
 
-### Step 4: Edit the Skill
+- Skill name and location
+- Slash command: `/<name>` (or `/<name> <args>`)
+- Committed to git
 
-When editing the (newly-generated or existing) skill, remember that the skill is being created for an agent to use. Focus on including information that would be beneficial and non-obvious to the agent. Consider what procedural knowledge, domain-specific details, or reusable assets would help the agent execute these tasks more effectively.
+## Common Mistakes
 
-#### Start with Reusable Skill Contents
+| Mistake                         | Fix                                            |
+| ------------------------------- | ---------------------------------------------- |
+| No slash command created        | Create `claude/commands/<name>.md` alongside   |
+| Blank lines before `---`        | Frontmatter must start at line 1               |
+| Missing closing `---`           | Add `---` after frontmatter fields             |
+| Name doesn't match directory    | Make `name:` field = directory name            |
+| SKILL.md > 500 lines            | Split into references/                         |
+| Vague description               | Include what + when, write in third person     |
+| Generic instructions            | Reference specific commands, paths, patterns   |
+| Duplicated content across files | Link to references, don't copy                 |
 
-To begin implementation, start with the reusable resources identified above: `scripts/`, `references/`, and `assets/` files. Note that this step may require user input. For example, when implementing a `brand-guidelines` skill, the user may need to provide brand assets or templates to store in `assets/`, or documentation to store in `references/`.
+## Tips
 
-Also, delete any example files and directories not needed for the skill. The initialization script creates example files in `scripts/`, `references/`, and `assets/` to demonstrate structure, but most skills won't need all of them.
+- **Reference project context**: mention specific directories, config files, conventions
+- **Use the project's tools**: if MCP servers exist, reference their tools by name
+- **Chain skills**: a skill can instruct the agent to load another skill for sub-tasks
+- **Keep it actionable**: every sentence should help the agent do something concrete
+- **Avoid generic advice**: "write clean code" is useless; "run `pnpm lint` and fix errors" is useful
+- **Scripts need shebangs**: `#!/usr/bin/env bash` + `set -euo pipefail`
 
-#### Update SKILL.md
+## Important Notes
 
-**Writing Style:** Write the entire skill using **imperative/infinitive form** (verb-first instructions), not second person. Use objective, instructional language (e.g., "To accomplish X, do Y" rather than "You should do X" or "If you need to do X"). This maintains consistency and clarity for AI consumption.
-
-To complete SKILL.md, answer the following questions:
-
-1. What is the purpose of the skill, in a few sentences?
-2. When should the skill be used?
-3. In practice, how should the agent use the skill? All reusable skill contents developed above should be referenced so that the agent knows how to use them.
-
-### Step 5: Packaging a Skill
-
-Once the skill is ready, it should be packaged into a distributable zip file that gets shared with the user. The packaging process automatically validates the skill first to ensure it meets all requirements:
-
-```bash
-scripts/package_skill.py <path/to/skill-folder>
-```
-
-Optional output directory specification:
-
-```bash
-scripts/package_skill.py <path/to/skill-folder> ./dist
-```
-
-The packaging script will:
-
-1. **Validate** the skill automatically, checking:
-   - YAML frontmatter format and required fields
-   - Skill naming conventions and directory structure
-   - Description completeness and quality
-   - File organization and resource references
-
-2. **Package** the skill if validation passes, creating a zip file named after the skill (e.g., `my-skill.zip`) that includes all files and maintains the proper directory structure for distribution.
-
-If validation fails, the script will report the errors and exit without creating a package. Fix any validation errors and run the packaging command again.
-
-### Step 6: Iterate
-
-After testing the skill, users may request improvements. Often this happens right after using the skill, with fresh context of how the skill performed.
-
-**Iteration workflow:**
-1. Use the skill on real tasks
-2. Notice struggles or inefficiencies
-3. Identify how SKILL.md or bundled resources should be updated
-4. Implement changes and test again
-
-## Pre-Submission Checklist
-
-Before packaging, verify:
-
-- [ ] **SKILL.md starts with `---`** (YAML frontmatter, line 1, no blank lines before)
-- [ ] **`name:` field present** and matches directory name
-- [ ] **`description:` field present** with specific activation triggers
-- [ ] **Closing `---`** after frontmatter
-- [ ] **No XML-style tags** (no `<purpose>`, `<description>`, etc.)
-- [ ] **SKILL.md under 200 lines** (use references/ for details)
-- [ ] **All referenced files exist** in scripts/, references/, or assets/
-
-## References
-
-- [Agent Skills Spec](./references/agent-skills-spec.md) - Complete format specification
-- [Agent Skills Blog](./references/agent-skills-intro-blog.md) - Design philosophy and examples
-- [Agent Skills Best Practices](./references/agent-skills-best-practices.md) - Authoring best practices
+- **Always create both files** — `claude/skills/<name>/SKILL.md` + `claude/commands/<name>.md`
+- **File must be named `SKILL.md`** (uppercase) — other names are ignored
+- **Directory name must match** the `name` field in frontmatter
+- **Skills are repo-scoped** — stored in `claude/skills/`, symlinked to `~/.claude/skills/`, committed to git
+- **No registration needed** — skills and commands are discovered automatically

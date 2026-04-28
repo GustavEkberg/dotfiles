@@ -22,23 +22,14 @@ Fetch GitHub issue details for the repository in the current working directory.
 
 ## Authentication
 
-**Always** prefix `gh` commands with `GH_TOKEN="$GH_AGENT_TOKEN"` so the CLI picks up the correct token:
+**Always** prefix `gh` commands with `GH_TOKEN="$GH_AGENT_TOKEN"` so the CLI picks up the correct token.
+
+## Command
+
+**Only** use the `--json` form with explicit fields. Plain `gh issue view` and `--comments` implicitly fetch `repository.issue.projectItems` (Projects v2) which the PAT cannot read — they fail with `Resource not accessible by personal access token`.
 
 ```bash
-GH_TOKEN="$GH_AGENT_TOKEN" gh issue view <number>
-```
-
-## Commands
-
-```bash
-# View issue with full details
-GH_TOKEN="$GH_AGENT_TOKEN" gh issue view <number>
-
-# View with comments
-GH_TOKEN="$GH_AGENT_TOKEN" gh issue view <number> --comments
-
-# JSON output for parsing
-GH_TOKEN="$GH_AGENT_TOKEN" gh issue view <number> --json title,body,labels,assignees,state,comments
+GH_TOKEN="$GH_AGENT_TOKEN" gh issue view <number> --json title,body,labels,assignees,state,comments,milestone,createdAt
 ```
 
 ## Output Fields
