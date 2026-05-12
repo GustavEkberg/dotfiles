@@ -11,7 +11,7 @@ set -euo pipefail
 #   - Auto-adjusts on terminal resize (SIGWINCH)
 
 MAX_ITERATIONS=50
-MODEL="anthropic/claude-opus-4-6"
+MODEL="anthropic/claude-opus-4-7"
 
 # Parse args
 while [[ $# -gt 0 ]]; do
@@ -45,13 +45,12 @@ done
 
 if [[ -z "${FEATURE:-}" ]]; then
     echo "Usage: task-loop <feature> [--max-iterations=N] [--model=MODEL]"
-    echo "  Default model: anthropic/claude-opus-4-6"
+    echo "  Default model: anthropic/claude-opus-4-7"
     exit 1
 fi
 
 COMPLETE_MARKER="<tasks>COMPLETE</tasks>"
 HEADER_LINES=6  # border + 3 content lines + border + blank
-TIMER_PID=""
 
 now_epoch() { date +%s; }
 
@@ -94,34 +93,6 @@ reset_scroll_region() {
     tput csr 0 $((term_lines - 1))
 }
 
-# ── Live timer ────────────────────────────────────────────────
-# The subshell uses epoch timestamps (not $SECONDS) to compute
-# durations correctly, since $SECONDS resets in child processes.
-
-start_timer() {
-    (
-        while true; do
-            sleep 1
-            local now elapsed iter_elapsed
-            now=$(now_epoch)
-            elapsed=$(fmt_duration $((now - LOOP_EPOCH)))
-            iter_elapsed=$(fmt_duration $((now - ITER_EPOCH)))
-            print_header "$CUR_ITER" "$MAX_ITERATIONS" "$MODEL" \
-                "$CUR_DONE" "$CUR_TOTAL" "$CUR_REMAINING" \
-                "$elapsed" "$iter_elapsed"
-        done
-    ) &
-    TIMER_PID=$!
-}
-
-stop_timer() {
-    if [[ -n "$TIMER_PID" ]] && kill -0 "$TIMER_PID" 2>/dev/null; then
-        kill "$TIMER_PID" 2>/dev/null || true
-        wait "$TIMER_PID" 2>/dev/null || true
-    fi
-    TIMER_PID=""
-}
-
 # ── Resize handler ────────────────────────────────────────────
 
 handle_winch() {
@@ -162,7 +133,6 @@ print_final_summary() {
 }
 
 cleanup() {
-    stop_timer
     reset_scroll_region
     tput cnorm 2>/dev/null || true  # restore cursor visibility
     print_final_summary
@@ -173,10 +143,6 @@ trap cleanup EXIT
 # ── Main loop ─────────────────────────────────────────────────
 
 LOOP_EPOCH=$(now_epoch)
-
-# Export functions and vars needed by timer subshell
-export -f fmt_duration print_header now_epoch
-export HEADER_LINES MAX_ITERATIONS MODEL LOOP_EPOCH
 
 for ((i=1; i<=MAX_ITERATIONS; i++)); do
     ITER_EPOCH=$(now_epoch)
@@ -191,9 +157,6 @@ for ((i=1; i<=MAX_ITERATIONS; i++)); do
     CUR_REMAINING=$((CUR_TOTAL - CUR_DONE))
     CUR_ITER=$i
 
-    # Export state for timer subshell
-    export ITER_EPOCH CUR_ITER CUR_TOTAL CUR_DONE CUR_REMAINING
-
     # Clear screen and draw initial header
     tput clear
     local_now=$(now_epoch)
@@ -206,18 +169,30 @@ for ((i=1; i<=MAX_ITERATIONS; i++)); do
     # Set scroll region below header
     setup_scroll_region
 
-    # Start live timer
-    start_timer
-
-    # Stream output and check for completion marker
+    # Stream output and tick header inline (single writer — no race
+    # with a background subshell stomping cursor save/restore).
     found=false
-    while IFS= read -r line; do
-        printf '%s\n' "$line"
-        [[ "$line" == *"$COMPLETE_MARKER"* ]] && found=true
-    done < <(opencode run --model "$MODEL" --command complete-next-task "$FEATURE" 2>&1)
-
-    # Stop timer
-    stop_timer
+    last_redraw=0
+    exec 3< <(opencode run --model "$MODEL" --command complete-next-task "$FEATURE" 2>&1)
+    while :; do
+        if IFS= read -t 1 -r line <&3; then
+            printf '%s\n' "$line"
+            [[ "$line" == *"$COMPLETE_MARKER"* ]] && found=true
+        else
+            rc=$?
+            (( rc > 128 )) || break  # rc==1 → EOF; >128 → timeout
+        fi
+        local_now=$(now_epoch)
+        if (( local_now > last_redraw )); then
+            elapsed=$(fmt_duration $((local_now - LOOP_EPOCH)))
+            iter_elapsed=$(fmt_duration $((local_now - ITER_EPOCH)))
+            print_header "$i" "$MAX_ITERATIONS" "$MODEL" \
+                "$CUR_DONE" "$CUR_TOTAL" "$CUR_REMAINING" \
+                "$elapsed" "$iter_elapsed"
+            last_redraw=$local_now
+        fi
+    done
+    exec 3<&-
 
     local_now=$(now_epoch)
     iter_dur=$(fmt_duration $((local_now - ITER_EPOCH)))

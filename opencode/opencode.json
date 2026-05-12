@@ -4,7 +4,7 @@
   "plugin": [
     "file:///Users/abraxas/.config/opencode/plugins/opencode-anthropic-auth.mjs"
   ],
-  "model": "anthropic/claude-opus-4-6",
+  "model": "anthropic/claude-opus-4-7",
   "permission": {
     "read": {
       "*": "allow",
