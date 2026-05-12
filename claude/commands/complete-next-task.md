@@ -103,53 +103,18 @@ Before committing, run ALL applicable:
 
 ### 6. Update PRD
 
-Set the task's `passes` field to `true` in the PRD file.
-
-Also capture session metrics and write a `completedAt` object on the task. Metrics are best-effort and harness-dependent — only fill fields the current harness exposes.
-
-If running under opencode, query the SQLite DB at `~/.local/share/opencode/storage/db.sqlite` (or `$XDG_DATA_HOME/opencode/storage/db.sqlite`) for session + subagent totals:
-
-```bash
-OPENCODE_DB="${XDG_DATA_HOME:-$HOME/.local/share}/opencode/storage/db.sqlite"
-if [[ -f "$OPENCODE_DB" ]]; then
-  CURRENT_SESSION=$(sqlite3 "$OPENCODE_DB" "SELECT id FROM session WHERE parent_id IS NULL ORDER BY time_created DESC LIMIT 1")
-  sqlite3 "$OPENCODE_DB" "
-    WITH session_tree AS (
-      SELECT id FROM session WHERE id = '$CURRENT_SESSION'
-      UNION ALL
-      SELECT s.id FROM session s
-      JOIN session_tree st ON s.parent_id = st.id
-    )
-    SELECT
-      COUNT(*) as messages,
-      COALESCE(SUM(json_extract(data,'$.tokens.total')), 0) as tokens,
-      MIN(m.time_created) as started,
-      MAX(m.time_created) as ended
-    FROM message m
-    JOIN session_tree st ON m.session_id = st.id
-    WHERE json_extract(data,'$.role') = 'assistant'
-  "
-fi
-```
-
-For other harnesses (e.g. Claude Code) without an equivalent session DB, skip the query and populate only `timestamp`. Add `completedAt` to the task object alongside `passes: true`:
+Set the task's `passes` field to `true` in the PRD file. Add `completedAt.timestamp` only.
 
 ```json
 {
   "passes": true,
   "completedAt": {
-    "timestamp": "<ISO 8601 UTC>",
-    "tokens": <total from query, omit if unavailable>,
-    "messages": <messages from query, omit if unavailable>,
-    "durationSec": <ended - started, omit if unavailable>
+    "timestamp": "<ISO 8601 UTC>"
   }
 }
 ```
 
 - `timestamp`: Current time in ISO 8601 UTC (e.g. `"2026-03-09T12:34:56Z"`) — always required
-- `tokens`: Total tokens consumed across session + subagents (reflects full computational cost)
-- `messages`: Number of assistant messages (turns of work)
-- `durationSec`: Wall-clock seconds from first to last message
 
 ### 7. Update Progress
 

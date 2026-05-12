@@ -98,7 +98,7 @@ Before committing, run ALL applicable:
 
 ### 6. Update PRD
 
-Set the task's `passes` field to `true`. Capture session metrics in a `completedAt` object — best-effort, harness-dependent. Under pi, the session DB equivalent is not exposed; populate only `timestamp`:
+Set the task's `passes` field to `true`. Add `completedAt.timestamp` only:
 
 ```json
 {

@@ -34,10 +34,7 @@
       ],
       "passes": true,
       "completedAt": {
-        "timestamp": "2026-03-09T14:22:31Z",
-        "tokens": 482150,
-        "messages": 34,
-        "durationSec": 145
+        "timestamp": "2026-03-09T14:22:31Z"
       }
     },
     {
