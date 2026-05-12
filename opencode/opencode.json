@@ -13,6 +13,13 @@
       "*.envrc": "deny",
       "secrets/*": "deny"
     },
+    "external_directory": {
+      "/tmp": "allow",
+      "/tmp/*": "allow"
+    },
+    "edit": {
+      "/tmp/*": "allow"
+    },
     "bash": {
       "supabase reset": "deny",
       "supabase reset *": "deny",
@@ -21,7 +28,27 @@
       "supabase function deploy": "deny",
       "supabase function deploy *": "deny",
       "supabase functions deploy": "deny",
-      "supabase functions deploy *": "deny"
+      "supabase functions deploy *": "deny",
+      "pnpm dev": "deny",
+      "pnpm dev *": "deny",
+      "pnpm run dev": "deny",
+      "pnpm run dev *": "deny",
+      "npm run dev": "deny",
+      "npm run dev *": "deny",
+      "npm dev": "deny",
+      "npm dev *": "deny",
+      "yarn dev": "deny",
+      "yarn dev *": "deny",
+      "yarn run dev": "deny",
+      "yarn run dev *": "deny",
+      "bun dev": "deny",
+      "bun dev *": "deny",
+      "bun run dev": "deny",
+      "bun run dev *": "deny",
+      "npx next dev": "deny",
+      "npx next dev *": "deny",
+      "npx vite": "deny",
+      "npx vite *": "deny"
     }
   }
 }

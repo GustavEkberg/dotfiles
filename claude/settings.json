@@ -44,7 +44,27 @@
       "Bash(npm run db:migrate *)",
       "Bash(npm run db:migrate)",
       "Bash(npx db:migrate *)",
-      "Bash(npx db:migrate)"
+      "Bash(npx db:migrate)",
+      "Bash(pnpm dev)",
+      "Bash(pnpm dev *)",
+      "Bash(pnpm run dev)",
+      "Bash(pnpm run dev *)",
+      "Bash(npm run dev)",
+      "Bash(npm run dev *)",
+      "Bash(npm dev)",
+      "Bash(npm dev *)",
+      "Bash(yarn dev)",
+      "Bash(yarn dev *)",
+      "Bash(yarn run dev)",
+      "Bash(yarn run dev *)",
+      "Bash(bun dev)",
+      "Bash(bun dev *)",
+      "Bash(bun run dev)",
+      "Bash(bun run dev *)",
+      "Bash(npx next dev)",
+      "Bash(npx next dev *)",
+      "Bash(npx vite)",
+      "Bash(npx vite *)"
     ]
   },
   "enabledPlugins": {
