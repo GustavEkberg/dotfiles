@@ -9,3 +9,4 @@ nvim/lazy-lock.json
 opencode/node_modules/
 opencode/bun.lock
 opencode/bun.lockb
+claude/skills/pptx/scripts/office/__pycache__
