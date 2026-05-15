@@ -32,6 +32,23 @@ Fetch GitHub issue details for the repository in the current working directory.
 GH_TOKEN="$GH_AGENT_TOKEN" gh issue view <number> --json title,body,labels,assignees,state,comments,milestone,createdAt
 ```
 
+### Reading all comments
+
+The `comments` field returns every comment with full body, author, and `createdAt`. **Always read every comment** — later comments often contain corrections, scope changes, or final decisions that override the original issue body.
+
+For long threads, pipe through `jq` to extract just comment content:
+
+```bash
+GH_TOKEN="$GH_AGENT_TOKEN" gh issue view <number> --json comments \
+  --jq '.comments[] | "## \(.author.login) (\(.createdAt))\n\n\(.body)\n"'
+```
+
+If `comments` is truncated or you need reaction/edit metadata, fall back to the REST API (paginates automatically):
+
+```bash
+GH_TOKEN="$GH_AGENT_TOKEN" gh api -X GET "repos/{owner}/{repo}/issues/<number>/comments" --paginate
+```
+
 ## Output Fields
 
 | Field | Description |
@@ -56,9 +73,10 @@ GH_TOKEN="$GH_AGENT_TOKEN" gh issue view <number> --json title,body,labels,assig
 ### When issue number is known
 
 1. **Fetch issue** - Get full issue details including body and comments
-2. **Parse requirements** - Extract acceptance criteria, specs from issue body
-3. **Check discussion** - Review comments for clarifications or changes
-4. **Note labels** - Labels often indicate priority, type (bug/feature), area
+2. **Read every comment** - Do not skim; later comments may supersede the body
+3. **Parse requirements** - Extract acceptance criteria, specs from issue body AND comments
+4. **Check discussion** - Review comments for clarifications, scope changes, final decisions
+5. **Note labels** - Labels often indicate priority, type (bug/feature), area
 
 ## Commit Footer
 
