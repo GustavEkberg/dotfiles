@@ -110,10 +110,10 @@ Proposed skill:
   Description: <description>
   Type: <minimal | reference | script | multi-file>
   Files:
-    - claude/skills/<name>/SKILL.md
-    - claude/commands/<name>.md
-    [- claude/skills/<name>/references/... ]
-    [- claude/skills/<name>/scripts/... ]
+    - opencode/skill/<name>/SKILL.md
+    - opencode/command/<name>.md
+    [- opencode/skill/<name>/references/... ]
+    [- opencode/skill/<name>/scripts/... ]
 ```
 
 Wait for the user to confirm or adjust before proceeding.
@@ -143,7 +143,7 @@ Bad:
 
 ### Step 3: Write the Skill Files
 
-Create at `claude/skills/<name>/SKILL.md`. For multi-file skills, create subdirectories as needed.
+Create at `opencode/skill/<name>/SKILL.md`. For multi-file skills, create subdirectories as needed.
 
 **Frontmatter (required, must start at line 1, no blank lines before `---`):**
 
@@ -248,7 +248,7 @@ description: <what + when>
 
 ### Step 4: Create the Slash Command
 
-Every skill needs a companion slash command so users can invoke it via `/<name>`. Create `claude/commands/<name>.md`:
+Every skill needs a companion slash command so users can invoke it via `/<name>`. Create `opencode/command/<name>.md`:
 
 ```markdown
 ---
@@ -277,11 +277,11 @@ This pattern:
 ### Step 5: Commit
 
 ```bash
-git add claude/skills/<name>/ claude/commands/<name>.md
+git add opencode/skill/<name>/ opencode/command/<name>.md
 git commit -m "feat: add <name> skill"
 ```
 
-Note: `claude/skills/` and `claude/commands/` are symlinked to active locations (`~/.claude/skills/`, `~/.claude/commands/`). Changes land in this repo first, then are picked up via existing symlinks — no re-linking needed.
+Note: `opencode/skill/` and `opencode/command/` are canonical. Do not create symlinks.
 
 ### Step 6: Verify
 
@@ -295,7 +295,7 @@ Both the skill and command are available after restarting the agent. Tell the us
 
 | Mistake                         | Fix                                            |
 | ------------------------------- | ---------------------------------------------- |
-| No slash command created        | Create `claude/commands/<name>.md` alongside   |
+| No slash command created        | Create `opencode/command/<name>.md` alongside  |
 | Blank lines before `---`        | Frontmatter must start at line 1               |
 | Missing closing `---`           | Add `---` after frontmatter fields             |
 | Name doesn't match directory    | Make `name:` field = directory name            |
@@ -315,8 +315,8 @@ Both the skill and command are available after restarting the agent. Tell the us
 
 ## Important Notes
 
-- **Always create both files** — `claude/skills/<name>/SKILL.md` + `claude/commands/<name>.md`
+- **Always create both files** — `opencode/skill/<name>/SKILL.md` + `opencode/command/<name>.md`
 - **File must be named `SKILL.md`** (uppercase) — other names are ignored
 - **Directory name must match** the `name` field in frontmatter
-- **Skills are repo-scoped** — stored in `claude/skills/`, symlinked to `~/.claude/skills/`, committed to git
+- **Skills are repo-scoped** — stored in `opencode/skill/`, committed to git
 - **No registration needed** — skills and commands are discovered automatically

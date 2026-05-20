@@ -1,7 +1,7 @@
 # AGENTS.md — Dotfiles
 
 Personal dotfiles for macOS (Apple Silicon). Config-only repo — no build system, no CI, no tests.
-Configs are manually symlinked to `~/.config/<tool>/` or `~/.<file>`. No stow/symlink automation.
+Configs are source files; active-tool deployment is manual. No stow/symlink automation.
 
 ## Repository Structure
 
@@ -14,7 +14,8 @@ nvim/               # Neovim (full Lua config)
   init.lua          #   Entry point: leader key, loads user/* modules
   lua/plugins/      #   lazy.nvim plugin specs (completion, core, git, lsp, markdown, navigation, telescope)
   lua/user/         #   User modules (options, keymaps, autocmds, utils, lsp/)
-opencode/           # OpenCode AI agent config (opencode.json, commands/, skills/, AGENTS.md)
+claude/             # Claude settings only — settings.json
+opencode/           # OpenCode AI agent config (opencode.json, agent/, command/, skill/, AGENTS.md)
 scripts/            # task-loop.sh — autonomous PRD-driven dev loop
 starship/           # Starship prompt — starship.toml
 tmux/               # tmux config + powerline theme/segments
@@ -140,4 +141,4 @@ From `opencode/AGENTS.md` — these apply to all agent interactions in this repo
 - Fish sources `connections.sh` at runtime — it's gitignored and may not exist
 - `opencode/` has its own `AGENTS.md` with generic agent instructions (not dotfiles-specific)
 - Keyboard layouts in `keep/` are binary/JSON exports from Vial — not hand-editable
-- **Claude Code & OpenCode configs are symlinked from this repo** — all changes to `.claude/` settings, `opencode/` config, and new skills must be created here first, then symlinked to their active locations
+- `claude/` stores only Claude settings; OpenCode owns agents, commands, skills, plugins, and config

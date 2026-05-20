@@ -5,14 +5,28 @@
 // 1. Claude identity system prompt
 // 2. System prompt relocation hotfix (griffinmartin/opencode-claude-auth#148)
 // 3. PascalCase mcp_ tool names hotfix (ex-machina-co/opencode-anthropic-auth#81)
-import { generatePKCE } from "@openauthjs/openauth/pkce";
-
 const CLIENT_ID = "9d1c250a-e61b-44d9-88ed-5944d1962f5e";
 const USER_AGENT = "claude-cli/2.1.2 (external, cli)";
 const SYSTEM_IDENTITY =
   "You are Claude Code, Anthropic's official CLI for Claude.";
 const BILLING_PREFIX = "x-anthropic-billing-header:";
 const TOOL_PREFIX = "mcp_";
+
+function toBase64Url(bytes) {
+  const binary = String.fromCharCode(...bytes);
+  return btoa(binary).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
+}
+
+async function generatePKCE() {
+  const verifier = toBase64Url(crypto.getRandomValues(new Uint8Array(32)));
+  const data = new TextEncoder().encode(verifier);
+  const digest = await crypto.subtle.digest("SHA-256", data);
+
+  return {
+    verifier,
+    challenge: toBase64Url(new Uint8Array(digest)),
+  };
+}
 
 function prefixName(name) {
   return `${TOOL_PREFIX}${name.charAt(0).toUpperCase()}${name.slice(1)}`;
