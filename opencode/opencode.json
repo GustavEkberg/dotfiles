@@ -5,6 +5,18 @@
     "file:///Users/abraxas/.config/opencode/plugins/opencode-anthropic-auth.mjs"
   ],
   "model": "anthropic/claude-opus-4-7",
+  "mcp": {
+    "figma": {
+      "type": "remote",
+      "url": "https://mcp.figma.com/mcp",
+      "enabled": true,
+      "oauth": {
+        "clientId": "{env:FIGMA_MCP_CLIENT_ID}",
+        "clientSecret": "{env:FIGMA_MCP_CLIENT_SECRET}"
+      },
+      "timeout": 30000
+    }
+  },
   "permission": {
     "read": {
       "*": "allow",
