@@ -15,8 +15,6 @@ LLM-friendly web crawler. Converts websites to clean markdown, extracts structur
 - Question-answer over crawled content (`-q`)
 - Single-page scrape into clean/fit markdown for LLM context
 
-Prefer crawl4ai over agent-browser when goal is content extraction at scale. Prefer agent-browser for interactive flows (clicks, forms, auth).
-
 ## Install
 
 ```bash
