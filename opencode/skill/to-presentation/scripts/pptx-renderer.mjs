@@ -9,6 +9,7 @@
  * The OOXML zip envelope lives in `pptx-package.mjs`.
  */
 import { Buffer } from "node:buffer";
+import fs from "node:fs";
 
 const EMU_PER_IN = 914400;
 const EMU_PER_PT = 12700;
@@ -112,6 +113,47 @@ const lineShapeXml = (id, x1, y1, x2, y2, opts) => {
 </p:sp>`;
 };
 
+// Embedded picture. `relId` ties to a slide-rels <Relationship> + a
+// ppt/media file written by the package layer; the renderer only emits the
+// shape and records the media bytes (see SlideBuilder.picture).
+const picXml = (id, relId, x, y, w, h) => `
+<p:pic>
+  <p:nvPicPr><p:cNvPr id="${id}" name="Picture ${id}"/><p:cNvPicPr><a:picLocks noChangeAspect="1"/></p:cNvPicPr><p:nvPr/></p:nvPicPr>
+  <p:blipFill><a:blip r:embed="${relId}"/><a:stretch><a:fillRect/></a:stretch></p:blipFill>
+  <p:spPr>
+    <a:xfrm><a:off x="${emu(x)}" y="${emu(y)}"/><a:ext cx="${emu(w)}" cy="${emu(h)}"/></a:xfrm>
+    <a:prstGeom prst="rect"><a:avLst/></a:prstGeom>
+  </p:spPr>
+</p:pic>`;
+
+// Sniff format + pixel dimensions straight from the file header — zero-dep,
+// so the renderer can preserve aspect ratio without an image library.
+// width/height 0 means "unknown" → caller falls back to 16:9.
+const imageMeta = (buf) => {
+  if (buf.length > 24 && buf[0] === 0x89 && buf[1] === 0x50) {
+    return { ext: "png", width: buf.readUInt32BE(16), height: buf.readUInt32BE(20) };
+  }
+  if (buf.length > 10 && buf.toString("latin1", 0, 3) === "GIF") {
+    return { ext: "gif", width: buf.readUInt16LE(6), height: buf.readUInt16LE(8) };
+  }
+  if (buf.length > 4 && buf[0] === 0xff && buf[1] === 0xd8) {
+    let o = 2;
+    while (o + 9 < buf.length) {
+      if (buf[o] !== 0xff) { o += 1; continue; }
+      const marker = buf[o + 1];
+      if (marker >= 0xc0 && marker <= 0xcf && marker !== 0xc4 && marker !== 0xc8 && marker !== 0xcc) {
+        return { ext: "jpg", height: buf.readUInt16BE(o + 5), width: buf.readUInt16BE(o + 7) };
+      }
+      o += 2 + buf.readUInt16BE(o + 2);
+    }
+    return { ext: "jpg", width: 0, height: 0 };
+  }
+  if (buf.length > 12 && buf.toString("latin1", 0, 4) === "RIFF" && buf.toString("latin1", 8, 12) === "WEBP") {
+    return { ext: "webp", width: 0, height: 0 };
+  }
+  return { ext: "png", width: 0, height: 0 };
+};
+
 const runXml = (text, opts) =>
   `<a:r><a:rPr lang="en-US" sz="${pt(opts.fontSize ?? 18)}"${opts.bold ? ' b="1"' : ""}${opts.italic ? ' i="1"' : ""}` +
   `${opts.spacing ? ` spc="${opts.spacing}"` : ""}>` +
@@ -161,6 +203,11 @@ class SlideBuilder {
     this.title = title;
     this.nextId = 2;
     this.shapes = [];
+    // Per-slide image relationships. rId1 is the slide layout, so embedded
+    // pictures start at rId2; the package layer turns these into
+    // <Relationship> entries + ppt/media files.
+    this.media = [];
+    this.nextRel = 2;
   }
   id() {
     const id = this.nextId;
@@ -181,6 +228,12 @@ class SlideBuilder {
   }
   text(value, x, y, w, h, opts = {}) {
     this.shapes.push(textXml(this.id(), value, x, y, w, h, opts));
+  }
+  picture(x, y, w, h, media) {
+    const rel = `rId${this.nextRel}`;
+    this.nextRel += 1;
+    this.media.push({ rel, ext: media.ext, data: media.data });
+    this.shapes.push(picXml(this.id(), rel, x, y, w, h));
   }
   toXml() {
     return slideXml(this.shapes.join(""));
@@ -401,6 +454,60 @@ const renderDivider = (s, slide, page) => {
   }
 };
 
+/**
+ * Image slide. A light page with heading + optional caption at the top and
+ * the picture fitted (aspect preserved) into the band below — for diagrams,
+ * screenshots, org charts. The image is embedded in the PPTX, not linked.
+ */
+const renderImage = (s, slide, page) => {
+  surface(s, COLORS.light, false, page);
+  s.text(safe(slide.heading, ""), 0.78, 1.05, 11.8, 0.7, {
+    fontSize: 28,
+    color: COLORS.ink,
+    bold: true,
+    margin: 0,
+  });
+  const hasCaption = Boolean(safe(slide.caption, ""));
+  if (hasCaption) {
+    s.text(slide.caption, 0.8, 1.74, 11.5, 0.6, {
+      fontSize: 14,
+      color: COLORS.muted,
+      margin: 0,
+    });
+  }
+  const bandTop = hasCaption ? 2.4 : 2.0;
+  const bandH = 6.75 - bandTop;
+  const maxW = SLIDE_W - 1.2;
+  let data = null;
+  let meta = null;
+  try {
+    data = fs.readFileSync(slide.image);
+    meta = imageMeta(data);
+  } catch {
+    data = null;
+  }
+  if (data) {
+    const ratio = meta.width > 0 && meta.height > 0 ? meta.width / meta.height : 16 / 9;
+    let w = maxW;
+    let h = w / ratio;
+    if (h > bandH) {
+      h = bandH;
+      w = h * ratio;
+    }
+    s.picture((SLIDE_W - w) / 2, bandTop + (bandH - h) / 2, w, h, { data, ext: meta.ext });
+  } else {
+    // Missing file → labelled placeholder instead of a silently broken deck.
+    s.rect(0.6, bandTop, maxW, bandH, { fill: COLORS.soft });
+    s.text(`missing image: ${safe(slide.image, "?")}`, 0.6, bandTop + bandH / 2 - 0.2, maxW, 0.4, {
+      fontSize: 14,
+      color: COLORS.muted,
+      align: "c",
+      valign: "middle",
+      margin: 0,
+    });
+  }
+};
+
 const renderBody = (s, slide, page) => {
   surface(s, COLORS.light, false, page);
   s.text(safe(slide.heading, "Point"), 0.78, 1.25, 4.2, 4.6, {
@@ -579,11 +686,14 @@ export const renderSlide = (payload, index, deck) => {
     case "quote":
       renderQuote(s, payload, page);
       break;
+    case "image":
+      renderImage(s, payload, page);
+      break;
     case "closing":
       renderClosing(s, payload, page);
       break;
     default:
       renderBody(s, payload, page);
   }
-  return Buffer.from(s.toXml(), "utf8").toString("utf8");
+  return { xml: Buffer.from(s.toXml(), "utf8").toString("utf8"), media: s.media };
 };

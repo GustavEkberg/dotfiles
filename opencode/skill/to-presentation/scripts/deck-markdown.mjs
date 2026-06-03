@@ -11,6 +11,7 @@ export const SLIDE_TYPES = [
   "compare",
   "stat",
   "quote",
+  "image",
   "closing",
 ];
 
@@ -23,7 +24,21 @@ const TYPE_ALIASES = new Map([
   ["category", "divider"],
   ["categorydivider", "divider"],
   ["categorybreak", "divider"],
+  ["img", "image"],
+  ["picture", "image"],
+  ["photo", "image"],
+  ["figure", "image"],
+  ["screenshot", "image"],
 ]);
+
+// First markdown image in a block: `![alt](path)`. Returns null if none.
+const imageRef = (lines) => {
+  for (const line of lines) {
+    const m = line.match(/!\[([^\]]*)\]\(([^)]+)\)/);
+    if (m) return { alt: m[1].trim(), src: m[2].trim() };
+  }
+  return null;
+};
 
 export const slugify = (value) => {
   const s = value
@@ -147,6 +162,7 @@ const inferKind = (section, index) => {
   if (index === 0 && /cover|title|intro/.test(title)) return "cover";
   if (/closing|thank|contact|next/.test(title)) return "closing";
   if (/^(part|chapter|category)\b/i.test(section.title.trim())) return "divider";
+  if (imageRef(section.lines)) return "image";
   if (quoteParts(section.lines).quote) return "quote";
   if (/^(~?\d|\d+[%x×]|[<>]\d)/.test(section.title.trim())) return "stat";
   if (/\b(vs|versus|from|to|today|tomorrow|before|after)\b/.test(title)) return "compare";
@@ -155,10 +171,25 @@ const inferKind = (section, index) => {
   return "body";
 };
 
-const sectionToSlide = (section, index) => {
+const sectionToSlide = (section, index, baseDir) => {
   const kind = section.kind ?? inferKind(section, index);
   const ps = paragraphs(section.lines);
   const text = ps.join("\n");
+
+  if (kind === "image") {
+    const img = imageRef(section.lines);
+    // Caption = the prose under the heading minus the image markdown itself.
+    const capLines = section.lines.map((l) => l.replace(/!\[[^\]]*\]\([^)]+\)/g, ""));
+    return {
+      kind,
+      heading: section.title,
+      caption: paragraphs(capLines).join(" "),
+      // Paths resolve relative to the deck file's directory (where the user
+      // keeps the .deck.md), so `![](attachments/x.png)` just works.
+      image: img ? path.resolve(baseDir || process.cwd(), img.src) : "",
+      alt: img ? img.alt : "",
+    };
+  }
 
   if (kind === "cover") return { kind, title: section.title, subtitle: ps[0] ?? "" };
   if (kind === "hero") return { kind, intro: section.title, conclusion: ps[0] ?? "" };
@@ -210,7 +241,10 @@ export const parseDeckMarkdown = (src, opts = {}) => {
       pendingKind = normaliseKind(marker[1]);
       continue;
     }
-    const h2 = line.match(/^##\s+(.*)$/);
+    // `##(?!#)` matches a slide heading but not an `###` sub-heading (used by
+    // compare). `\s*(.*?)` allows an empty heading so a `quote` slide can be
+    // anchored by its `>` blockquote alone (`##` on its own line).
+    const h2 = line.match(/^##(?!#)\s*(.*?)\s*$/);
     if (h2) {
       push();
       let sectionTitle = h2[1].trim();
@@ -225,7 +259,8 @@ export const parseDeckMarkdown = (src, opts = {}) => {
   }
   push();
 
-  const slides = sections.map(sectionToSlide).filter((slide) => slide !== null);
+  const baseDir = opts.baseDir || process.cwd();
+  const slides = sections.map((section, i) => sectionToSlide(section, i, baseDir)).filter((slide) => slide !== null);
   if (!slides.some((slide) => slide.kind === "cover")) {
     slides.unshift({ kind: "cover", title, subtitle: opts.subtitle ?? "" });
   }

@@ -13,10 +13,11 @@ Turn markdown files, pasted content, or a mix of both into a `.pptx` deck that m
 
 **In scope:**
 
-- One or more `.md` files, inline text, or a temporary deck markdown file -> `.pptx`.
+- A committable `<name>.deck.md` source (see "Deck markdown format" below) -> `<name>.pptx`. The `.md` is the source of truth; the `.pptx` is a disposable, regenerable artefact.
+- One or more raw `.md` files or inline text the agent compresses *into* a deck file first.
 - Agent-led content fitting into a small fixed slide vocabulary.
 - Deterministic rendering via a zero-dependency Node script. No install step.
-- Output goes beside the user-meaningful source (see "Output location" below) — temp scratch files do not anchor the default.
+- Output goes beside the deck source (see "Output location" below) — temp scratch files do not anchor the default.
 
 **Out of scope:**
 
@@ -40,46 +41,105 @@ Use the smallest set that covers different jobs. If two seem interchangeable, dr
 | `compare` | Shows tension | before/after, today/tomorrow | Two unrelated columns |
 | `stat` | Anchors one number | Big number + caption | Several metrics |
 | `quote` | Lets a source speak | Verbatim quote + attribution | Invented quotes |
+| `image` | Shows a diagram / screenshot | One image + heading + optional caption | Decorative filler |
 | `closing` | Ends quietly | Closing line + next step/contact | CTA lists |
 
 `hero`, `section`, and `divider` are deliberately different: `hero` is an argument beat; `section` is a numbered nav break (giant index + label); `divider` introduces a *named category* for the slides that follow (eyebrow + large category name + optional caption). In a short deck, skip `section` and `divider`. A `divider`'s title may carry an eyebrow before a separator — `## [divider] 02 — Foundations` renders eyebrow `02` over label `Foundations`; a bare `## [divider] Risks` is label-only. The paragraph under it becomes the "what's coming" caption.
 
-## Deck markdown contract
+## Deck markdown format (the committable source)
 
-The renderer reads a compact slide-markdown format. The agent should create this in `/tmp` when the source content is not already shaped.
+The deck is authored as a standalone markdown file, and **this `.md` is the committable source of truth** — the `.pptx` is a disposable artefact regenerated from it. Name it `<name>.deck.md` and keep it in the repo where the deck belongs; rendering writes `<name>.pptx` next to it (the `.deck` segment is stripped from the output name).
+
+A deck file is plain markdown: YAML frontmatter, an `# H1`, then one `##` section per slide, each tagged with its slide type. The renderer reads only this structure — author it by hand, or have the agent compress raw source into it.
+
+### Frontmatter
+
+```yaml
+---
+title: My deck title      # deck title + cover fallback
+author: Gustav Ekberg     # metadata (default: Gustav Ekberg)
+---
+```
+
+### Slide markers
+
+Tag each `##` section with its type, either form:
+
+- HTML comment on the line above: `<!-- slide: hero -->`
+- Inline prefix in the heading: `## [hero] One sharp thesis line`
+
+Unmarked `##` sections are *inferred* — a best-effort fallback only. For a committable deck, mark every slide explicitly; inference is not guaranteed stable across versions.
+
+If no `cover` slide is present, one is prepended from the title; if no `closing`, one is appended (suppress with `--no-closing`).
+
+### Per-type content shape
+
+Each type reads the `##` heading plus the lines beneath it in a fixed way:
+
+| Type | Heading is… | Body beneath |
+| --- | --- | --- |
+| `cover` | deck title | first paragraph = subtitle / audience line |
+| `hero` | the thesis line | optional paragraph = second line |
+| `section` | `NN — Label` | number + label split on `—`/`-`/`:`; bare title → auto number |
+| `divider` | `NN — Label` or `Label` | split → eyebrow + category name; first paragraph = caption |
+| `body` | heading | paragraph(s), joined (≤ 450 chars) |
+| `bullets` | heading | `- item` list, 2–8 items (≤ 140 chars each) |
+| `compare` | heading | two `### Side label` blocks each with a paragraph (≤ 240/side); fallbacks: `- Today: …` / `- Tomorrow: …` bullets, or two paragraphs |
+| `stat` | the number/value (≤ 40) | paragraph = caption (≤ 160) |
+| `quote` | (optional) | `> quote line(s)` (≤ 260) then `— Attribution` |
+| `image` | heading | `![alt](path)` = the image; first paragraph = caption (≤ 200) |
+| `closing` | closing line | first paragraph = subtitle; `hello@gustav.im` is added automatically |
+
+**Images** are referenced with standard markdown — `![alt](path)` — and **embedded** into the `.pptx` (not linked). The path resolves relative to the deck file's directory, so keep assets beside it (e.g. `attachments/org-current.png`). PNG, JPEG, GIF, and WebP are supported; aspect ratio is preserved and the image is fitted into the slide's content band. A `##` section that contains a markdown image is inferred as an `image` slide even without the marker.
+
+### Example (`imvi-rebuild.deck.md`)
 
 ```md
 ---
-title: My deck title
+title: Imvi rebuild
 author: Gustav Ekberg
 ---
 
-# My deck title
+# Imvi rebuild
 
 <!-- slide: cover -->
-## Deck title
-Subtitle or audience line.
+## Imvi rebuild
+Board review · June 2026
 
 <!-- slide: hero -->
-## One sharp thesis line
-Optional second line.
+## The product system is the risk, not the code.
+Code problems are symptoms.
+
+<!-- slide: divider -->
+## 01 — Findings
+What the review surfaced.
 
 <!-- slide: bullets -->
-## What matters
-- First point
-- Second point
+## Where it breaks
+- No product owner
+- No release discipline
+- Security debt
+
+<!-- slide: compare -->
+## Now vs next
+### Today
+Scattered requests, no acceptance criteria.
+### Next
+Prioritised roadmap with a definition of done.
+
+<!-- slide: stat -->
+## 94%
+of school training comes from three providers.
+
+<!-- slide: quote -->
+##
+> A junior developer doing senior-developer work.
+— Michael
 
 <!-- slide: closing -->
-## Let's talk.
-hello@gustav.im
+## Let's rebuild the right thing.
+gustav.im
 ```
-
-Accepted markers:
-
-- HTML comment before a slide: `<!-- slide: hero -->`
-- Heading marker: `## [hero] One sharp thesis line`
-
-Unmarked `##` sections are inferred, but inference is a fallback. For real work, mark slide types explicitly.
 
 ## Workflow
 
@@ -90,8 +150,8 @@ Unmarked `##` sections are inferred, but inference is a fallback. For real work,
    The script enforces this: it rejects any unshaped input over ~1,200 words. Do not bypass with `--allow-unshaped-long` to dodge the question.
 2. **Skim, then compress.** With the focus locked, read only what supports it. Cut aggressively. One idea per slide.
 3. **Pick the smallest arc that lands the message.** Target 6-10 slides. Going over 15 still renders but the script prints a warning — treat it as a nudge to compress, not a wall. Skip slide types you do not need — do not pad to hit a count.
-4. **Write deck markdown in `/tmp/to-presentation-<slug>.md`** unless the user already supplied a deck-shaped file. Mark every slide explicitly with `<!-- slide: <kind> -->`.
-5. **Pick the output location** (see "Output location" below) and pass it via `--out` whenever the source content was compressed from a real workspace file. Never let the PPTX default into `/tmp` — the script falls back to cwd in that case, which is still rarely what the user wants.
+4. **Write the committable deck file `<name>.deck.md`** at a real workspace path (next to where the deck belongs), unless the user already supplied a deck-shaped file. This is the source the user commits. Mark every slide explicitly with `<!-- slide: <kind> -->`. Use `/tmp` only for genuine throwaways the user will not keep.
+5. **Render beside the deck file.** With a `<name>.deck.md` source the default output is already the right place (`<name>.pptx` next to it). Pass `--out` only to override; never let the PPTX default into `/tmp`.
 6. **Run the script from workspace root:**
 
    ```sh
@@ -112,16 +172,16 @@ Unmarked `##` sections are inferred, but inference is a fallback. For real work,
 
 ## Output location
 
-The PPTX should land somewhere the user can find without searching `/tmp`. Decide based on what the deck was made from, in priority order:
+The PPTX should land beside its deck source, never in `/tmp`. Priority order:
 
 1. **User named a target.** `--out <path>` they passed, or "save it under work/decks/foo" in chat → use it verbatim.
-2. **Compressed from a single workspace file** (e.g. `me/playbook/<slug>.md`, `work/blog/posts/<slug>.md`, `notes/<date>-<slug>.md`) → output beside that file, same basename + `.pptx`. Example: source `me/playbook/digital-product-development-manifesto.md` → `me/playbook/digital-product-development-manifesto.pptx`.
-3. **Compressed from multiple workspace files** under a common parent → that parent dir + deck-title slug. Example: sources under `work/blog/posts/` → `work/blog/posts/<deck-slug>.pptx`.
+2. **Committable `<name>.deck.md` source** → `<name>.pptx` beside it (the script strips `.deck` automatically). This is the normal case.
+3. **Compressed from a single raw workspace file** with no separate deck file → output beside that file, same basename + `.pptx`.
 4. **Inline text only / nothing else fits** → cwd + deck-title slug.
 
-The temp scratch file under `/tmp/to-presentation-*.md` is **never** the anchor for the output path. The script ignores temp paths when picking a default, but the agent should still pass `--out` explicitly whenever a real source file exists — it's clearer in the command and immune to script changes.
+The temp scratch file under `/tmp/to-presentation-*.md` is **never** the anchor for the output path; the script ignores temp paths when picking a default.
 
-Generated decks are artefacts. Do not commit them unless the user asks. `work/<area>/` directories may want them gitignored locally; check before staging.
+**Commit the `.deck.md`, not the `.pptx`.** The deck markdown is source — commit it like any other file. The generated `.pptx` is a rebuildable artefact: do not commit it unless the user asks, and consider gitignoring `*.pptx` under `work/<area>/`.
 
 ## Rules
 
@@ -133,7 +193,7 @@ Generated decks are artefacts. Do not commit them unless the user asks. `work/<a
 - **Keep slide count low.** 6-12 slides is the default range. More than 15 still renders but triggers a warning — have a reason.
 - **Use the user's voice.** Direct, concrete, no hedging, no filler, no AI-speak.
 - **No invented quotes or stats.** If the source does not contain it, do not make it a `quote` or `stat`.
-- **Generated PPTX is an artefact.** Ask before committing it.
+- **`.deck.md` is source; `.pptx` is artefact.** Commit the deck markdown; ask before committing the generated `.pptx`.
 
 ## Font
 

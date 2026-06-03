@@ -29,10 +29,28 @@ const MASTER_RELS = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Rel
 
 const LAYOUT_RELS = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/slideMaster" Target="../slideMasters/slideMaster1.xml"/></Relationships>`;
 
-const SLIDE_RELS = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/slideLayout" Target="../slideLayouts/slideLayout1.xml"/></Relationships>`;
+const IMAGE_CONTENT_TYPE = {
+  png: "image/png",
+  jpg: "image/jpeg",
+  jpeg: "image/jpeg",
+  gif: "image/gif",
+  webp: "image/webp",
+};
 
-const contentTypes = (count) =>
-  `<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types"><Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/><Default Extension="xml" ContentType="application/xml"/><Override PartName="/ppt/presentation.xml" ContentType="application/vnd.openxmlformats-officedocument.presentationml.presentation.main+xml"/><Override PartName="/ppt/slideMasters/slideMaster1.xml" ContentType="application/vnd.openxmlformats-officedocument.presentationml.slideMaster+xml"/><Override PartName="/ppt/slideLayouts/slideLayout1.xml" ContentType="application/vnd.openxmlformats-officedocument.presentationml.slideLayout+xml"/><Override PartName="/ppt/theme/theme1.xml" ContentType="application/vnd.openxmlformats-officedocument.theme+xml"/><Override PartName="/docProps/core.xml" ContentType="application/vnd.openxmlformats-package.core-properties+xml"/><Override PartName="/docProps/app.xml" ContentType="application/vnd.openxmlformats-officedocument.extended-properties+xml"/>${Array.from({ length: count }, (_, i) => `<Override PartName="/ppt/slides/slide${i + 1}.xml" ContentType="application/vnd.openxmlformats-officedocument.presentationml.slide+xml"/>`).join("")}</Types>`;
+// Per-slide rels: always the layout (rId1), plus one <Relationship> per
+// embedded image (rId2…) pointing at its ppt/media file.
+const slideRels = (media) =>
+  `<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/slideLayout" Target="../slideLayouts/slideLayout1.xml"/>${media
+    .map(
+      (m) =>
+        `<Relationship Id="${m.rel}" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/image" Target="../media/${m.file}"/>`,
+    )
+    .join("")}</Relationships>`;
+
+const contentTypes = (count, exts) =>
+  `<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types"><Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/><Default Extension="xml" ContentType="application/xml"/>${exts
+    .map((e) => `<Default Extension="${e}" ContentType="${IMAGE_CONTENT_TYPE[e] ?? "application/octet-stream"}"/>`)
+    .join("")}<Override PartName="/ppt/presentation.xml" ContentType="application/vnd.openxmlformats-officedocument.presentationml.presentation.main+xml"/><Override PartName="/ppt/slideMasters/slideMaster1.xml" ContentType="application/vnd.openxmlformats-officedocument.presentationml.slideMaster+xml"/><Override PartName="/ppt/slideLayouts/slideLayout1.xml" ContentType="application/vnd.openxmlformats-officedocument.presentationml.slideLayout+xml"/><Override PartName="/ppt/theme/theme1.xml" ContentType="application/vnd.openxmlformats-officedocument.theme+xml"/><Override PartName="/docProps/core.xml" ContentType="application/vnd.openxmlformats-package.core-properties+xml"/><Override PartName="/docProps/app.xml" ContentType="application/vnd.openxmlformats-officedocument.extended-properties+xml"/>${Array.from({ length: count }, (_, i) => `<Override PartName="/ppt/slides/slide${i + 1}.xml" ContentType="application/vnd.openxmlformats-officedocument.presentationml.slide+xml"/>`).join("")}</Types>`;
 
 const presentationXml = (count) =>
   `<?xml version="1.0" encoding="UTF-8" standalone="yes"?><p:presentation xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships" xmlns:p="http://schemas.openxmlformats.org/presentationml/2006/main"><p:sldMasterIdLst><p:sldMasterId id="2147483648" r:id="rId1"/></p:sldMasterIdLst><p:sldIdLst>${Array.from({ length: count }, (_, i) => `<p:sldId id="${256 + i}" r:id="rId${i + 2}"/>`).join("")}</p:sldIdLst><p:sldSz cx="${emu(SLIDE_W)}" cy="${emu(SLIDE_H)}" type="wide"/><p:notesSz cx="6858000" cy="9144000"/><p:defaultTextStyle/></p:presentation>`;
@@ -51,7 +69,20 @@ const appXml = (count) =>
 export const renderPptx = (deck) => {
   const zip = new ZipStore();
   const slides = deck.slides.map((slide, i) => renderSlide(slide, i, deck));
-  zip.addFile("[Content_Types].xml", contentTypes(slides.length));
+
+  // Assign each embedded image a globally-unique ppt/media filename and
+  // collect the distinct extensions for the content-type declarations.
+  const mediaFiles = [];
+  const exts = new Set();
+  slides.forEach((rendered) => {
+    rendered.media.forEach((m) => {
+      m.file = `image${mediaFiles.length + 1}.${m.ext}`;
+      exts.add(m.ext);
+      mediaFiles.push({ file: m.file, data: m.data });
+    });
+  });
+
+  zip.addFile("[Content_Types].xml", contentTypes(slides.length, [...exts]));
   zip.addFile("_rels/.rels", ROOT_RELS);
   zip.addFile("docProps/core.xml", coreXml(deck));
   zip.addFile("docProps/app.xml", appXml(slides.length));
@@ -62,9 +93,10 @@ export const renderPptx = (deck) => {
   zip.addFile("ppt/slideMasters/_rels/slideMaster1.xml.rels", MASTER_RELS);
   zip.addFile("ppt/slideLayouts/slideLayout1.xml", SLIDE_LAYOUT);
   zip.addFile("ppt/slideLayouts/_rels/slideLayout1.xml.rels", LAYOUT_RELS);
-  slides.forEach((slide, i) => {
-    zip.addFile(`ppt/slides/slide${i + 1}.xml`, slide);
-    zip.addFile(`ppt/slides/_rels/slide${i + 1}.xml.rels`, SLIDE_RELS);
+  slides.forEach((rendered, i) => {
+    zip.addFile(`ppt/slides/slide${i + 1}.xml`, rendered.xml);
+    zip.addFile(`ppt/slides/_rels/slide${i + 1}.xml.rels`, slideRels(rendered.media));
   });
+  mediaFiles.forEach(({ file, data }) => zip.addFile(`ppt/media/${file}`, data));
   return Buffer.from(zip.toBuffer());
 };

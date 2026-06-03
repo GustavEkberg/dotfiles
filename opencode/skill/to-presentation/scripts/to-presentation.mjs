@@ -103,6 +103,11 @@ const validateDeck = (deck) => {
       if (tooLong(slide.rightBody, 240)) errors.push(`${label}: right side > 240 chars`);
     }
     if (slide.kind === "quote" && tooLong(slide.quote, 260)) errors.push(`${label}: quote > 260 chars`);
+    if (slide.kind === "image") {
+      if (!slide.image) errors.push(`${label}: image slide needs a \`![](path)\``);
+      else if (!fs.existsSync(slide.image)) errors.push(`${label}: image not found — ${slide.image}`);
+      if (tooLong(slide.caption, 200)) errors.push(`${label}: caption > 200 chars`);
+    }
     if (slide.kind === "stat") {
       if (tooLong(slide.value, 40)) errors.push(`${label}: stat value > 40 chars`);
       if (tooLong(slide.caption, 160)) errors.push(`${label}: caption > 160 chars`);
@@ -125,14 +130,20 @@ const isTempPath = (p) => {
   );
 };
 
+const deckBaseName = (file) =>
+  // `<name>.deck.md` is the committable deck-source convention — drop the
+  // `.deck` segment so the artefact lands as `<name>.pptx`, not
+  // `<name>.deck.pptx`. Plain `<name>.md` keeps its basename.
+  path.parse(file).name.replace(/\.deck$/i, "");
+
 const defaultOut = (files, title) => {
-  // Prefer the first non-temp input file — that's the user-meaningful source.
-  // Falling back to the deck title slug in cwd is better than burying the
-  // PPTX in /tmp when the agent compressed source into a temp scratch file.
+  // Prefer the first non-temp input file — that's the user-meaningful source
+  // (typically the committable `<name>.deck.md`). Falling back to the deck
+  // title slug in cwd beats burying the PPTX in /tmp when the agent
+  // compressed source into a temp scratch file.
   const nonTemp = files.find((f) => !isTempPath(f));
   if (nonTemp) {
-    const parsed = path.parse(nonTemp);
-    return path.join(path.dirname(nonTemp), `${parsed.name}.pptx`);
+    return path.join(path.dirname(nonTemp), `${deckBaseName(nonTemp)}.pptx`);
   }
   return path.resolve(`${slugify(title)}.pptx`);
 };
@@ -158,10 +169,14 @@ const main = () => {
     process.exit(1);
   }
 
+  // Image paths in the deck resolve relative to the deck file's directory
+  // (where the user keeps the .deck.md + its attachments), or cwd for inline.
+  const baseDir = files.length > 0 ? path.dirname(files[0]) : process.cwd();
   const deck = parseDeckMarkdown(source, {
     title: args.title,
     subtitle: args.subtitle,
     noClosing: args.noClosing,
+    baseDir,
   });
   const errors = validateDeck(deck);
   if (errors.length > 0) {
