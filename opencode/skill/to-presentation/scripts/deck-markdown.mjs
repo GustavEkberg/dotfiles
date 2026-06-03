@@ -5,6 +5,7 @@ export const SLIDE_TYPES = [
   "cover",
   "hero",
   "section",
+  "divider",
   "body",
   "bullets",
   "compare",
@@ -19,6 +20,9 @@ const TYPE_ALIASES = new Map([
   ["bodyparagraph", "body"],
   ["sectiondivider", "section"],
   ["closingcover", "closing"],
+  ["category", "divider"],
+  ["categorydivider", "divider"],
+  ["categorybreak", "divider"],
 ]);
 
 export const slugify = (value) => {
@@ -142,6 +146,7 @@ const inferKind = (section, index) => {
   const title = section.title.toLowerCase();
   if (index === 0 && /cover|title|intro/.test(title)) return "cover";
   if (/closing|thank|contact|next/.test(title)) return "closing";
+  if (/^(part|chapter|category)\b/i.test(section.title.trim())) return "divider";
   if (quoteParts(section.lines).quote) return "quote";
   if (/^(~?\d|\d+[%x×]|[<>]\d)/.test(section.title.trim())) return "stat";
   if (/\b(vs|versus|from|to|today|tomorrow|before|after)\b/.test(title)) return "compare";
@@ -160,6 +165,17 @@ const sectionToSlide = (section, index) => {
   if (kind === "section") {
     const m = section.title.match(/^([\w.]+)\s*[-:–—]\s*(.*)$/);
     return { kind, number: m ? m[1].replace(/\.$/, "") : String(index + 1).padStart(2, "0"), label: m ? stripMarkdown(m[2]) : section.title };
+  }
+  if (kind === "divider") {
+    // "02 — Foundations" / "Part Two: Foundations" → eyebrow + label;
+    // a bare title becomes the label with no eyebrow.
+    const m = section.title.match(/^(.+?)\s*[-:–—]\s+(.*)$/);
+    return {
+      kind,
+      eyebrow: m ? stripMarkdown(m[1]) : "",
+      label: m ? stripMarkdown(m[2]) : section.title,
+      caption: ps[0] ?? "",
+    };
   }
   if (kind === "bullets") return { kind, heading: section.title, bullets: listItems(section.lines).slice(0, 8) };
   if (kind === "compare") return { kind, heading: section.title, ...compareParts(section.lines) };

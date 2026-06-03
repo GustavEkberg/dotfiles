@@ -362,6 +362,45 @@ const renderSection = (s, slide, page) => {
   });
 };
 
+/**
+ * Category divider. Announces the next category of slides: a small spaced
+ * eyebrow over a short accent rule, a large category label, and an optional
+ * one-line caption of what's coming. Distinct from `section` (giant left
+ * number for navigation) and `hero` (an argument beat) — this is a calm
+ * category break, vertically centred on dark.
+ */
+const renderDivider = (s, slide, page) => {
+  surface(s, COLORS.dark, true, page);
+  const label = safe(slide.label, "Category");
+  const hasEyebrow = Boolean(safe(slide.eyebrow, ""));
+  let y = 2.85;
+  if (hasEyebrow) {
+    s.text(String(slide.eyebrow).toUpperCase(), 0.8, y, 11.5, 0.42, {
+      fontSize: 14,
+      color: COLORS.faint,
+      bold: true,
+      spacing: 120,
+      margin: 0,
+    });
+    y += 0.62;
+  }
+  // Short accent rule above the label.
+  s.line(0.82, y, 2.1, y, { color: blend(COLORS.dark, COLORS.white, 0.35), width: 1 });
+  s.text(label, 0.78, y + 0.28, 11.9, 2.4, {
+    fontSize: heroLeadFont(label),
+    color: COLORS.white,
+    bold: true,
+    margin: 0,
+  });
+  if (slide.caption) {
+    s.text(slide.caption, 0.8, y + 2.35, 11.4, 1.1, {
+      fontSize: 22,
+      color: COLORS.soft,
+      margin: 0,
+    });
+  }
+};
+
 const renderBody = (s, slide, page) => {
   surface(s, COLORS.light, false, page);
   s.text(safe(slide.heading, "Point"), 0.78, 1.25, 4.2, 4.6, {
@@ -512,7 +551,7 @@ const renderClosing = (s, slide, page) => {
 };
 
 export const renderSlide = (payload, index, deck) => {
-  const title = payload.title ?? payload.heading ?? payload.intro ?? payload.value ?? deck.title;
+  const title = payload.title ?? payload.heading ?? payload.intro ?? payload.label ?? payload.value ?? deck.title;
   const s = new SlideBuilder(index + 1, title);
   const page = index + 1;
   switch (payload.kind) {
@@ -524,6 +563,9 @@ export const renderSlide = (payload, index, deck) => {
       break;
     case "section":
       renderSection(s, payload, page);
+      break;
+    case "divider":
+      renderDivider(s, payload, page);
       break;
     case "bullets":
       renderBullets(s, payload, page);

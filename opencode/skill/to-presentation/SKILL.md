@@ -34,6 +34,7 @@ Use the smallest set that covers different jobs. If two seem interchangeable, dr
 | `cover` | Opens the deck | Title + subtitle | Mid-deck breaks |
 | `hero` | Lands one thesis | One strong sentence, optional second line | Lists or paragraphs |
 | `section` | Chapter break | Long decks only, 8+ slides | Short decks |
+| `divider` | Opens a new category | Announce the theme of the slides that follow; optional eyebrow + one-line caption | A plain numbered nav break (use `section`) |
 | `body` | Explains one argument | One heading + one paragraph | Enumerated content |
 | `bullets` | Separates items | 2-8 distinct points | Fake paragraph bullets |
 | `compare` | Shows tension | before/after, today/tomorrow | Two unrelated columns |
@@ -41,7 +42,7 @@ Use the smallest set that covers different jobs. If two seem interchangeable, dr
 | `quote` | Lets a source speak | Verbatim quote + attribution | Invented quotes |
 | `closing` | Ends quietly | Closing line + next step/contact | CTA lists |
 
-`hero` and `section` are deliberately different: `hero` is an argument beat; `section` is navigation. In a short deck, skip `section`.
+`hero`, `section`, and `divider` are deliberately different: `hero` is an argument beat; `section` is a numbered nav break (giant index + label); `divider` introduces a *named category* for the slides that follow (eyebrow + large category name + optional caption). In a short deck, skip `section` and `divider`. A `divider`'s title may carry an eyebrow before a separator — `## [divider] 02 — Foundations` renders eyebrow `02` over label `Foundations`; a bare `## [divider] Risks` is label-only. The paragraph under it becomes the "what's coming" caption.
 
 ## Deck markdown contract
 
