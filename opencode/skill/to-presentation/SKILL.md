@@ -89,7 +89,7 @@ Unmarked `##` sections are inferred, but inference is a fallback. For real work,
    - What must be in it; what can be cut?
    The script enforces this: it rejects any unshaped input over ~1,200 words. Do not bypass with `--allow-unshaped-long` to dodge the question.
 2. **Skim, then compress.** With the focus locked, read only what supports it. Cut aggressively. One idea per slide.
-3. **Pick the smallest arc that lands the message.** Target 6-10 slides; hard cap 15 unless the user asks for more. Skip slide types you do not need — do not pad to hit a count.
+3. **Pick the smallest arc that lands the message.** Target 6-10 slides. Going over 15 still renders but the script prints a warning — treat it as a nudge to compress, not a wall. Skip slide types you do not need — do not pad to hit a count.
 4. **Write deck markdown in `/tmp/to-presentation-<slug>.md`** unless the user already supplied a deck-shaped file. Mark every slide explicitly with `<!-- slide: <kind> -->`.
 5. **Pick the output location** (see "Output location" below) and pass it via `--out` whenever the source content was compressed from a real workspace file. Never let the PPTX default into `/tmp` — the script falls back to cwd in that case, which is still rarely what the user wants.
 6. **Run the script from workspace root:**
@@ -130,7 +130,7 @@ Generated decks are artefacts. Do not commit them unless the user asks. `work/<a
 - **Ask on broad input.** A pile of source docs is not a deck brief. Ask for focus / audience / must-include points before compressing, unless the user already gave them.
 - **No walls of text.** Slide budgets are strict: hero <= 2 short lines; body <= 450 chars; compare side <= 240 chars; quote <= 260 chars; bullets <= 8 items, each <= 140 chars. If source exceeds this, cut or ask.
 - **No two-slide synonyms.** If content could be `hero` or `section`, choose `hero` unless it is literally a chapter divider. If content could be `body` or `bullets`, choose based on whether the audience must see separate items.
-- **Keep slide count low.** 6-12 slides is the default range. More than 15 needs a reason.
+- **Keep slide count low.** 6-12 slides is the default range. More than 15 still renders but triggers a warning — have a reason.
 - **Use the user's voice.** Direct, concrete, no hedging, no filler, no AI-speak.
 - **No invented quotes or stats.** If the source does not contain it, do not make it a `quote` or `stat`.
 - **Generated PPTX is an artefact.** Ask before committing it.
