@@ -7,19 +7,21 @@
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
+import zlib from "node:zlib";
 import { spawn, spawnSync } from "node:child_process";
 
 const HELP = `to-pdf — markdown → PDF, gustav.im style
 
 Usage:
-  to-pdf <file.md> [--dark] [--out <path>] [--keep-html]
+  to-pdf <file.md> [--dark] [--out <path>] [--keep-html] [--no-page-numbers]
 
 Options:
-  --dark         Render in dark mode (gustav.im dark palette).
-                 Default output then becomes <basename>-dark.pdf.
-  --out <path>   Output PDF path (overrides default sibling location)
-  --keep-html    Keep intermediate HTML in /tmp and print its path
-  -h, --help     Show this help
+  --dark              Render in dark mode (gustav.im dark palette).
+                      Default output then becomes <basename>-dark.pdf.
+  --out <path>        Output PDF path (overrides default sibling location)
+  --keep-html         Keep intermediate HTML in /tmp and print its path
+  --no-page-numbers   Omit the per-page "n / total" footer numbering
+  -h, --help          Show this help
 
 Env:
   GUSTAV_IM_ROOT  Override path to gustav.im checkout (default: ~/code/gustav.im)
@@ -28,7 +30,7 @@ Env:
 // ─── args ──────────────────────────────────────────────────────────────────
 
 function parseArgs(argv) {
-  const args = { _: [], out: null, keepHtml: false, dark: false };
+  const args = { _: [], out: null, keepHtml: false, dark: false, pageNumbers: true };
   for (let i = 0; i < argv.length; i++) {
     const a = argv[i];
     if (a === "-h" || a === "--help") {
@@ -40,6 +42,8 @@ function parseArgs(argv) {
       args.keepHtml = true;
     } else if (a === "--dark") {
       args.dark = true;
+    } else if (a === "--no-page-numbers") {
+      args.pageNumbers = false;
     } else {
       args._.push(a);
     }
@@ -276,7 +280,7 @@ function mdToHtml(src) {
 
 // ─── signal-flow background (static svg) ──────────────────────────────────
 
-function generateBackgroundSvg({ dark = false, width = 800, height = 1200 } = {}) {
+function generateBackgroundSvg({ dark = false, width = 800, height = 1200, strength = 1 } = {}) {
   // Lower density than the live site — print doesn't need motion, and a
   // dense SVG slows chrome's headless render enough to stall the exit.
   const density = 5e-5;
@@ -288,8 +292,10 @@ function generateBackgroundSvg({ dark = false, width = 800, height = 1200 } = {}
   // opaque hex prints identically everywhere.
   const bg = dark ? [10, 10, 10] : [255, 255, 255];
   const fg = dark ? [255, 255, 255] : [0, 0, 0];
-  const lineMax = dark ? 0.07 : 0.05;
-  const dotAlpha = dark ? 0.11 : 0.08;
+  // `strength` boosts the texture (the cover uses a stronger value than the
+  // body pages). Clamp so a high multiplier can't push alpha past 1.
+  const lineMax = Math.min(1, (dark ? 0.07 : 0.05) * strength);
+  const dotAlpha = Math.min(1, (dark ? 0.11 : 0.08) * strength);
   const blend = (alpha) => {
     const mix = (c) =>
       Math.round(bg[c] + (fg[c] - bg[c]) * alpha)
@@ -409,8 +415,8 @@ const LOGO_SVG =
   '<line x1="16" y1="16" x2="24" y2="16" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/>' +
   "</svg>";
 
-function buildHtml({ title, dateRaw, dateStr, author, bodyHtml, dark = false, hasMermaid = false }) {
-  const svg = generateBackgroundSvg({ dark });
+function buildHtml({ inner, docTitle = "", dark = false, hasMermaid = false, bgStrength = 1 }) {
+  const svg = generateBackgroundSvg({ dark, strength: bgStrength });
   const svgB64 = Buffer.from(svg).toString("base64");
   // Palette mirrors gustav.im — light pulls from :root, dark from .dark.
   const palette = dark
@@ -442,7 +448,7 @@ function buildHtml({ title, dateRaw, dateStr, author, bodyHtml, dark = false, ha
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<title>${escapeHtml(title)}</title>
+<title>${escapeHtml(docTitle)}</title>
 <style>
 ${fontFaceCss()}
 
@@ -490,44 +496,94 @@ body {
  * chrome to repeat the box's padding at every page-fragment boundary so
  * pages 2..N also get a top/bottom inset (not only the first/last).
  *
- * min-height: 100vh + position: relative make this the positioning
- * context for the absolutely-pinned doc-footer (see below). On a
- * single-page document this guarantees the footer lands at the bottom
- * of the page; on multi-page documents the footer rides the bottom of
- * .page (i.e. after the last content block on the last page). */
+ * Bottom padding is smaller than top because Chrome reserves a print
+ * margin band at the page floor for the native running footer (brand +
+ * page number); padding-bottom + that margin together restore the ~3cm
+ * bottom inset. The footer is drawn by Chrome's print engine, not the
+ * DOM, so it is positioned perfectly on every page with no arithmetic. */
 .page {
-  position: relative;
-  padding: 3cm 1.8cm;
+  padding: 3cm 1.8cm 1.4cm;
   -webkit-box-decoration-break: clone;
   box-decoration-break: clone;
-  /* min-height is set by the inline boot script below — measures the
-   * natural content height, rounds up to the nearest A4 page, and
-   * stretches .page to that exact pixel total. With min-height fixed
-   * to a page-height multiple, the absolutely-positioned footer lands
-   * at the bottom of the last printed page regardless of doc length. */
 }
 
 article {
   max-width: 36rem;
   margin: 0 auto;
   width: 100%;
-  padding: 0 0 5rem;  /* room for the absolute footer */
 }
 
-h1.title {
-  font-size: 2rem;
-  font-weight: 600;
-  line-height: 1.15;
-  letter-spacing: -0.01em;
-  margin: 0 0 0.5rem;
+/* Cover page — fills one A4 sheet, content block sitting in the lower-left
+ * third (a calm, gustav.im-ish title layout). The page background texture
+ * still bleeds edge to edge behind it. */
+.cover {
+  /* Fill exactly one sheet: 100vh minus the .page top+bottom padding
+   * (3cm + 1.4cm) that wraps this inner. Without the subtraction the cover
+   * overflows onto a second blank page. Content is vertically centred. */
+  min-height: calc(100vh - 4.4cm);
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  /* Sit a little above the true vertical centre — the bottom padding
+   * shrinks the centring region, lifting the block upward. */
+  padding-bottom: 3cm;
+}
+
+.cover-top {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 1.1rem;
+  margin-bottom: 2.5rem;
+}
+
+.cover-mark {
   color: var(--grey-900);
+  display: inline-flex;
 }
 
-time.date {
-  display: block;
-  font-size: 0.875rem;
+.cover-mark .mark {
+  width: 24px;
+  height: 24px;
+}
+
+.cover-title {
+  font-size: 2.6rem;
+  font-weight: 600;
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+  margin: 0;
+  color: var(--grey-900);
+  max-width: 30rem;
+}
+
+.cover-subtitle {
+  font-size: 1.05rem;
+  font-weight: 450;
+  line-height: 1.5;
+  color: var(--grey-600);
+  margin: 1.1rem 0 0;
+  max-width: 28rem;
+}
+
+.cover-meta {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  font-size: 0.85rem;
+  letter-spacing: 0.02em;
   color: var(--grey-500);
-  margin-bottom: 2.25rem;
+}
+
+.cover-date,
+.cover-domain {
+  color: inherit;
+  text-decoration: none;
+}
+
+.cover-dot {
+  opacity: 0.6;
 }
 
 .prose {
@@ -693,64 +749,6 @@ time.date {
   opacity: 0.7;
 }
 
-/* Header + footer share the same understated styling: small grey text,
- * logo-mark + name on the left, domain on the right. Header sits at
- * the top of <article> so it appears on page 1 only; footer is absolute
- * pinned to the last page's floor by the JS measurement above. */
-.doc-header,
-.doc-footer {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 1rem;
-  font-size: 0.7rem;
-  letter-spacing: 0.02em;
-  color: var(--grey-500);
-  font-weight: 450;
-}
-
-.doc-header {
-  padding-bottom: 0.85rem;
-  margin-bottom: 2.25rem;
-  border-bottom: 1px solid var(--divider);
-}
-
-.doc-footer {
-  position: absolute;
-  bottom: 2cm;
-  left: 1.8cm;
-  right: 1.8cm;
-  padding-top: 0.9rem;
-  border-top: 1px solid var(--divider);
-  page-break-inside: avoid;
-  break-inside: avoid;
-}
-
-.doc-header .brand,
-.doc-footer .brand {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.45rem;
-}
-
-.doc-header .brand .mark,
-.doc-footer .brand .mark {
-  width: 14px;
-  height: 14px;
-  color: var(--grey-500);
-}
-
-.doc-header .domain,
-.doc-footer .domain {
-  color: inherit;
-  text-decoration: none;
-}
-
-.doc-footer a {
-  color: inherit;
-  text-decoration: none;
-}
-
 /* Mermaid diagrams: strip the code-block chrome and center the rendered
  * SVG. Before mermaid.js runs the source sits in a <pre class="mermaid">;
  * after, the same node holds an <svg>. */
@@ -772,49 +770,7 @@ time.date {
 </style>
 </head>
 <body>
-<script>
-  // Fragmented .page + CSS min-height: 100% doesn't reliably stretch
-  // the wrapper to a full A4 in Chrome's headless print engine, so we
-  // measure the natural content height and pin .page to the nearest
-  // page-height multiple. After this runs, the absolute doc-footer at
-  // bottom: 2cm lands at the floor of the last printed page on docs
-  // of any length.
-  //
-  // Runs synchronously after a couple of animation frames — Promise-
-  // based waits (document.fonts.ready) don't resolve under Chrome's
-  // --virtual-time-budget clock, so we use raf chains instead.
-  (function () {
-    const CM = 96 / 2.54;
-    const PAGE_PX = 29.7 * CM;          // A4 sheet height
-    const PAD_PX = 6 * CM;              // 3cm top + 3cm bottom (clone)
-    const CONTENT_PAGE_PX = PAGE_PX - PAD_PX; // 23.7cm per page of content
-    function fitPage() {
-      const page = document.querySelector(".page");
-      if (!page) return;
-      // Strip the one-time top+bottom padding off the natural height —
-      // box-decoration-break: clone re-applies the same padding on
-      // every fragment, so the *content* must be divided by the inner
-      // page area (23.7cm), not the sheet height (29.7cm). Without
-      // this correction multi-page docs land one page short.
-      const total = page.getBoundingClientRect().height;
-      const content = Math.max(0, total - PAD_PX);
-      const pages = Math.max(1, Math.ceil(content / CONTENT_PAGE_PX));
-      page.style.minHeight = pages * PAGE_PX + "px";
-    }
-    function later(fn) {
-      requestAnimationFrame(() => requestAnimationFrame(fn));
-    }
-    // Exposed so the mermaid pass can re-measure after diagrams render
-    // (async SVG injection changes content height and would otherwise
-    // throw off pagination).
-    window.__fitPage = () => later(fitPage);
-    if (document.readyState === "complete") {
-      later(fitPage);
-    } else {
-      window.addEventListener("load", () => later(fitPage));
-    }
-  })();
-</script>${
+${
   hasMermaid
     ? `
 <script type="module">
@@ -825,35 +781,40 @@ time.date {
   } catch (e) {
     console.error("mermaid render failed", e);
   }
-  if (window.__fitPage) window.__fitPage();
 </script>`
     : ""
 }
 <div class="page">
-<article>
-  <header class="doc-header">
-    <span class="brand">${LOGO_SVG}<span>Gustav Ekberg</span></span>
-    <a class="domain" href="https://gustav.im">gustav.im</a>
-  </header>
-  ${
-    title
-      ? `<header>
-    <h1 class="title">${inlineMd(title)}</h1>
-    ${dateStr ? `<time class="date" datetime="${escapeHtml(dateRaw)}">${escapeHtml(dateStr)}</time>` : ""}
-  </header>`
-      : ""
-  }
-  <div class="prose">
-${bodyHtml}
-  </div>
-</article>
-<footer class="doc-footer">
-  <span class="brand">${LOGO_SVG}<span>Gustav Ekberg</span></span>
-  <a class="domain" href="https://gustav.im">gustav.im</a>
-</footer>
+${inner}
 </div>
 </body>
 </html>`;
+}
+
+// Content body: the prose column. Branding + page number live in the native
+// print footer (every page); the title, when present, lives on the cover.
+function contentInner(bodyHtml) {
+  return `<article>
+  <div class="prose">
+${bodyHtml}
+  </div>
+</article>`;
+}
+
+// Cover page: GE mark, title, optional subtitle + date. A full A4 page on its
+// own (no footer, not counted) — content numbering starts on the next page.
+function coverInner({ title, subtitle, dateStr, dateRaw }) {
+  return `<section class="cover">
+  <div class="cover-top">
+    <span class="cover-mark">${LOGO_SVG}</span>
+    <div class="cover-meta">
+      ${dateStr ? `<time class="cover-date" datetime="${escapeHtml(dateRaw)}">${escapeHtml(dateStr)}</time><span class="cover-dot">·</span>` : ""}
+      <a class="cover-domain" href="https://gustav.im">gustav.im</a>
+    </div>
+  </div>
+  <h1 class="cover-title">${inlineMd(title)}</h1>
+  ${subtitle ? `<p class="cover-subtitle">${inlineMd(subtitle)}</p>` : ""}
+</section>`;
 }
 
 // ─── main ─────────────────────────────────────────────────────────────────
@@ -886,25 +847,12 @@ async function main() {
   const src = fs.readFileSync(inputPath, "utf8");
   const { data, content } = parseFrontmatter(src);
 
-  // Title + date come from frontmatter only — never inferred from the
-  // filename or file mtime. If the user wants a header, they declare it
-  // in `title:` / `created:`. Otherwise we let the body's first heading
-  // act as the visual title.
-  const title = data.title || "";
-  const dateRaw = data.created || data.date || "";
-  const dateStr = formatDate(dateRaw);
-  const author = data.author || "";
-
-  const bodyHtml = mdToHtml(content);
+  // Cover fields. Frontmatter wins; otherwise a leading `# H1` (plus the
+  // paragraph right after it, if any) is promoted to the cover and stripped
+  // from the body so it isn't duplicated. No title anywhere → no cover page.
+  const cover = extractCover(content, data);
+  const bodyHtml = mdToHtml(cover.body);
   const hasMermaid = /<pre class="mermaid">/.test(bodyHtml);
-  const html = buildHtml({ title, dateRaw, dateStr, author, bodyHtml, dark: args.dark, hasMermaid });
-
-  // HTML always lives in /tmp — only PDF goes sibling.
-  const htmlPath = path.join(
-    os.tmpdir(),
-    `to-pdf-${Date.now()}-${path.basename(inputPath, ".md")}.html`,
-  );
-  fs.writeFileSync(htmlPath, html, "utf8");
 
   const chrome = findChrome();
   if (!chrome) {
@@ -914,121 +862,408 @@ async function main() {
     process.exit(1);
   }
 
-  await runChrome(chrome, htmlPath, outPath, hasMermaid);
+  const tmpHtml = (tag) =>
+    path.join(
+      os.tmpdir(),
+      `to-pdf-${Date.now()}-${Math.random().toString(36).slice(2)}-${tag}-${path.basename(inputPath, ".md")}.html`,
+    );
+
+  // Content is always its own document so Chrome's native footer numbers it
+  // 1..M (physical page index == visible number). The cover, when present,
+  // is a separate footer-less render prepended afterwards — which is why the
+  // page count starts on the first content page, not the cover.
+  const contentHtmlPath = tmpHtml("body");
+  fs.writeFileSync(contentHtmlPath, buildHtml({
+    inner: contentInner(bodyHtml), docTitle: cover.title,
+    dark: args.dark, hasMermaid,
+  }), "utf8");
+
+  // Render content with the footer. Native displayHeaderFooter draws the
+  // brand + "n / total" on every page, positioned by the print engine — no
+  // DOM arithmetic, no per-page drift, correct across forced breaks /
+  // unbreakable tables / mermaid diagrams.
+  const contentPdf = cover.title ? outPath + ".content.pdf" : outPath;
+  await renderPdf(chrome, contentHtmlPath, contentPdf, {
+    dark: args.dark, hasMermaid,
+    footerTemplate: footerTemplate({ dark: args.dark, showNumber: args.pageNumbers }),
+  });
+  // A lone "1 / 1" is noise — re-render numberless once we know it's 1 page.
+  if (args.pageNumbers && countPdfPages(contentPdf) === 1) {
+    await renderPdf(chrome, contentHtmlPath, contentPdf, {
+      dark: args.dark, hasMermaid,
+      footerTemplate: footerTemplate({ dark: args.dark, showNumber: false }),
+    });
+  }
+
+  let coverHtmlPath = null;
+  if (cover.title) {
+    coverHtmlPath = tmpHtml("cover");
+    fs.writeFileSync(coverHtmlPath, buildHtml({
+      inner: coverInner(cover), docTitle: cover.title, dark: args.dark,
+      bgStrength: 1.8, // the cover carries a stronger texture than the body
+    }), "utf8");
+    const coverPdf = outPath + ".cover.pdf";
+    // No footer, no page number — the cover is not part of the count.
+    await renderPdf(chrome, coverHtmlPath, coverPdf, { dark: args.dark });
+    // Prepend the cover to the content (zero-dep PDF concat).
+    fs.writeFileSync(outPath, concatPdfs(fs.readFileSync(coverPdf), fs.readFileSync(contentPdf)));
+    try { fs.unlinkSync(coverPdf); } catch {}
+    try { fs.unlinkSync(contentPdf); } catch {}
+  }
 
   if (args.keepHtml) {
-    process.stdout.write(`html: ${htmlPath}\n`);
+    process.stdout.write(`html: ${contentHtmlPath}\n`);
+    if (coverHtmlPath) process.stdout.write(`html: ${coverHtmlPath}\n`);
   } else {
-    try {
-      fs.unlinkSync(htmlPath);
-    } catch {}
+    try { fs.unlinkSync(contentHtmlPath); } catch {}
+    if (coverHtmlPath) { try { fs.unlinkSync(coverHtmlPath); } catch {} }
   }
 
   process.stdout.write(`${outPath}\n`);
 }
 
-// Spawn Chrome, wait for the PDF to be written, kill Chrome if it lingers.
-// Chrome's headless print-to-pdf occasionally fails to exit cleanly on
-// macOS even after the PDF is on disk; we watch for the file and tear
-// down the process ourselves.
-function runChrome(chrome, htmlPath, outPath, hasMermaid = false) {
+// Decide the cover content. Returns { title, subtitle, dateStr, dateRaw, body }.
+// Frontmatter `title`/`subtitle`/`created|date` take precedence and leave the
+// body untouched. With no frontmatter title, a leading `# H1` is promoted as
+// the title (and the first paragraph after it, if present, as the subtitle)
+// and removed from the body. title === "" means "no cover".
+function extractCover(content, data) {
+  // The cover always carries a date: frontmatter `created`/`date` if given,
+  // otherwise today (the render date) so a bare draft still gets one.
+  const dateRaw = data.created || data.date || new Date().toISOString().slice(0, 10);
+  const dateStr = formatDate(dateRaw);
+  if (data.title) {
+    return { title: data.title, subtitle: data.subtitle || "", dateStr, dateRaw, body: content };
+  }
+  const lines = content.split("\n");
+  let i = 0;
+  while (i < lines.length && lines[i].trim() === "") i++;
+  const h1 = lines[i] != null ? /^#\s+(.+?)\s*$/.exec(lines[i]) : null;
+  if (!h1) return { title: "", subtitle: "", dateStr, dateRaw, body: content };
+  const title = h1[1];
+  let j = i + 1;
+  while (j < lines.length && lines[j].trim() === "") j++;
+  // A subtitle is the paragraph immediately after the H1 — only if it isn't
+  // another heading, list, quote, code fence, or table.
+  let subtitle = "";
+  if (lines[j] != null && lines[j].trim() !== "" && !/^(#{1,6}\s|[-*+>|]|\d+\.\s|```|~~~)/.test(lines[j].trim())) {
+    const para = [];
+    while (j < lines.length && lines[j].trim() !== "") para.push(lines[j++]);
+    subtitle = para.join(" ").trim();
+  }
+  const body = lines.slice(j).join("\n").replace(/^\n+/, "");
+  return { title, subtitle, dateStr, dateRaw, body };
+}
+
+// Concatenate two Chrome-produced PDFs (cover first) with no external deps.
+// Chrome emits clean PDF 1.4 with classic xref tables (no object/xref
+// streams), so we can: renumber the content's objects past the cover's,
+// rewrite its references, give each file's page-tree root a shared parent,
+// and emit one new root Pages node + Catalog. Operates on latin1 strings
+// (1 char == 1 byte) so binary streams pass through untouched.
+function concatPdfs(coverBuf, contentBuf) {
+  const parse = (buf) => {
+    const s = buf.toString("latin1");
+    const sx = parseInt(s.slice(s.lastIndexOf("startxref") + 9).trim().split(/\s/)[0], 10);
+    const trailer = s.slice(s.lastIndexOf("trailer"));
+    const root = +/\/Root\s+(\d+)\s+\d+\s+R/.exec(trailer)[1];
+    // Parse the classic xref table → { objNum: byteOffset } for in-use objs.
+    const offsets = new Map();
+    let p = s.indexOf("\n", s.indexOf("xref", sx)) + 1;
+    while (true) {
+      const head = /^(\d+)\s+(\d+)\s*$/.exec(s.slice(p, s.indexOf("\n", p)));
+      if (!head) break;
+      let num = +head[1];
+      const count = +head[2];
+      p = s.indexOf("\n", p) + 1;
+      for (let k = 0; k < count; k++, num++) {
+        const entry = s.slice(p, p + 20);
+        if (entry[17] === "n") offsets.set(num, parseInt(entry.slice(0, 10), 10));
+        p += 20;
+      }
+      if (s.slice(p, p + 7) === "trailer") break;
+    }
+    // Slice each object body by walking consecutive offsets.
+    const sorted = [...offsets.entries()].sort((a, b) => a[1] - b[1]);
+    const objs = new Map();
+    for (let k = 0; k < sorted.length; k++) {
+      const [num, start] = sorted[k];
+      const end = k + 1 < sorted.length ? sorted[k + 1][1] : sx;
+      const chunk = s.slice(start, end);
+      objs.set(num, chunk.slice(0, chunk.lastIndexOf("endobj") + 6));
+    }
+    const maxNum = Math.max(...offsets.keys());
+    const catalog = objs.get(root);
+    const pagesNum = +/\/Pages\s+(\d+)\s+\d+\s+R/.exec(catalog)[1];
+    const count = +/\/Count\s+(\d+)/.exec(objs.get(pagesNum))[1];
+    return { objs, maxNum, pagesNum, count };
+  };
+
+  // Replace indirect references "N 0 R" only in the dict portion of an object
+  // (never inside a binary stream), shifting them by `off`.
+  const shiftRefs = (chunk, off) => {
+    const si = chunk.indexOf("stream");
+    const head = si < 0 ? chunk : chunk.slice(0, si);
+    const tail = si < 0 ? "" : chunk.slice(si);
+    return head.replace(/\b(\d+)\s+0\s+R\b/g, (_, n) => `${+n + off} 0 R`) + tail;
+  };
+  const renumber = (chunk, off) =>
+    shiftRefs(chunk.replace(/^\s*(\d+)\s+0\s+obj/, (_, n) => `${+n + off} 0 obj`), off);
+  // Add /Parent to a (flat) Pages-root dict, before its closing >>endobj.
+  const addParent = (chunk, parentNum) =>
+    chunk.replace(/>>\s*endobj\s*$/, `\n/Parent ${parentNum} 0 R>>\nendobj`);
+
+  const cov = parse(coverBuf);
+  const con = parse(contentBuf);
+  const off = cov.maxNum; // content nums shifted past the cover's
+  const conPagesNum = con.pagesNum + off;
+  const rootPagesNum = off + con.maxNum + 1;
+  const catalogNum = rootPagesNum + 1;
+
+  const out = new Map();
+  for (const [num, chunk] of cov.objs) {
+    out.set(num, num === cov.pagesNum ? addParent(chunk, rootPagesNum) : chunk);
+  }
+  for (const [num, chunk] of con.objs) {
+    const shifted = renumber(chunk, off);
+    out.set(num + off, (num === con.pagesNum) ? addParent(shifted, rootPagesNum) : shifted);
+  }
+  out.set(rootPagesNum, `${rootPagesNum} 0 obj\n<</Type /Pages\n/Count ${cov.count + con.count}\n/Kids [${cov.pagesNum} 0 R ${conPagesNum} 0 R]>>\nendobj`);
+  out.set(catalogNum, `${catalogNum} 0 obj\n<</Type /Catalog\n/Pages ${rootPagesNum} 0 R>>\nendobj`);
+
+  // Serialize with a fresh xref table.
+  const size = catalogNum + 1;
+  let body = "%PDF-1.4\n%\xe2\xe3\xcf\xd3\n";
+  const at = new Map();
+  for (let n = 1; n < size; n++) {
+    const chunk = out.get(n);
+    if (!chunk) continue;
+    at.set(n, body.length);
+    body += chunk + "\n";
+  }
+  const xrefAt = body.length;
+  let xref = `xref\n0 ${size}\n0000000000 65535 f \n`;
+  for (let n = 1; n < size; n++) {
+    xref += at.has(n)
+      ? `${String(at.get(n)).padStart(10, "0")} 00000 n \n`
+      : "0000000000 00000 f \n";
+  }
+  body += xref + `trailer\n<</Size ${size}\n/Root ${catalogNum} 0 R>>\nstartxref\n${xrefAt}\n%%EOF\n`;
+  return Buffer.from(body, "latin1");
+}
+
+// Count pages in a Chrome-produced PDF, zero-dep. Chrome writes compressed
+// object streams, so a raw grep misses the page objects — inflate every
+// FlateDecode stream first, then count `/Type /Page` leaf objects. Falls
+// back to the largest `/Count` (the page-tree root) and finally to null so
+// the caller can degrade to a height estimate.
+function countPdfPages(pdfPath) {
+  try {
+    const buf = fs.readFileSync(pdfPath);
+    const latin = buf.toString("latin1");
+    let inflated = "";
+    const re = /stream\r?\n/g;
+    let m;
+    while ((m = re.exec(latin)) !== null) {
+      const start = m.index + m[0].length;
+      const end = latin.indexOf("endstream", start);
+      if (end < 0) continue;
+      const chunk = buf.subarray(start, end);
+      // zlib streams start with a 0x78 CMF byte.
+      if (chunk[0] === 0x78) {
+        try { inflated += zlib.inflateSync(chunk).toString("latin1"); } catch {}
+      }
+    }
+    const all = latin + "\n" + inflated;
+    const leaf = (all.match(/\/Type\s*\/Page(?![a-zA-Z])/g) || []).length;
+    if (leaf > 0) return leaf;
+    const counts = [...all.matchAll(/\/Count\s+(\d+)/g)].map((x) => +x[1]);
+    if (counts.length) return Math.max(...counts);
+    return null;
+  } catch {
+    return null;
+  }
+}
+
+// ─── native print footer ────────────────────────────────────────────────────
+
+// GE mark sized for the native print footer. The page's CSS and @font-face
+// don't reach the footer-template context, so size + colour are inline and
+// the text falls back to system sans.
+const FOOTER_LOGO = LOGO_SVG.replace(
+  'class="mark"',
+  'width="9" height="9" style="display:block"',
+);
+
+// Chrome native-footer template: brand on the left, "n / total" centred,
+// domain on the right — the running footer drawn on every page. Chrome fills
+// the pageNumber/totalPages spans. When showNumber is false (single-page
+// docs, or --no-page-numbers) the centre slot is empty but the brand still
+// prints. Horizontal padding (108px) aligns the brand/domain with the
+// centred 36rem text column and the first-page header.
+function footerTemplate({ dark = false, showNumber = true } = {}) {
+  const divider = dark ? "rgba(255,255,255,0.12)" : "rgba(0,0,0,0.1)";
+  const num = showNumber
+    ? `<span style="justify-self:center;letter-spacing:0.6px;font-variant-numeric:tabular-nums;"><span class="pageNumber"></span> / <span class="totalPages"></span></span>`
+    : "<span></span>";
+  // 3-column grid (1fr | auto | 1fr) — equal side columns keep the centre
+  // cell at the true page centre regardless of the brand/domain widths.
+  // (flex space-between would shift it toward the narrower side.)
+  return (
+    `<div style="width:100%;margin:0;padding:0 108px;box-sizing:border-box;` +
+    `font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;` +
+    `font-size:8px;font-weight:450;letter-spacing:0.2px;color:#737373;` +
+    `-webkit-print-color-adjust:exact;print-color-adjust:exact;">` +
+    `<div style="display:grid;grid-template-columns:1fr auto 1fr;align-items:center;` +
+    `border-top:1px solid ${divider};padding-top:6px;">` +
+    `<span style="justify-self:start;display:inline-flex;align-items:center;gap:5px;">${FOOTER_LOGO}<span>Gustav Ekberg</span></span>` +
+    num +
+    `<span style="justify-self:end;">gustav.im</span>` +
+    `</div></div>`
+  );
+}
+
+// ─── render (Chrome DevTools Protocol) ───────────────────────────────────────
+
+// Render htmlPath → outPath via CDP Page.printToPDF. CDP (not the
+// --print-to-pdf CLI flag) is required because only it exposes
+// displayHeaderFooter + footerTemplate — the one reliable way to get a
+// correct running footer on every printed page. Margins are zero except a
+// bottom band that holds the footer; the full-bleed html background still
+// paints across it (printBackground), so the edge-to-edge texture survives.
+// Zero-dep: drives Chrome over its debug WebSocket using Node's global
+// WebSocket (Node >= 22).
+function renderPdf(chrome, htmlPath, outPath, { dark = false, hasMermaid = false, footerTemplate: footer }) {
   return new Promise((resolve, reject) => {
-    const userDataDir = fs.mkdtempSync(
-      path.join(os.tmpdir(), "to-pdf-chrome-"),
-    );
-    // Mermaid renders async after fetching the library; give Chrome a
-    // wider virtual-time budget so it prints after diagrams settle.
-    const vtBudget = hasMermaid ? 20000 : 8000;
-
-    // Wipe any previous output so we can detect a fresh write.
-    try {
-      fs.unlinkSync(outPath);
-    } catch {}
-
+    const userDataDir = fs.mkdtempSync(path.join(os.tmpdir(), "to-pdf-chrome-"));
     const proc = spawn(
       chrome,
       [
-        "--headless=new",
-        "--disable-gpu",
-        "--no-sandbox",
-        "--hide-scrollbars",
-        "--no-first-run",
-        "--no-default-browser-check",
-        "--disable-background-networking",
-        "--disable-default-apps",
-        "--disable-extensions",
-        "--disable-sync",
-        "--disable-translate",
-        "--mute-audio",
-        "--no-pdf-header-footer",
-        `--user-data-dir=${userDataDir}`,
-        `--print-to-pdf=${outPath}`,
-        "--virtual-time-budget=8000",
-        `file://${htmlPath}`,
+        "--headless=new", "--disable-gpu", "--no-sandbox", "--hide-scrollbars",
+        "--no-first-run", "--no-default-browser-check",
+        "--disable-background-networking", "--disable-default-apps",
+        "--disable-extensions", "--disable-sync", "--disable-translate",
+        "--mute-audio", "--remote-debugging-port=0",
+        `--user-data-dir=${userDataDir}`, "about:blank",
       ],
       { stdio: ["ignore", "ignore", "pipe"] },
     );
 
-    const stderrChunks = [];
-    proc.stderr.on("data", (b) => stderrChunks.push(b));
-
-    const HARD_TIMEOUT_MS = 30_000;
-    const POLL_MS = 200;
-    const STABLE_MS = 600;
-
-    let lastSize = -1;
-    let stableSince = 0;
     let settled = false;
-
-    function cleanup() {
-      try {
-        fs.rmSync(userDataDir, { recursive: true, force: true });
-      } catch {}
-    }
+    let ws = null;
+    const stderrChunks = [];
+    const hardTimer = setTimeout(
+      () => finish(new Error(`chrome hung past 60s\n${Buffer.concat(stderrChunks).toString()}`)),
+      60_000,
+    );
 
     function finish(err) {
       if (settled) return;
       settled = true;
-      clearInterval(poller);
       clearTimeout(hardTimer);
-      if (!proc.killed) proc.kill("SIGTERM");
-      setTimeout(() => {
-        if (!proc.killed) proc.kill("SIGKILL");
-        cleanup();
-        if (err) reject(err);
-        else resolve();
-      }, 200);
+      try { if (ws) ws.close(); } catch {}
+      try { if (!proc.killed) proc.kill("SIGKILL"); } catch {}
+      try { fs.rmSync(userDataDir, { recursive: true, force: true }); } catch {}
+      if (err) reject(err);
+      else resolve();
     }
 
     proc.on("error", (e) => finish(e));
     proc.on("exit", () => {
-      // Chrome exited on its own — confirm the PDF exists.
-      if (fs.existsSync(outPath) && fs.statSync(outPath).size > 0) finish();
-      else finish(new Error(`chrome exited without writing PDF\n${Buffer.concat(stderrChunks).toString()}`));
+      if (!settled) finish(new Error(`chrome exited early\n${Buffer.concat(stderrChunks).toString()}`));
     });
 
-    const poller = setInterval(() => {
-      if (!fs.existsSync(outPath)) return;
-      const size = fs.statSync(outPath).size;
-      if (size <= 0) return;
-      const now = Date.now();
-      if (size !== lastSize) {
-        lastSize = size;
-        stableSince = now;
-        return;
-      }
-      if (now - stableSince >= STABLE_MS) finish();
-    }, POLL_MS);
+    // Chrome prints "DevTools listening on ws://..." to stderr once ready.
+    let buf = "";
+    proc.stderr.on("data", (b) => {
+      stderrChunks.push(b);
+      if (ws) return;
+      buf += b.toString();
+      const m = buf.match(/ws:\/\/\S+/);
+      if (m) connect(m[0]).catch(finish);
+    });
 
-    const hardTimer = setTimeout(() => {
-      if (fs.existsSync(outPath) && fs.statSync(outPath).size > 0) finish();
-      else
-        finish(
-          new Error(
-            `chrome hung past ${HARD_TIMEOUT_MS}ms without writing PDF\n${Buffer.concat(stderrChunks).toString()}`,
-          ),
-        );
-    }, HARD_TIMEOUT_MS);
+    async function connect(wsURL) {
+      ws = new WebSocket(wsURL);
+      let id = 0;
+      const pending = new Map();
+      const events = new Map(); // one-shot event method -> resolver
+      ws.onmessage = (e) => {
+        const msg = JSON.parse(e.data);
+        if (msg.id && pending.has(msg.id)) {
+          const { resolve: r, reject: j } = pending.get(msg.id);
+          pending.delete(msg.id);
+          if (msg.error) j(new Error(msg.error.message));
+          else r(msg.result);
+        } else if (msg.method && events.has(msg.method)) {
+          events.get(msg.method)();
+          events.delete(msg.method);
+        }
+      };
+      const send = (method, params = {}, sessionId) =>
+        new Promise((r, j) => {
+          const i = ++id;
+          pending.set(i, { resolve: r, reject: j });
+          ws.send(JSON.stringify({ id: i, method, params, sessionId }));
+        });
+      const once = (method, ms) =>
+        new Promise((r) => {
+          events.set(method, r);
+          if (ms) setTimeout(r, ms);
+        });
+      await new Promise((r, j) => {
+        ws.onopen = r;
+        ws.onerror = () => j(new Error("devtools websocket error"));
+      });
+
+      const { targetId } = await send("Target.createTarget", { url: "about:blank" });
+      const { sessionId } = await send("Target.attachToTarget", { targetId, flatten: true });
+      await send("Page.enable", {}, sessionId);
+      await send("Runtime.enable", {}, sessionId);
+
+      const loaded = once("Page.loadEventFired", 20_000);
+      await send("Page.navigate", { url: `file://${htmlPath}` }, sessionId);
+      await loaded;
+
+      // Wait for embedded fonts so Satoshi metrics drive pagination.
+      await send("Runtime.evaluate", {
+        expression: "document.fonts.ready.then(()=>document.fonts.size)",
+        awaitPromise: true,
+      }, sessionId).catch(() => {});
+
+      // Mermaid renders async after fetching its module from the CDN; wait
+      // until every diagram has an <svg> (or give up after a budget).
+      if (hasMermaid) {
+        await send("Runtime.evaluate", {
+          expression:
+            "new Promise(res=>{const t=Date.now();(function c(){" +
+            "const ds=[...document.querySelectorAll('pre.mermaid')];" +
+            "if((ds.length&&ds.every(d=>d.querySelector('svg')))||Date.now()-t>15000)return res(1);" +
+            "setTimeout(c,100);})();})",
+          awaitPromise: true,
+        }, sessionId).catch(() => {});
+      }
+
+      // A4 in inches. With a footer, marginBottom reserves its band; without
+      // one (the cover) all margins are zero so the page fills edge to edge.
+      // Either way printBackground keeps the texture full-bleed.
+      const withFooter = !!footer;
+      const res = await send("Page.printToPDF", {
+        paperWidth: 8.2677,
+        paperHeight: 11.6929,
+        marginTop: 0,
+        marginBottom: withFooter ? 0.62 : 0,
+        marginLeft: 0,
+        marginRight: 0,
+        printBackground: true,
+        displayHeaderFooter: withFooter,
+        headerTemplate: "<span></span>",
+        footerTemplate: withFooter ? footer : "<span></span>",
+      }, sessionId);
+
+      fs.writeFileSync(outPath, Buffer.from(res.data, "base64"));
+      finish();
+    }
   });
 }
 

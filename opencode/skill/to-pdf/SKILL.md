@@ -14,7 +14,7 @@ One command, one file in, one PDF out. Pixel-honest reproduction of the gustav.i
 **In scope:**
 
 - Single `.md` file → sibling `.pdf`.
-- Frontmatter parsing (`title`, `created` / `date`, `author`) rendered as a header block.
+- Frontmatter parsing (`title`, `subtitle`, `created` / `date`, `author`). When a title is present a dedicated **cover page** is generated (GE mark, title, subtitle, then a `date · gustav.im` meta line, vertically centred). The date is interpreted by the skill: frontmatter `created`/`date` if given, otherwise the render date (today). If there's no frontmatter `title`, a leading `# H1` is promoted to the cover title and the paragraph right after it (if any) becomes the subtitle — both are then stripped from the body so they don't repeat. No title anywhere → no cover. The cover carries no footer and is **not** counted; page numbering starts at `1` on the first content page.
 - Plain-markdown subset: ATX headings, paragraphs, lists (ul/ol), GFM tables, code fences + inline code, blockquotes, HR, bold / italic / strike / links.
 - Mermaid diagrams: ` ```mermaid ` fences render to SVG inside the headless-Chrome pass. The diagram source never leaves the machine; only the mermaid library is fetched from a CDN (jsdelivr), so a `mermaid` export needs network at render time.
 - Satoshi `woff2` resolved from `~/code/gustav.im/public/fonts/`, embedded as data-URI; falls back to system sans if missing.
@@ -33,13 +33,14 @@ One command, one file in, one PDF out. Pixel-honest reproduction of the gustav.i
 2. **Run the script.** From the workspace root:
 
    ```sh
-   node .opencode/skill/to-pdf/scripts/to-pdf.mjs <file.md> [--dark] [--out <path>] [--keep-html]
+   node .opencode/skill/to-pdf/scripts/to-pdf.mjs <file.md> [--dark] [--out <path>] [--keep-html] [--no-page-numbers]
    ```
 
    - Default output: sibling `.pdf` (same dir, same basename).
    - `--dark` switches to the gustav.im dark palette; default output becomes `<basename>-dark.pdf`. Run twice (without and with `--dark`) to produce both.
    - `--out` overrides the destination (use when you need a non-default path; pairs with `--dark` cleanly).
    - `--keep-html` retains the intermediate HTML in `/tmp` and prints its path on stdout.
+   - `--no-page-numbers` omits the per-page `n / total` footer numbering (on by default; auto-suppressed on single-page docs).
 
 3. **Tell the user the output path.** One line. No recap.
 
@@ -52,6 +53,8 @@ One command, one file in, one PDF out. Pixel-honest reproduction of the gustav.i
 - **Resolve Chrome lazily.** macOS path first (`/Applications/Google Chrome.app/Contents/MacOS/Google Chrome`), then Chromium / Linux fallbacks, then PATH. If none, surface the failure — don't silent-fail.
 - **The font path is config, not gospel.** Honour `GUSTAV_IM_ROOT` env var if set; otherwise probe `~/code/gustav.im`, then `~/code/takt/gustav.im`. Missing font → fall back, don't crash.
 - **Tile the background, don't stretch.** It's a `repeat-y` `background-image` on `body` with `print-color-adjust: exact`. Tiling lets the texture repeat across multi-page documents instead of one stretched copy that disappears after page 1.
+- **Page numbers + brand are Chrome's native print footer, not DOM nodes.** They're drawn via CDP `Page.printToPDF` with `displayHeaderFooter` + `footerTemplate` (the `--print-to-pdf` CLI flag can't emit footers, so the script drives Chrome over its debug WebSocket — needs Node ≥ 22 for the global `WebSocket`). Chrome positions the footer on every page and fills the `pageNumber`/`totalPages` spans itself: no arithmetic, no page-count pre-pass, no per-page drift, and it stays correct across forced breaks, unbreakable tables, and mermaid diagrams. The earlier DOM approach (absolute-positioned labels placed by `k × page-height` arithmetic + a `min-height` stretch) drifted and landed mid-page the moment any block left pagination slack — don't reintroduce it. The footer sits in a small bottom print margin; the full-bleed `html` background still paints across it (`printBackground: true`), so the edge-to-edge texture is preserved. One render normally; a single-page doc is re-rendered once without the number to drop a lone `1 / 1` (detected by inflating the PDF's FlateDecode streams via `node:zlib` and counting `/Type /Page` leaves).
+- **Cover page is a separate render, merged zero-dep.** Because Chrome's native footer can only show *physical* page numbers (verified: `pageRanges:"2-"` still prints `2 of N`, not `1 of N-1`), the only way to keep the cover footer-less *and* number content from `1` is to render them as two independent PDFs — content as its own doc (so its footer counts `1..M`), the cover with no footer — then prepend. The merge is done in-process (`concatPdfs`) by exploiting that Chrome emits clean PDF 1.4 with classic xref tables: renumber the content's objects past the cover's, rewrite refs (dict portions only — never inside binary streams), give both page-tree roots a shared new `/Pages` parent, and emit a fresh xref + `/Catalog`. Don't reach for `pdfunite`/`pdf-lib` — keep it dependency-free.
 - **Never push.** PDFs are local artefacts; the user commits + safe-push handles the rest if they want it tracked.
 
 ## Contracts & signature lines
