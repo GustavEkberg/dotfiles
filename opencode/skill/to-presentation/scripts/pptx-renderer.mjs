@@ -380,16 +380,18 @@ const renderCover = (s, slide) => {
 const renderHero = (s, slide, page) => {
   surface(s, COLORS.dark, true, page);
   const intro = safe(slide.intro, "One sharp point.");
-  // Lead is top-anchored. Box must accommodate 2 lines at 54pt (~1.9")
-  // without spilling into the tail. Raise top, widen height.
-  s.text(intro, 0.78, 1.9, 11.8, 2.4, {
+  // Lead is BOTTOM-anchored in a tall band so it grows upward from a fixed
+  // baseline (4.2") above the tail — 1, 2, or 3 lines all sit just above the
+  // subtitle instead of a long title spilling over it (top-anchored did).
+  s.text(intro, 0.78, 0.9, 11.8, 3.3, {
     fontSize: heroLeadFont(intro),
     color: COLORS.white,
     bold: true,
+    valign: "bottom",
     margin: 0,
   });
   if (slide.conclusion) {
-    s.text(slide.conclusion, 0.8, 4.5, 11.5, 1.5, {
+    s.text(slide.conclusion, 0.8, 4.5, 11.5, 1.6, {
       fontSize: heroTailFont(slide.conclusion),
       color: COLORS.soft,
       margin: 0,
@@ -556,7 +558,7 @@ const renderBullets = (s, slide, page) => {
       fontSize,
       color: COLORS.ink,
       valign: "top",
-      lineSpacing: 1.3,
+      lineSpacing: 1.12,
       margin: 0,
     });
   });
