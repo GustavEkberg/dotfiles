@@ -1325,7 +1325,13 @@ function coalesceGlyphRuns(buf) {
     const o = objs.get(n) || "";
     const fc = /\/FirstChar\s+(\d+)/.exec(o);
     const wm = /\/Widths\s*\[([\s\S]*?)\]/.exec(o);
-    const res = fc && wm ? { first: +fc[1], widths: wm[1].trim().split(/\s+/).map(Number) } : null;
+    // Type3 /Widths are in glyph space; the text-space advance is
+    // width * FontMatrix[0] * fontSize. Body fonts use .001, but the
+    // monospace code font uses 1/2048 (.000488…) — assuming .001 makes its
+    // advance ~2x too big and the kerning piles glyphs on top of each other.
+    const fmm = /\/FontMatrix\s*\[\s*([\d.]+)/.exec(o);
+    const fm = fmm ? parseFloat(fmm[1]) : 0.001;
+    const res = fc && wm ? { first: +fc[1], widths: wm[1].trim().split(/\s+/).map(Number), fm } : null;
     fontCache.set(n, res);
     return res;
   };
@@ -1344,11 +1350,13 @@ function coalesceGlyphRuns(buf) {
     }
     return map;
   };
+  // Returns the glyph's advance in 1/1000-em units (so it's directly
+  // comparable to dx*1000/sz), normalising for the font's FontMatrix scale.
   const widthOf = (fmap, name, code) => {
     const f = fmap[name];
     if (!f) return 500;
     const w = f.widths[code - f.first];
-    return Number.isFinite(w) ? w : 500;
+    return (Number.isFinite(w) ? w : 500) * f.fm * 1000;
   };
   // Total advance of a glyph-show string, which may pack several 1-byte glyph
   // codes (e.g. `<4669>` = two glyphs "Fi"). The renderer advances by the sum
@@ -1390,7 +1398,13 @@ function coalesceGlyphRuns(buf) {
           if (gg) { seq.push([f, parseFloat(gg[1]), gg[2]]); continue; }
           break;
         }
-        if (seq.length > 1) {
+        // Only coalesce when every glyph uses a known 1-byte Type3 font (in
+        // fmap with /Widths). Mixed/unknown fonts — notably the Type0
+        // Identity-H monospace used for `code` (2-byte codes, widths in a
+        // descendant /W array) — don't fit this model, so leave the whole
+        // sequence exactly as Chrome rendered it (visually correct).
+        const known = seq.every((g) => fmap[g[0]]);
+        if (seq.length > 1 && known) {
           let k = 0;
           let prev = null; // [fontName, code]
           while (k < seq.length) {
@@ -1412,6 +1426,14 @@ function coalesceGlyphRuns(buf) {
           const totalDx = seq.reduce((a, g) => a + g[1], 0);
           if (totalDx) out.push(`${totalDx.toFixed(3)} 0 Td`);
           if (prev) curFont = prev[0];
+          size = sz;
+          i = j - 1;
+          continue;
+        }
+        if (seq.length > 1) {
+          // Unknown-font sequence (e.g. inline code) — emit verbatim.
+          for (let q = i; q < j; q++) out.push(lines[q]);
+          curFont = f;
           size = sz;
           i = j - 1;
           continue;
