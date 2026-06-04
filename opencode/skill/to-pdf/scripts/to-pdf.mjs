@@ -911,6 +911,16 @@ async function main() {
     try { fs.unlinkSync(contentPdf); } catch {}
   }
 
+  // Make the text copy-pasteable. Chrome on macOS emits each glyph as its own
+  // positioned show op (Type3 fonts), which macOS Preview/PDFKit can't
+  // reassemble into words — copy splits and drops letters mid-word. Coalesce
+  // the per-glyph runs into TJ arrays so viewers read whole words.
+  if (!process.env.TOPDF_NOCOAL) try {
+    fs.writeFileSync(outPath, coalesceGlyphRuns(fs.readFileSync(outPath)));
+  } catch (e) {
+    process.stderr.write(`to-pdf: text-coalesce skipped (${e.message})\n`);
+  }
+
   if (args.keepHtml) {
     process.stdout.write(`html: ${contentHtmlPath}\n`);
     if (coverHtmlPath) process.stdout.write(`html: ${coverHtmlPath}\n`);
@@ -1265,6 +1275,207 @@ function renderPdf(chrome, htmlPath, outPath, { dark = false, hasMermaid = false
       finish();
     }
   });
+}
+
+// Coalesce per-glyph text-show operators into TJ runs so macOS PDFKit (Preview)
+// can copy whole words. Chrome on macOS embeds Type3 fonts and emits every
+// glyph as its own positioned `<G> Tj`; PDFKit then guesses word boundaries
+// from glyph gaps and gets them wrong (splitting/dropping letters). We merge
+// each run of glyphs into `[<G> kern <G> ...] TJ`, where kern = font advance
+// width − original offset, so the on-page layout is unchanged but the text is
+// one coherent run. Zero-dep (node:zlib); operates on latin1 so binary passes
+// through untouched; rebuilds the xref since stream lengths change.
+function coalesceGlyphRuns(buf) {
+  const s = buf.toString("latin1");
+  const sxRaw = s.slice(s.lastIndexOf("startxref") + 9).trim().split(/\s/)[0];
+  const sx = parseInt(sxRaw, 10);
+  if (!Number.isFinite(sx)) return buf;
+
+  // Classic xref → in-use object byte offsets.
+  const offsets = new Map();
+  let p = s.indexOf("\n", s.indexOf("xref", sx)) + 1;
+  while (p > 0) {
+    const head = /^(\d+)\s+(\d+)\s*$/.exec(s.slice(p, s.indexOf("\n", p)));
+    if (!head) break;
+    let num = +head[1];
+    const count = +head[2];
+    p = s.indexOf("\n", p) + 1;
+    for (let k = 0; k < count; k++, num++) {
+      if (s.slice(p, p + 20)[17] === "n") offsets.set(num, parseInt(s.slice(p, p + 10), 10));
+      p += 20;
+    }
+    if (s.slice(p, p + 7) === "trailer") break;
+  }
+  if (offsets.size === 0) return buf;
+  const trailer = s.slice(s.lastIndexOf("trailer"));
+  const rootM = /\/Root\s+(\d+)\s+\d+\s+R/.exec(trailer);
+  const infoM = /\/Info\s+(\d+)\s+\d+\s+R/.exec(trailer);
+
+  const sorted = [...offsets.entries()].sort((a, b) => a[1] - b[1]);
+  const objs = new Map();
+  for (let k = 0; k < sorted.length; k++) {
+    const [num, start] = sorted[k];
+    const end = k + 1 < sorted.length ? sorted[k + 1][1] : sx;
+    objs.set(num, s.slice(start, s.lastIndexOf("endobj", end) + 6));
+  }
+
+  const fontCache = new Map();
+  const fontWidths = (n) => {
+    if (fontCache.has(n)) return fontCache.get(n);
+    const o = objs.get(n) || "";
+    const fc = /\/FirstChar\s+(\d+)/.exec(o);
+    const wm = /\/Widths\s*\[([\s\S]*?)\]/.exec(o);
+    const res = fc && wm ? { first: +fc[1], widths: wm[1].trim().split(/\s+/).map(Number) } : null;
+    fontCache.set(n, res);
+    return res;
+  };
+  // Page → { fontName: widths }. Resources may be inline or an indirect ref.
+  const resolveRes = (chunk) => {
+    const ref = /\/Resources\s+(\d+)\s+0\s+R/.exec(chunk);
+    return ref ? objs.get(+ref[1]) || chunk : chunk;
+  };
+  const fontMap = (chunk) => {
+    const res = resolveRes(chunk);
+    const fd = /\/Font\s*<<([\s\S]*?)>>/.exec(res);
+    const map = {};
+    if (fd) for (const m of fd[1].matchAll(/\/(\w+)\s+(\d+)\s+0\s+R/g)) {
+      const w = fontWidths(+m[2]);
+      if (w) map[m[1]] = w;
+    }
+    return map;
+  };
+  const widthOf = (fmap, name, code) => {
+    const f = fmap[name];
+    if (!f) return 500;
+    const w = f.widths[code - f.first];
+    return Number.isFinite(w) ? w : 500;
+  };
+
+  const transform = (text, fmap) => {
+    const lines = text.split("\n");
+    const out = [];
+    let curFont = null;
+    let size = 16;
+    const reTf = /^\/(\w+)\s+([\d.]+)\s+Tf$/;
+    const reG0 = /^<([0-9A-Fa-f]+)>\s*Tj$/;
+    const reGt = /^([-\d.]+)\s+0\s+Td\s*<([0-9A-Fa-f]+)>\s*Tj$/;
+    for (let i = 0; i < lines.length; i++) {
+      const t = lines[i].trim();
+      const g0 = reG0.exec(t);
+      const gt = reGt.exec(t);
+      // Only coalesce body/heading text (>= 10pt). The small native print
+      // footer (8pt brand + page number) is left exactly as Chrome rendered
+      // it — its multi-font/positioning structure doesn't round-trip cleanly
+      // and it's not meaningful copy text anyway.
+      if ((g0 || gt) && size >= 10) {
+        const seq = [];
+        let f = curFont;
+        let sz = size;
+        seq.push(g0 ? [f, 0, g0[1]] : [f, parseFloat(gt[1]), gt[2]]);
+        let j = i + 1;
+        for (; j < lines.length; j++) {
+          const tt = lines[j].trim();
+          const ff = reTf.exec(tt);
+          if (ff) { f = ff[1]; sz = parseFloat(ff[2]); continue; }
+          const gg = reGt.exec(tt);
+          if (gg) { seq.push([f, parseFloat(gg[1]), gg[2]]); continue; }
+          break;
+        }
+        if (seq.length > 1) {
+          let k = 0;
+          let prev = null; // [fontName, code]
+          while (k < seq.length) {
+            const fn = seq[k][0];
+            out.push(`/${fn} ${sz} Tf`);
+            let arr = "[";
+            for (; k < seq.length && seq[k][0] === fn; k++) {
+              const [, dx, code] = seq[k];
+              if (prev) arr += (widthOf(fmap, prev[0], parseInt(prev[1], 16)) - (dx * 1000) / sz).toFixed(1);
+              arr += `<${code}>`;
+              prev = [fn, code];
+            }
+            out.push(arr + "] TJ");
+          }
+          // Chrome's per-glyph `dx 0 Td` advanced the *line matrix* to the end
+          // of the line; a TJ only moves the text position. Re-apply the total
+          // advance as one Td so the next line-break Td/Tm lands correctly —
+          // otherwise continuation lines overlap the line above.
+          const totalDx = seq.reduce((a, g) => a + g[1], 0);
+          if (totalDx) out.push(`${totalDx.toFixed(3)} 0 Td`);
+          if (prev) curFont = prev[0];
+          size = sz;
+          i = j - 1;
+          continue;
+        }
+      }
+      const fm = reTf.exec(t);
+      if (fm) { curFont = fm[1]; size = parseFloat(fm[2]); }
+      out.push(lines[i]);
+    }
+    return out.join("\n");
+  };
+
+  // Map content-stream object → its page's font widths.
+  const streamFonts = new Map();
+  for (const [, chunk] of objs) {
+    if (!/\/Type\s*\/Page(?![a-zA-Z])/.test(chunk)) continue;
+    const fmap = fontMap(chunk);
+    const one = /\/Contents\s+(\d+)\s+0\s+R/.exec(chunk);
+    if (one) streamFonts.set(+one[1], fmap);
+    const arr = /\/Contents\s*\[([^\]]*)\]/.exec(chunk);
+    if (arr) for (const m of arr[1].matchAll(/(\d+)\s+0\s+R/g)) streamFonts.set(+m[1], fmap);
+  }
+
+  let changed = false;
+  for (const [num, fmap] of streamFonts) {
+    const chunk = objs.get(num);
+    if (!chunk) continue;
+    const si = chunk.indexOf("stream");
+    if (si < 0) continue;
+    const head = chunk.slice(0, si);
+    const lenM = /\/Length\s+(\d+)(?!\s+\d+\s+R)/.exec(head);
+    if (!lenM) continue; // indirect length — skip (Chrome uses direct)
+    let ds = si + 6;
+    if (chunk[ds] === "\r") ds++;
+    if (chunk[ds] === "\n") ds++;
+    const bytes = Buffer.from(chunk.slice(ds, ds + +lenM[1]), "latin1");
+    if (bytes[0] !== 0x78) continue; // not zlib
+    let dec;
+    try { dec = zlib.inflateSync(bytes).toString("latin1"); } catch { continue; }
+    if (!/\bTj$|\bTj\b/m.test(dec)) continue;
+    const nt = transform(dec, fmap);
+    if (nt === dec) continue;
+    const comp = zlib.deflateSync(Buffer.from(nt, "latin1"));
+    objs.set(
+      num,
+      head.replace(/\/Length\s+\d+/, `/Length ${comp.length}`) +
+        "stream\n" + comp.toString("latin1") + "\nendstream\nendobj",
+    );
+    changed = true;
+  }
+  if (!changed) return buf;
+
+  // Re-serialize with a fresh xref.
+  const maxNum = Math.max(...objs.keys());
+  let body = "%PDF-1.4\n%\xe2\xe3\xcf\xd3\n";
+  const at = new Map();
+  for (let n = 1; n <= maxNum; n++) {
+    const chunk = objs.get(n);
+    if (!chunk) continue;
+    at.set(n, body.length);
+    body += chunk + "\n";
+  }
+  const xrefAt = body.length;
+  const sizeN = maxNum + 1;
+  let xref = `xref\n0 ${sizeN}\n0000000000 65535 f \n`;
+  for (let n = 1; n < sizeN; n++) {
+    xref += at.has(n) ? `${String(at.get(n)).padStart(10, "0")} 00000 n \n` : "0000000000 00000 f \n";
+  }
+  body += xref + `trailer\n<</Size ${sizeN}` +
+    (rootM ? `\n/Root ${rootM[1]} 0 R` : "") +
+    (infoM ? `\n/Info ${infoM[1]} 0 R` : "") +
+    `>>\nstartxref\n${xrefAt}\n%%EOF\n`;
+  return Buffer.from(body, "latin1");
 }
 
 main().catch((e) => {
