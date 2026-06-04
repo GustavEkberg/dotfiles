@@ -1350,6 +1350,15 @@ function coalesceGlyphRuns(buf) {
     const w = f.widths[code - f.first];
     return Number.isFinite(w) ? w : 500;
   };
+  // Total advance of a glyph-show string, which may pack several 1-byte glyph
+  // codes (e.g. `<4669>` = two glyphs "Fi"). The renderer advances by the sum
+  // of their widths, so kerning must use the sum — otherwise the glyph after a
+  // multi-glyph string is misplaced (a visible gap mid-word, e.g. "Fi ndings").
+  const advanceOf = (fmap, name, hex) => {
+    let total = 0;
+    for (let i = 0; i + 1 < hex.length; i += 2) total += widthOf(fmap, name, parseInt(hex.slice(i, i + 2), 16));
+    return total;
+  };
 
   const transform = (text, fmap) => {
     const lines = text.split("\n");
@@ -1390,7 +1399,7 @@ function coalesceGlyphRuns(buf) {
             let arr = "[";
             for (; k < seq.length && seq[k][0] === fn; k++) {
               const [, dx, code] = seq[k];
-              if (prev) arr += (widthOf(fmap, prev[0], parseInt(prev[1], 16)) - (dx * 1000) / sz).toFixed(1);
+              if (prev) arr += (advanceOf(fmap, prev[0], prev[1]) - (dx * 1000) / sz).toFixed(1);
               arr += `<${code}>`;
               prev = [fn, code];
             }
