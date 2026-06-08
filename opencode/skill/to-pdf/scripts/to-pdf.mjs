@@ -1376,6 +1376,8 @@ function coalesceGlyphRuns(buf) {
     const reTf = /^\/(\w+)\s+([\d.]+)\s+Tf$/;
     const reG0 = /^<([0-9A-Fa-f]+)>\s*Tj$/;
     const reGt = /^([-\d.]+)\s+0\s+Td\s*<([0-9A-Fa-f]+)>\s*Tj$/;
+    const reBdc = /^\/\w+<<[\s\S]*>>\s+BDC$/;
+    const reEmc = /^EMC$/;
     for (let i = 0; i < lines.length; i++) {
       const t = lines[i].trim();
       const g0 = reG0.exec(t);
@@ -1388,14 +1390,21 @@ function coalesceGlyphRuns(buf) {
         const seq = [];
         let f = curFont;
         let sz = size;
-        seq.push(g0 ? [f, 0, g0[1]] : [f, parseFloat(gt[1]), gt[2]]);
+        seq.push(
+          g0
+            ? { kind: "glyph", font: f, size: sz, dx: null, code: g0[1] }
+            : { kind: "glyph", font: f, size: sz, dx: parseFloat(gt[1]), code: gt[2] },
+        );
         let j = i + 1;
         for (; j < lines.length; j++) {
           const tt = lines[j].trim();
           const ff = reTf.exec(tt);
           if (ff) { f = ff[1]; sz = parseFloat(ff[2]); continue; }
+          if (reBdc.test(tt) || reEmc.test(tt)) { seq.push({ kind: "raw", line: lines[j] }); continue; }
+          const ggg = reG0.exec(tt);
+          if (ggg) { seq.push({ kind: "glyph", font: f, size: sz, dx: null, code: ggg[1] }); continue; }
           const gg = reGt.exec(tt);
-          if (gg) { seq.push([f, parseFloat(gg[1]), gg[2]]); continue; }
+          if (gg) { seq.push({ kind: "glyph", font: f, size: sz, dx: parseFloat(gg[1]), code: gg[2] }); continue; }
           break;
         }
         // Only coalesce when every glyph uses a known 1-byte Type3 font (in
@@ -1403,34 +1412,63 @@ function coalesceGlyphRuns(buf) {
         // Identity-H monospace used for `code` (2-byte codes, widths in a
         // descendant /W array) — don't fit this model, so leave the whole
         // sequence exactly as Chrome rendered it (visually correct).
-        const known = seq.every((g) => fmap[g[0]]);
-        if (seq.length > 1 && known) {
-          let k = 0;
-          let prev = null; // [fontName, code]
-          while (k < seq.length) {
-            const fn = seq[k][0];
-            out.push(`/${fn} ${sz} Tf`);
-            let arr = "[";
-            for (; k < seq.length && seq[k][0] === fn; k++) {
-              const [, dx, code] = seq[k];
-              if (prev) arr += (advanceOf(fmap, prev[0], prev[1]) - (dx * 1000) / sz).toFixed(1);
-              arr += `<${code}>`;
-              prev = [fn, code];
-            }
-            out.push(arr + "] TJ");
+        const glyphs = seq.filter((g) => g.kind === "glyph");
+        const known = glyphs.every((g) => fmap[g.font]);
+        if (glyphs.length > 1 && known) {
+          // `Td` advances the text line matrix; bare `Tj` only advances the
+          // text matrix. Ligature spans often use bare `Tj`, so derive each
+          // glyph's real origin before converting the run to TJ kerning.
+          let lineX = 0;
+          let textX = 0;
+          for (const item of glyphs) {
+            if (item.dx !== null) lineX += item.dx;
+            item.origin = item.dx === null ? textX : lineX;
+            textX = item.origin + (advanceOf(fmap, item.font, item.code) * item.size) / 1000;
           }
+          let prev = null;
+          let arr = null;
+          let activeFont = null;
+          let activeSize = null;
+          const flush = () => {
+            if (!arr) return;
+            out.push(arr + "] TJ");
+            arr = null;
+            activeFont = null;
+            activeSize = null;
+          };
+          for (const item of seq) {
+            if (item.kind === "raw") {
+              flush();
+              out.push(item.line);
+              continue;
+            }
+            if (arr && (activeFont !== item.font || activeSize !== item.size)) flush();
+            if (!arr) {
+              out.push(`/${item.font} ${item.size} Tf`);
+              arr = "[";
+              activeFont = item.font;
+              activeSize = item.size;
+            }
+            if (prev) {
+              const prevAdvance = (advanceOf(fmap, prev.font, prev.code) * prev.size) / 1000;
+              arr += (((prevAdvance - (item.origin - prev.origin)) * 1000) / item.size).toFixed(1);
+            }
+            arr += `<${item.code}>`;
+            prev = item;
+          }
+          flush();
           // Chrome's per-glyph `dx 0 Td` advanced the *line matrix* to the end
           // of the line; a TJ only moves the text position. Re-apply the total
           // advance as one Td so the next line-break Td/Tm lands correctly —
           // otherwise continuation lines overlap the line above.
-          const totalDx = seq.reduce((a, g) => a + g[1], 0);
+          const totalDx = lineX;
           if (totalDx) out.push(`${totalDx.toFixed(3)} 0 Td`);
-          if (prev) curFont = prev[0];
+          if (prev) curFont = prev.font;
           size = sz;
           i = j - 1;
           continue;
         }
-        if (seq.length > 1) {
+        if (glyphs.length > 1) {
           // Unknown-font sequence (e.g. inline code) — emit verbatim.
           for (let q = i; q < j; q++) out.push(lines[q]);
           curFont = f;
