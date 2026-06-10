@@ -48,6 +48,7 @@ One command, one file in, one PDF out. Pixel-honest reproduction of the gustav.i
 
 ## Rules
 
+- **Normalise metadata into frontmatter before export.** The paragraph right after a leading `# H1` becomes the cover **subtitle**. If that paragraph is pseudo-metadata (`Date: … Status: … Author: …`, key-value runs, "Inputs:", etc.), it makes an ugly cover — move it into YAML frontmatter (`title`, `subtitle`, `created`/`date`, `author`) and delete it from the body first. Only a real one-sentence summary belongs as the subtitle; if there isn't one, leave it out — no subtitle beats a metadata dump.
 - **Light is the default.** Dark mode is opt-in via `--dark` — meant for on-screen reading, not paper. Don't auto-emit dark unless the user asked.
 - **Don't shell out to `pnpm install` or `npx` for deps.** The script is zero-dep on purpose. If the markdown subset is too narrow for a real document, expand the inline parser — don't pull in `marked`.
 - **Resolve Chrome lazily.** macOS path first (`/Applications/Google Chrome.app/Contents/MacOS/Google Chrome`), then Chromium / Linux fallbacks, then PATH. If none, surface the failure — don't silent-fail.

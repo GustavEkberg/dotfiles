@@ -11,3 +11,4 @@ opencode/bun.lock
 opencode/bun.lockb
 claude/skills/pptx/scripts/office/__pycache__
 opencode/pnpm-lock.yaml
+/claude/claude-settings.json
