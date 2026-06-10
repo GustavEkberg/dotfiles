@@ -242,19 +242,47 @@ function mdToHtml(src) {
     }
 
     const ulm = line.match(/^[-*+]\s+(.*)$/);
-    const olm = line.match(/^\d+\.\s+(.*)$/);
+    const olm = line.match(/^(\d+)\.\s+(.*)$/);
     if (ulm || olm) {
       const ordered = !!olm;
+      const start = ordered ? +olm[1] : 1;
       const items = [];
       const re = ordered ? /^\d+\.\s+(.*)$/ : /^[-*+]\s+(.*)$/;
+      // A line that opens a different block construct ends the current item
+      // (and, unless it's another marker of this list, the list itself).
+      const isBlockOpener = (l) =>
+        /^#{1,6}\s+/.test(l) || l.startsWith("```") || l.startsWith("> ") ||
+        /^[-*+]\s+/.test(l) || /^\d+\.\s+/.test(l) ||
+        /^(---+|\*\*\*+|___+)\s*$/.test(l) || l.trim().startsWith("|");
       while (i < lines.length) {
         const m = lines[i].match(re);
-        if (!m) break;
-        items.push(`<li>${inlineMd(m[1])}</li>`);
+        if (!m) {
+          // Loose list: a blank line between items doesn't end the list when
+          // the next non-blank line is another marker of the same kind.
+          if (lines[i].trim() === "") {
+            let k = i;
+            while (k < lines.length && lines[k].trim() === "") k++;
+            if (k < lines.length && re.test(lines[k])) { i = k; continue; }
+          }
+          break;
+        }
+        // Item text wraps across source lines (indented or lazy continuation)
+        // — fold them into the item instead of leaking a separate <p>.
+        const buf = [m[1]];
         i++;
+        while (
+          i < lines.length &&
+          lines[i].trim() !== "" &&
+          (/^\s/.test(lines[i]) || !isBlockOpener(lines[i]))
+        ) {
+          buf.push(lines[i].trim());
+          i++;
+        }
+        items.push(`<li>${inlineMd(buf.join(" "))}</li>`);
       }
       const tag = ordered ? "ol" : "ul";
-      out.push(`<${tag}>${items.join("")}</${tag}>`);
+      const startAttr = ordered && start !== 1 ? ` start="${start}"` : "";
+      out.push(`<${tag}${startAttr}>${items.join("")}</${tag}>`);
       continue;
     }
 
@@ -555,7 +583,8 @@ article {
   letter-spacing: -0.02em;
   margin: 0;
   color: var(--grey-900);
-  max-width: 30rem;
+  /* Match the 36rem body column — 30rem wrapped long titles to 4+ lines. */
+  max-width: 36rem;
 }
 
 .cover-subtitle {
