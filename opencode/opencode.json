@@ -17,6 +17,16 @@
     }
   },
   "mcp": {
+    "next-devtools": {
+      "type": "local",
+      "command": ["npx", "-y", "next-devtools-mcp@latest"],
+      "enabled": true
+    },
+    "effect-mcp": {
+      "type": "local",
+      "command": ["npx", "-y", "effect-mcp@latest"],
+      "enabled": true
+    },
     "figma": {
       "type": "remote",
       "url": "https://mcp.figma.com/mcp",
