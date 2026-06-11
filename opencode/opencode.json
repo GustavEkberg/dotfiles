@@ -16,26 +16,14 @@
       }
     }
   },
-  "mcp": {
-    "next-devtools": {
-      "type": "local",
-      "command": ["npx", "-y", "next-devtools-mcp@latest"],
-      "enabled": true
+  "references": {
+    "next": {
+      "repository": "vercel/next.js",
+      "description": "Use for Next.js implementation details, examples, and docs source."
     },
-    "effect-mcp": {
-      "type": "local",
-      "command": ["npx", "-y", "effect-mcp@latest"],
-      "enabled": true
-    },
-    "figma": {
-      "type": "remote",
-      "url": "https://mcp.figma.com/mcp",
-      "enabled": true,
-      "oauth": {
-        "clientId": "{env:FIGMA_MCP_CLIENT_ID}",
-        "clientSecret": "{env:FIGMA_MCP_CLIENT_SECRET}"
-      },
-      "timeout": 30000
+    "effect": {
+      "repository": "Effect-TS/effect",
+      "description": "Use for Effect library implementation details, examples, and docs source."
     }
   },
   "permission": {
