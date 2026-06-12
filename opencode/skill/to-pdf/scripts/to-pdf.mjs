@@ -322,7 +322,10 @@ function generateBackgroundSvg({ dark = false, width = 800, height = 1200, stren
   const fg = dark ? [255, 255, 255] : [0, 0, 0];
   // `strength` boosts the texture (the cover uses a stronger value than the
   // body pages). Clamp so a high multiplier can't push alpha past 1.
-  const lineMax = Math.min(1, (dark ? 0.07 : 0.05) * strength);
+  // Chrome's PDF viewer aliases 0.5px vector hairlines into dotted seams at
+  // some zoom levels. Use a wider, lighter stroke instead: similar perceived
+  // weight, more stable rasterization.
+  const lineMax = Math.min(1, (dark ? 0.04 : 0.03) * strength);
   const dotAlpha = Math.min(1, (dark ? 0.11 : 0.08) * strength);
   const blend = (alpha) => {
     const mix = (c) =>
@@ -349,7 +352,7 @@ function generateBackgroundSvg({ dark = false, width = 800, height = 1200, stren
         const d = Math.sqrt(dsq);
         const a = (1 - d / connectDist) * lineMax;
         lines.push(
-          `<line x1="${nodes[i].x.toFixed(1)}" y1="${nodes[i].y.toFixed(1)}" x2="${nodes[j].x.toFixed(1)}" y2="${nodes[j].y.toFixed(1)}" stroke="${blend(a)}" stroke-width="0.5"/>`,
+          `<line x1="${nodes[i].x.toFixed(1)}" y1="${nodes[i].y.toFixed(1)}" x2="${nodes[j].x.toFixed(1)}" y2="${nodes[j].y.toFixed(1)}" stroke="${blend(a)}" stroke-width="0.85" stroke-linecap="round"/>`,
         );
       }
     }
@@ -360,7 +363,7 @@ function generateBackgroundSvg({ dark = false, width = 800, height = 1200, stren
         `<circle cx="${n.x.toFixed(1)}" cy="${n.y.toFixed(1)}" r="1.2" fill="${dotColour}"/>`,
     )
     .join("");
-  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${width} ${height}" preserveAspectRatio="xMidYMid slice">${lines.join("")}${circles}</svg>`;
+  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${width} ${height}" preserveAspectRatio="xMidYMid slice" shape-rendering="geometricPrecision">${lines.join("")}${circles}</svg>`;
 }
 
 // ─── font resolution ──────────────────────────────────────────────────────
@@ -493,20 +496,13 @@ ${fontFaceCss()}
   box-sizing: border-box;
 }
 
-/* html bg fills the page sheet edge-to-edge (chrome paints html background
- * across the full canvas, including any @page margin area). body adds the
- * per-page reading inset via padding.
- *
- * height: 100% on html + body propagates the @page sheet height down to
- * .page so its min-height: 100% resolves to one A4 page — necessary for
- * the absolute footer to land at the page floor on single-page docs. */
+/* Put the texture in a fixed print layer, not on the root page canvas. Chrome
+ * may raster-cache the first page of each separately rendered PDF differently;
+ * a fixed DOM layer is repeated per printed page, so every content page gets
+ * the same texture treatment. Cover strength still comes from bgStrength. */
 html {
   height: 100%;
   background-color: var(--background);
-  background-image: url("data:image/svg+xml;base64,${svgB64}");
-  background-repeat: repeat-y;
-  background-size: 100% auto;
-  background-position: top center;
   color: var(--grey-900);
   font-family: 'Satoshi', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   margin: 0;
@@ -520,6 +516,18 @@ body {
   padding: 0;
 }
 
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  background-image: url("data:image/svg+xml;base64,${svgB64}");
+  background-repeat: repeat-y;
+  background-size: 100% auto;
+  background-position: top center;
+  pointer-events: none;
+}
+
 /* The wrapper carries per-page padding. box-decoration-break: clone asks
  * chrome to repeat the box's padding at every page-fragment boundary so
  * pages 2..N also get a top/bottom inset (not only the first/last).
@@ -530,6 +538,8 @@ body {
  * bottom inset. The footer is drawn by Chrome's print engine, not the
  * DOM, so it is positioned perfectly on every page with no arithmetic. */
 .page {
+  position: relative;
+  z-index: 1;
   padding: 3cm 1.8cm 1.4cm;
   -webkit-box-decoration-break: clone;
   box-decoration-break: clone;

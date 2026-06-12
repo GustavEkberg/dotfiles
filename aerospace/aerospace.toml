@@ -195,6 +195,10 @@ if.app-name-regex-substring = '1Password'
 run = 'layout floating'
 
 [[on-window-detected]]
+if.app-name-regex-substring = 'Chrome'
+run = 'move-node-to-workspace 1'
+
+[[on-window-detected]]
 if.app-name-regex-substring = 'Telegram'
 run = 'move-node-to-workspace S'
 
