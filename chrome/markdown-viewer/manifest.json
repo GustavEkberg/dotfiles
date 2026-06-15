@@ -1,0 +1,14 @@
+{
+  "manifest_version": 3,
+  "name": "Local Markdown Viewer",
+  "description": "Render local .md and .markdown files in Chrome.",
+  "version": "0.1.0",
+  "content_scripts": [
+    {
+      "matches": ["file:///*"],
+      "js": ["content.js"],
+      "css": ["style.css"],
+      "run_at": "document_end"
+    }
+  ]
+}
