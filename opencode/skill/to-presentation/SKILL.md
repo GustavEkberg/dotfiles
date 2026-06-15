@@ -39,6 +39,7 @@ Use the smallest set that covers different jobs. If two seem interchangeable, dr
 | `body` | Explains one argument | One heading + one paragraph | Enumerated content |
 | `bullets` | Separates items | 2-8 distinct points | Fake paragraph bullets |
 | `compare` | Shows tension | before/after, today/tomorrow | Two unrelated columns |
+| `table` | Compares many items | 2-5 columns, 1-8 rows | Dense spreadsheets or prose cells |
 | `stat` | Anchors one number | Big number + caption | Several metrics |
 | `quote` | Lets a source speak | Verbatim quote + attribution | Invented quotes |
 | `image` | Shows a diagram / screenshot | One image + heading + optional caption | Decorative filler |
@@ -85,6 +86,7 @@ Each type reads the `##` heading plus the lines beneath it in a fixed way:
 | `body` | heading | paragraph(s), joined (≤ 450 chars) |
 | `bullets` | heading | `- item` list, 2–8 items (≤ 140 chars each) |
 | `compare` | heading | two `### Side label` blocks each with a paragraph (≤ 240/side); fallbacks: `- Today: …` / `- Tomorrow: …` bullets, or two paragraphs |
+| `table` | heading | markdown table, 2–5 columns + 1–8 rows; headers ≤ 36 chars, cells ≤ 80 chars |
 | `stat` | the number/value (≤ 40) | paragraph = caption (≤ 160) |
 | `quote` | (optional) | `> quote line(s)` (≤ 260) then `— Attribution` |
 | `image` | heading | `![alt](path)` = the image; first paragraph = caption (≤ 200) |
@@ -126,6 +128,14 @@ What the review surfaced.
 Scattered requests, no acceptance criteria.
 ### Next
 Prioritised roadmap with a definition of done.
+
+<!-- slide: table -->
+## Vendor options
+| Option | Strength | Risk |
+| --- | --- | --- |
+| Rebuild | Full control | Slowest path |
+| Buy | Fast rollout | Vendor lock-in |
+| Hybrid | Keeps leverage | Needs clear owner |
 
 <!-- slide: stat -->
 ## 94%
@@ -189,6 +199,7 @@ The temp scratch file under `/tmp/to-presentation-*.md` is **never** the anchor 
 - **Fit before render.** The script can infer, but the agent owns the editorial judgment.
 - **Ask on broad input.** A pile of source docs is not a deck brief. Ask for focus / audience / must-include points before compressing, unless the user already gave them.
 - **No walls of text.** Slide budgets are strict: hero <= 2 short lines; body <= 450 chars; compare side <= 240 chars; quote <= 260 chars; bullets <= 8 items, each <= 140 chars. If source exceeds this, cut or ask.
+- **Tables are summaries, not spreadsheets.** `table` is capped at 5 columns, 8 rows, 36-char headers, 80-char cells. If it needs more, split or cut.
 - **No two-slide synonyms.** If content could be `hero` or `section`, choose `hero` unless it is literally a chapter divider. If content could be `body` or `bullets`, choose based on whether the audience must see separate items.
 - **Keep slide count low.** 6-12 slides is the default range. More than 15 still renders but triggers a warning — have a reason.
 - **Use the user's voice.** Direct, concrete, no hedging, no filler, no AI-speak.

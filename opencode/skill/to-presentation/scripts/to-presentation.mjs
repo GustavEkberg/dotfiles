@@ -102,6 +102,24 @@ const validateDeck = (deck) => {
       if (tooLong(slide.leftBody, 240)) errors.push(`${label}: left side > 240 chars`);
       if (tooLong(slide.rightBody, 240)) errors.push(`${label}: right side > 240 chars`);
     }
+    if (slide.kind === "table") {
+      if (!Array.isArray(slide.headers) || slide.headers.length < 2) errors.push(`${label}: needs 2+ columns`);
+      if (Array.isArray(slide.headers) && slide.headers.length > 5) errors.push(`${label}: > 5 columns`);
+      if (!Array.isArray(slide.rows) || slide.rows.length < 1) errors.push(`${label}: needs 1+ rows`);
+      if (Array.isArray(slide.rows) && slide.rows.length > 8) errors.push(`${label}: > 8 rows`);
+      if (Array.isArray(slide.headers)) {
+        slide.headers.forEach((header, colIdx) => {
+          if (tooLong(header, 36)) errors.push(`${label}: header ${colIdx + 1} > 36 chars`);
+        });
+      }
+      if (Array.isArray(slide.rows)) {
+        slide.rows.forEach((row, rowIdx) => {
+          row.forEach((cell, colIdx) => {
+            if (tooLong(cell, 80)) errors.push(`${label}: row ${rowIdx + 1} col ${colIdx + 1} > 80 chars`);
+          });
+        });
+      }
+    }
     if (slide.kind === "quote" && tooLong(slide.quote, 260)) errors.push(`${label}: quote > 260 chars`);
     if (slide.kind === "image") {
       if (!slide.image) errors.push(`${label}: image slide needs a \`![](path)\``);

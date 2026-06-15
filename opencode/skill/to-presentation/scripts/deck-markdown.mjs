@@ -9,6 +9,7 @@ export const SLIDE_TYPES = [
   "body",
   "bullets",
   "compare",
+  "table",
   "stat",
   "quote",
   "image",
@@ -29,6 +30,8 @@ const TYPE_ALIASES = new Map([
   ["photo", "image"],
   ["figure", "image"],
   ["screenshot", "image"],
+  ["matrix", "table"],
+  ["grid", "table"],
 ]);
 
 // First markdown image in a block: `![alt](path)`. Returns null if none.
@@ -157,6 +160,24 @@ const compareParts = (lines) => {
   return { leftLabel: "Today", leftBody: p[0] ?? "", rightLabel: "Tomorrow", rightBody: p[1] ?? "" };
 };
 
+const tableParts = (lines) => {
+  const parsed = [];
+  for (const line of lines) {
+    const trimmed = line.trim();
+    if (!/^\|.*\|$/.test(trimmed)) continue;
+    const cells = trimmed
+      .replace(/^\||\|$/g, "")
+      .split("|")
+      .map((cell) => stripMarkdown(cell.trim()));
+    if (cells.length < 2 || cells.every((cell) => cell.length === 0)) continue;
+    if (cells.every((cell) => /^:?-{3,}:?$/.test(cell))) continue;
+    parsed.push(cells);
+  }
+  const headers = parsed[0] ?? [];
+  const rows = parsed.slice(1).filter((row) => row.some(Boolean));
+  return { headers, rows };
+};
+
 const inferKind = (section, index) => {
   const title = section.title.toLowerCase();
   if (index === 0 && /cover|title|intro/.test(title)) return "cover";
@@ -164,6 +185,7 @@ const inferKind = (section, index) => {
   if (/^(part|chapter|category)\b/i.test(section.title.trim())) return "divider";
   if (imageRef(section.lines)) return "image";
   if (quoteParts(section.lines).quote) return "quote";
+  if (tableParts(section.lines).rows.length > 0) return "table";
   if (/^(~?\d|\d+[%x×]|[<>]\d)/.test(section.title.trim())) return "stat";
   if (/\b(vs|versus|from|to|today|tomorrow|before|after)\b/.test(title)) return "compare";
   if (listItems(section.lines).length >= 2) return "bullets";
@@ -210,6 +232,7 @@ const sectionToSlide = (section, index, baseDir) => {
   }
   if (kind === "bullets") return { kind, heading: section.title, bullets: listItems(section.lines).slice(0, 8) };
   if (kind === "compare") return { kind, heading: section.title, ...compareParts(section.lines) };
+  if (kind === "table") return { kind, heading: section.title, ...tableParts(section.lines) };
   if (kind === "stat") return { kind, value: section.title, caption: text };
   if (kind === "quote") {
     const q = quoteParts(section.lines);

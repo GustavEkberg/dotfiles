@@ -81,7 +81,7 @@ const shapeXml = (id, preset, x, y, w, h, opts) => `
   <p:nvSpPr><p:cNvPr id="${id}" name="Shape ${id}"/><p:cNvSpPr/><p:nvPr/></p:nvSpPr>
   <p:spPr>
     <a:xfrm><a:off x="${emu(x)}" y="${emu(y)}"/><a:ext cx="${emu(w)}" cy="${emu(h)}"/></a:xfrm>
-    <a:prstGeom prst="${preset}"><a:avLst/></a:prstGeom>
+    <a:prstGeom prst="${preset}"><a:avLst>${opts.radius ? `<a:gd name="adj" fmla="val ${opts.radius}"/>` : ""}</a:avLst></a:prstGeom>
     ${fillXml(opts.fill)}
     ${strokeXml(opts.line)}
   </p:spPr>
@@ -356,6 +356,12 @@ const heroTailFont = (text) => {
   if (len > 60) return 24;
   return 28;
 };
+const tableFont = (cols, rows) => {
+  if (cols > 4 || rows > 6) return 10;
+  if (cols > 3 || rows > 4) return 11;
+  return 12;
+};
+const TABLE_RADIUS = 900;
 
 const renderCover = (s, slide) => {
   surface(s, COLORS.dark, true, 1);
@@ -593,6 +599,61 @@ const renderCompare = (s, slide, page) => {
   });
 };
 
+const renderTable = (s, slide, page) => {
+  surface(s, COLORS.light, false, page);
+  s.text(safe(slide.heading, "Table"), 0.78, 1.0, 11.5, 0.8, {
+    fontSize: 30,
+    color: COLORS.ink,
+    bold: true,
+    margin: 0,
+  });
+  const headers = Array.isArray(slide.headers) && slide.headers.length > 0
+    ? slide.headers.slice(0, 5)
+    : ["Item", "Detail"];
+  const rows = Array.isArray(slide.rows) && slide.rows.length > 0
+    ? slide.rows.slice(0, 8)
+    : [["First", "Value"]];
+  const x = 0.78;
+  const y = 2.0;
+  const w = 11.8;
+  const h = 4.55;
+  const cols = headers.length;
+  const colW = w / cols;
+  const headerH = 0.58;
+  const rowH = (h - headerH) / rows.length;
+  const fontSize = tableFont(cols, rows.length);
+  const borderColor = blend(COLORS.light, COLORS.ink, 0.14);
+  const gridColor = blend(COLORS.light, COLORS.ink, 0.08);
+
+  s.roundRect(x, y, w, h, { fill: COLORS.white, line: { color: borderColor, width: 0.6 }, radius: TABLE_RADIUS });
+  s.roundRect(x, y, w, headerH, { fill: COLORS.ink, radius: TABLE_RADIUS });
+  s.rect(x, y + headerH * 0.55, w, headerH * 0.45, { fill: COLORS.ink });
+  headers.forEach((header, col) => {
+    s.text(header.toUpperCase(), x + col * colW + 0.12, y + 0.15, colW - 0.22, headerH - 0.12, {
+      fontSize: 9,
+      color: COLORS.white,
+      bold: true,
+      spacing: 50,
+      margin: 0,
+    });
+  });
+
+  rows.forEach((row, rowIndex) => {
+    const rowY = y + headerH + rowIndex * rowH;
+    s.rect(x, rowY, w, rowH, { fill: rowIndex % 2 === 0 ? COLORS.white : "F7F7F7" });
+    headers.forEach((_, col) => {
+      if (col > 0) s.line(x + col * colW, rowY, x + col * colW, rowY + rowH, { color: gridColor, width: 0.35 });
+      s.text(safe(row[col], ""), x + col * colW + 0.12, rowY + 0.12, colW - 0.22, rowH - 0.16, {
+        fontSize,
+        color: COLORS.ink,
+        lineSpacing: 1.05,
+        margin: 0,
+      });
+    });
+    s.line(x, rowY + rowH, x + w, rowY + rowH, { color: gridColor, width: 0.35 });
+  });
+};
+
 const renderStat = (s, slide, page) => {
   surface(s, COLORS.dark, true, page);
   const value = safe(slide.value, "1");
@@ -681,6 +742,9 @@ export const renderSlide = (payload, index, deck) => {
       break;
     case "compare":
       renderCompare(s, payload, page);
+      break;
+    case "table":
+      renderTable(s, payload, page);
       break;
     case "stat":
       renderStat(s, payload, page);
