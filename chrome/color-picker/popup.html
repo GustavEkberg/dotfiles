@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Local Color Picker</title>
+    <link rel="stylesheet" href="popup.css">
+  </head>
+  <body>
+    <main>
+      <header>
+        <p>Local Color Picker</p>
+        <h1>Pick pixel color</h1>
+      </header>
+
+      <button id="pick" type="button">Pick color</button>
+
+      <section id="result" class="result" hidden>
+        <div id="swatch" class="swatch"></div>
+        <dl>
+          <div>
+            <dt>RGB</dt>
+            <dd id="rgb"></dd>
+          </div>
+          <div>
+            <dt>Hex</dt>
+            <dd id="hex"></dd>
+          </div>
+        </dl>
+        <button id="copy" type="button">Copy RGB</button>
+      </section>
+
+      <p id="status" class="status">Click pick, then choose any visible pixel.</p>
+    </main>
+
+    <script src="popup.js"></script>
+  </body>
+</html>

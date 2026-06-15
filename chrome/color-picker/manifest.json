@@ -1,0 +1,10 @@
+{
+  "manifest_version": 3,
+  "name": "Local Color Picker",
+  "description": "Pick a pixel color and copy its RGB value.",
+  "version": "0.1.0",
+  "action": {
+    "default_title": "Pick color",
+    "default_popup": "popup.html"
+  }
+}
