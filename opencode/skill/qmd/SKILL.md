@@ -1,11 +1,11 @@
 ---
 name: qmd
-description: Use qmd for read-only personal context about the user, their manifesto, priorities, business, people, companies, projects, deals, notes, library, and prior writing.
+description: Search the user's local knowledge base for read-only personal context: manifesto, priorities, business, people, companies, projects, deals, notes, library, and prior writing.
 ---
 
-# QMD Personal Context
+# Local Knowledge Base
 
-Read-only access to `/Users/abraxas/code/takt/local-workspace` through the global `qmd` MCP server.
+Read-only access to the user's local knowledge base at `/Users/abraxas/code/takt/local-workspace` through the global `qmd` MCP server.
 
 Use when the task needs context about:
 
@@ -19,8 +19,10 @@ Use when the task needs context about:
 
 - Use MCP tools first: `query`, `get`, `multi_get`, `status`.
 - Always pass `rerank: false` to `query` when the tool supports it.
-- Treat qmd results as navigation hints, not final truth.
+- Refer to this capability as the user's local knowledge base. Use `qmd` only when naming the technical tool/server.
+- Treat local knowledge base results as navigation hints, not final truth.
 - After `query`, use `get` or `multi_get` for every result you rely on.
+- If the task maps to a relevant project, check for `/Users/abraxas/code/takt/local-workspace/projects/<project>/work/living-notes.md` and read it when present. These notes may contain fresher working context than `index.md`.
 - For high-stakes or freshness-sensitive facts, read the source file from `/Users/abraxas/code/takt/local-workspace` after qmd points to it.
 - Never write to the takt workspace from global sessions.
 - Never run qmd maintenance/write commands: `update`, `embed`, `cleanup`, `collection`, `context`.
