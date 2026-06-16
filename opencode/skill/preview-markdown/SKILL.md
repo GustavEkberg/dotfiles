@@ -1,32 +1,29 @@
 ---
 name: preview-markdown
-description: Create or copy temporary Markdown to /tmp and open a link-renderable Chrome preview. Use when the user asks to preview, view, open, or render Markdown in Chrome, especially temporary .md drafts with local file:// links or references.
+description: Create or copy temporary Markdown to /tmp and open it in Chrome. Use when the user asks to preview, view, open, or render Markdown in Chrome, especially temporary .md drafts with local file:// links or references.
 ---
 
 # Preview Markdown
 
-Use this skill when the user wants Markdown content opened in Chrome from a temporary file, with links visibly rendered and clickable.
+Use this skill when the user wants Markdown content opened in Chrome from a temporary `.md` file. The user's Chrome extension renders Markdown and handles links.
 
 ## Workflow
 
 1. Create or copy the Markdown file under `/tmp` with a descriptive, collision-resistant name ending in `.md`.
 2. Rewrite all local file links and references to absolute browser-readable URLs.
-3. Ensure the Chrome preview renders links as links, not raw Markdown text.
-4. Open the rendered preview in Google Chrome.
-5. Tell the user the absolute path to the temporary `.md` file and, if created, the `.html` preview file.
+3. Ensure local paths are explicit Markdown links so the Chrome extension can make them clickable.
+4. Open the `.md` file in Google Chrome.
+5. Tell the user the absolute path to the temporary `.md` file.
 
 ## Link Rendering
 
-Chrome does not reliably render raw `.md` files as clickable Markdown without an extension. If clickable links matter, prefer this output shape:
+The preview is Markdown-only. Do not create an HTML preview.
 
-- Write the canonical Markdown file to `/tmp/example.md`.
-- Create `/tmp/example.html` as the Chrome preview.
-- Render Markdown links as HTML anchors in the preview with exact `href` values.
-- Open the `.html` file in Chrome.
+- Write the Markdown file to `/tmp/example.md`.
+- Keep links as valid Markdown links with exact `file:///...` href values.
+- Open the `.md` file in Chrome.
 
-The Markdown source should still contain valid Markdown links. The HTML preview is only for display.
-
-Do not rely on bare `file:///...` text becoming clickable. If a path or URL should be clickable, make it an explicit Markdown link in the `.md` file and an explicit `<a href="...">...</a>` in the `.html` file.
+Do not rely on bare `file:///...` text becoming clickable. If a path or URL should be clickable, make it an explicit Markdown link in the `.md` file.
 
 ## Absolute References
 
@@ -60,21 +57,9 @@ Write this Markdown:
 See [ISSUE_TRIAGE_140-166.md](file:///Users/abraxas/code/nigel/dp/reference/ISSUE_TRIAGE_140-166.md)
 ```
 
-Render this HTML:
-
-```html
-See <a href="file:///Users/abraxas/code/nigel/dp/reference/ISSUE_TRIAGE_140-166.md">ISSUE_TRIAGE_140-166.md</a>
-```
-
 ## Open Command
 
-Use macOS `open` with Chrome. Prefer opening the rendered `.html` preview when one exists:
-
-```sh
-open -a "Google Chrome" "/tmp/example.html"
-```
-
-If opening raw Markdown is explicitly requested and link rendering is known to work, open the `.md` file:
+Use macOS `open` with Chrome:
 
 ```sh
 open -a "Google Chrome" "/tmp/example.md"
@@ -84,10 +69,10 @@ Quote paths. Do not use repo-relative paths when opening files.
 
 ## Verification
 
-Before opening Chrome, inspect the generated preview and verify expected local links appear as `href="file:///..."`. If the source includes `/Users/abraxas/code/nigel/dp/reference/ISSUE_TRIAGE_140-166.md`, the preview must include:
+Before opening Chrome, inspect the generated Markdown and verify expected local links appear as Markdown links with `file:///...` URLs. If the source includes `/Users/abraxas/code/nigel/dp/reference/ISSUE_TRIAGE_140-166.md`, the Markdown must include:
 
-```html
-href="file:///Users/abraxas/code/nigel/dp/reference/ISSUE_TRIAGE_140-166.md"
+```md
+[ISSUE_TRIAGE_140-166.md](file:///Users/abraxas/code/nigel/dp/reference/ISSUE_TRIAGE_140-166.md)
 ```
 
 ## Safety
