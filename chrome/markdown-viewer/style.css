@@ -141,6 +141,19 @@
   line-height: 1.55;
 }
 
+.markdown-viewer-content pre.mermaid {
+  display: flex;
+  justify-content: center;
+  padding: 24px;
+  background: #18181b;
+  white-space: pre;
+}
+
+.markdown-viewer-content pre.mermaid svg {
+  max-width: 100%;
+  height: auto;
+}
+
 @media (max-width: 640px) {
   .markdown-viewer-shell {
     padding: 32px 18px 56px;

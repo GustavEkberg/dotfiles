@@ -150,6 +150,14 @@
     }
 
     const closeCodeBlock = () => {
+      if (codeLanguage.toLowerCase() === 'mermaid') {
+        output.push(`<pre class="mermaid">${escapeHtml(codeLines.join('\n'))}</pre>`)
+        inCode = false
+        codeLanguage = ''
+        codeLines = []
+        return
+      }
+
       const languageClass = codeLanguage ? ` class="language-${escapeHtml(codeLanguage)}"` : ''
       output.push(`<pre><code${languageClass}>${escapeHtml(codeLines.join('\n'))}</code></pre>`)
       inCode = false
@@ -248,6 +256,28 @@
     return output.join('\n')
   }
 
+  const renderMermaid = () => {
+    const mermaidBlocks = Array.from(document.querySelectorAll('pre.mermaid'))
+
+    if (mermaidBlocks.length === 0 || !window.mermaid) {
+      return
+    }
+
+    window.mermaid.initialize({
+      startOnLoad: false,
+      theme: 'dark',
+      securityLevel: 'strict',
+      flowchart: {
+        htmlLabels: false,
+        useMaxWidth: true,
+      },
+    })
+
+    window.mermaid.run({ nodes: mermaidBlocks }).catch((error) => {
+      console.error('Mermaid render failed', error)
+    })
+  }
+
   document.documentElement.classList.add('markdown-viewer-extension')
   document.title = fileName
   document.body.innerHTML = `
@@ -263,6 +293,8 @@
       <pre class="markdown-viewer-raw" hidden>${escapeHtml(rawMarkdown)}</pre>
     </main>
   `
+
+  renderMermaid()
 
   const toggle = document.querySelector('.markdown-viewer-toggle')
   const rendered = document.querySelector('.markdown-viewer-content')

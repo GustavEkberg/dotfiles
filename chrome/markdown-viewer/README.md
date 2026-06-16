@@ -13,5 +13,5 @@ Buildless Chrome extension for rendering local `.md` and `.markdown` files.
 ## Notes
 
 - Works only for local `file://` markdown files.
-- Supports basic headings, paragraphs, links, inline code, bold, italic, lists, quotes, tables, and fenced code blocks.
-- No build step, package manager, or remote scripts.
+- Supports basic headings, paragraphs, links, inline code, bold, italic, lists, quotes, tables, Mermaid charts, and fenced code blocks.
+- No build step, package manager, or runtime remote scripts. Mermaid is vendored in `vendor/mermaid.min.js`.

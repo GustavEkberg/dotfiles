@@ -6,7 +6,7 @@
   "content_scripts": [
     {
       "matches": ["file:///*"],
-      "js": ["content.js"],
+      "js": ["vendor/mermaid.min.js", "content.js"],
       "css": ["style.css"],
       "run_at": "document_end"
     }
