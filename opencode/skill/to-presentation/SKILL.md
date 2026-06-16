@@ -159,7 +159,7 @@ gustav.im
    - What must be in it; what can be cut?
    The script enforces this: it rejects any unshaped input over ~1,200 words. Do not bypass with `--allow-unshaped-long` to dodge the question.
 2. **Skim, then compress.** With the focus locked, read only what supports it. Cut aggressively. One idea per slide.
-3. **Pick the smallest arc that lands the message.** Target 6-10 slides. Going over 15 still renders but the script prints a warning — treat it as a nudge to compress, not a wall. Skip slide types you do not need — do not pad to hit a count.
+3. **Pick the smallest arc that lands the message.** Skip slide types you do not need — do not pad to hit a count.
 4. **Write the committable deck file `<name>.deck.md`** at a real workspace path (next to where the deck belongs), unless the user already supplied a deck-shaped file. This is the source the user commits. Mark every slide explicitly with `<!-- slide: <kind> -->`. Use `/tmp` only for genuine throwaways the user will not keep.
 5. **Render beside the deck file.** With a `<name>.deck.md` source the default output is already the right place (`<name>.pptx` next to it). Pass `--out` only to override; never let the PPTX default into `/tmp`.
 6. **Run the script from workspace root:**
@@ -201,7 +201,6 @@ The temp scratch file under `/tmp/to-presentation-*.md` is **never** the anchor 
 - **No walls of text.** Slide budgets are strict: hero <= 2 short lines; body <= 450 chars; compare side <= 240 chars; quote <= 260 chars; bullets <= 8 items, each <= 140 chars. If source exceeds this, cut or ask.
 - **Tables are summaries, not spreadsheets.** `table` is capped at 5 columns, 8 rows, 36-char headers, 80-char cells. If it needs more, split or cut.
 - **No two-slide synonyms.** If content could be `hero` or `section`, choose `hero` unless it is literally a chapter divider. If content could be `body` or `bullets`, choose based on whether the audience must see separate items.
-- **Keep slide count low.** 6-12 slides is the default range. More than 15 still renders but triggers a warning — have a reason.
 - **Use the user's voice.** Direct, concrete, no hedging, no filler, no AI-speak.
 - **No invented quotes or stats.** If the source does not contain it, do not make it a `quote` or `stat`.
 - **`.deck.md` is source; `.pptx` is artefact.** Commit the deck markdown; ask before committing the generated `.pptx`.
