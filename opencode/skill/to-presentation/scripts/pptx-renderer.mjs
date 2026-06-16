@@ -335,6 +335,11 @@ const surface = (s, color, dark, pageNumber) => {
   stamp(s, dark, pageNumber);
 };
 
+const quietSurface = (s, color, dark, pageNumber) => {
+  s.rect(0, 0, SLIDE_W, SLIDE_H, { fill: color });
+  stamp(s, dark, pageNumber);
+};
+
 // ─── archetype renderers ─────────────────────────────────────────────────
 
 const safe = (value, fallback) => String(value ?? "").trim() || fallback;
@@ -360,6 +365,17 @@ const tableFont = (cols, rows) => {
   if (cols > 4 || rows > 6) return 10;
   if (cols > 3 || rows > 4) return 11;
   return 12;
+};
+const bulletFont = (items, cols) => {
+  const longest = items.reduce((max, item) => Math.max(max, String(item ?? "").length), 0);
+  if (cols > 1) {
+    if (longest > 95 || items.length > 6) return 13;
+    if (longest > 70) return 14;
+    return 15;
+  }
+  if (longest > 105) return 16;
+  if (longest > 75 || items.length > 3) return 18;
+  return 21;
 };
 const TABLE_RADIUS = 900;
 
@@ -533,7 +549,7 @@ const renderBody = (s, slide, page) => {
 };
 
 const renderBullets = (s, slide, page) => {
-  surface(s, COLORS.light, false, page);
+  quietSurface(s, COLORS.light, false, page);
   s.text(safe(slide.heading, "What matters"), 0.78, 1.05, 11.5, 1.0, {
     fontSize: 32,
     color: COLORS.ink,
@@ -544,27 +560,41 @@ const renderBullets = (s, slide, page) => {
     ? slide.bullets.slice(0, 8)
     : ["First point", "Second point"];
   const n = items.length;
-  // Choose font + step so the list fills the body band without crowding.
-  const fontSize = n > 6 ? 16 : n > 5 ? 18 : n > 3 ? 20 : 24;
-  const step = n > 6 ? 0.62 : n > 5 ? 0.74 : n > 3 ? 0.82 : 0.95;
-  const startY = 2.55;
-  const dotSize = 0.085;
-  const dotX = 0.85;
-  const textX = 1.18;
-  const textW = SLIDE_W - textX - 0.6;
+  const cols = n > 4 ? 2 : 1;
+  const rows = Math.ceil(n / cols);
+  const startX = 0.78;
+  const startY = 2.25;
+  const gapX = 0.34;
+  const gapY = rows > 3 ? 0.16 : 0.22;
+  const cardW = cols === 1 ? 9.4 : (SLIDE_W - startX * 2 - gapX) / 2;
+  const bandH = 4.55;
+  const cardH = (bandH - gapY * (rows - 1)) / rows;
+  const fontSize = bulletFont(items, cols);
+  const numbered = slide.numbered === true;
+  const numberSize = cols === 1 ? 0.42 : 0.34;
+  const numberGap = cols === 1 ? 0.32 : 0.22;
+  const contentX = numbered ? 0.42 + numberSize + numberGap : 0.48;
+  const ruleColor = blend(COLORS.light, COLORS.ink, 0.16);
   items.forEach((item, i) => {
-    const y = startY + i * step;
-    // Vertically center the dot on the first line of text.
-    const lineH = (fontSize * 1.25) / 72;
-    const dotCy = y + lineH * 0.48;
-    s.ellipse(dotX - dotSize / 2, dotCy - dotSize / 2, dotSize, dotSize, {
-      fill: COLORS.ink,
-    });
-    s.text(item, textX, y, textW, step - 0.05, {
+    const col = cols === 1 ? 0 : i % 2;
+    const row = cols === 1 ? i : Math.floor(i / 2);
+    const x = startX + col * (cardW + gapX);
+    const y = startY + row * (cardH + gapY);
+    s.line(x + 0.22, y + 0.18, x + 0.22, y + cardH - 0.18, { color: ruleColor, width: 1.1 });
+    if (numbered) {
+      s.text(String(i + 1).padStart(2, "0"), x + 0.42, y + 0.2, numberSize, 0.24, {
+        fontSize: 9,
+        color: COLORS.muted,
+        bold: true,
+        spacing: 80,
+        margin: 0,
+      });
+    }
+    s.text(item, x + contentX, y + 0.15, cardW - contentX - 0.4, cardH - 0.3, {
       fontSize,
       color: COLORS.ink,
-      valign: "top",
-      lineSpacing: 1.12,
+      valign: "middle",
+      lineSpacing: 1.05,
       margin: 0,
     });
   });

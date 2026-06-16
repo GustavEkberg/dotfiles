@@ -84,7 +84,7 @@ Each type reads the `##` heading plus the lines beneath it in a fixed way:
 | `section` | `NN — Label` | number + label split on `—`/`-`/`:`; bare title → auto number |
 | `divider` | `NN — Label` or `Label` | split → eyebrow + category name; first paragraph = caption |
 | `body` | heading | paragraph(s), joined (≤ 450 chars) |
-| `bullets` | heading | `- item` list, 2–8 items (≤ 140 chars each) |
+| `bullets` | heading | `- item` list, 2–8 items (≤ 140 chars each); use `1. item` only when visible numbering is intended |
 | `compare` | heading | two `### Side label` blocks each with a paragraph (≤ 240/side); fallbacks: `- Today: …` / `- Tomorrow: …` bullets, or two paragraphs |
 | `table` | heading | markdown table, 2–5 columns + 1–8 rows; headers ≤ 36 chars, cells ≤ 80 chars |
 | `stat` | the number/value (≤ 40) | paragraph = caption (≤ 160) |

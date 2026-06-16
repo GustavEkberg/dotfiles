@@ -78,8 +78,6 @@ const wordCount = (source) => source.trim().split(/\s+/).filter(Boolean).length;
 
 const tooLong = (value, max) => String(value ?? "").trim().length > max;
 
-const SLIDE_SOFT_CAP = 15;
-
 const validateDeck = (deck) => {
   const errors = [];
   deck.slides.forEach((slide, idx) => {
@@ -200,14 +198,6 @@ const main = () => {
   if (errors.length > 0) {
     process.stderr.write(`to-presentation: deck too dense\n- ${errors.join("\n- ")}\n`);
     process.exit(1);
-  }
-  // Slide count is a soft guideline, not a gate — a long deck still renders,
-  // but warn so the agent is nudged to compress (the per-slide char limits
-  // above stay hard because they cause real visual overflow).
-  if (deck.slides.length > SLIDE_SOFT_CAP) {
-    process.stderr.write(
-      `to-presentation: warning — ${deck.slides.length} slides (recommended max ${SLIDE_SOFT_CAP}); rendering anyway, but consider cutting.\n`,
-    );
   }
   const outPath = path.resolve(args.out ?? defaultOut(files, deck.title));
   if (!outPath.toLowerCase().endsWith(".pptx")) {

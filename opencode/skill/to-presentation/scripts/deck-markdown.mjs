@@ -88,12 +88,27 @@ const normaliseKind = (raw) => {
   return SLIDE_TYPES.includes(aliased) ? aliased : null;
 };
 
-const listItems = (lines) =>
+const listEntries = (lines) =>
   lines
-    .map((line) => line.match(/^\s*(?:[-*+] |\d+\.\s+)(.*)$/))
-    .filter((m) => m !== null)
-    .map((m) => stripMarkdown(m[1]))
+    .map((line) => {
+      const m = line.match(/^\s*((?:[-*+])|(?:\d+\.))\s+(.*)$/);
+      return m ? { ordered: /\d+\./.test(m[1]), text: stripMarkdown(m[2]) } : null;
+    })
+    .filter((entry) => entry !== null)
+    .filter((entry) => entry.text);
+
+const listItems = (lines) =>
+  listEntries(lines)
+    .map((entry) => entry.text)
     .filter(Boolean);
+
+const bulletParts = (lines) => {
+  const entries = listEntries(lines);
+  return {
+    bullets: entries.map((entry) => entry.text).slice(0, 8),
+    numbered: entries.length > 0 && entries.every((entry) => entry.ordered),
+  };
+};
 
 const paragraphs = (lines) => {
   const out = [];
@@ -230,7 +245,7 @@ const sectionToSlide = (section, index, baseDir) => {
       caption: ps[0] ?? "",
     };
   }
-  if (kind === "bullets") return { kind, heading: section.title, bullets: listItems(section.lines).slice(0, 8) };
+  if (kind === "bullets") return { kind, heading: section.title, ...bulletParts(section.lines) };
   if (kind === "compare") return { kind, heading: section.title, ...compareParts(section.lines) };
   if (kind === "table") return { kind, heading: section.title, ...tableParts(section.lines) };
   if (kind === "stat") return { kind, value: section.title, caption: text };
