@@ -211,6 +211,10 @@ if.app-name-regex-substring = 'Slack'
 run = 'move-node-to-workspace W'
 
 [[on-window-detected]]
+if.app-name-regex-substring = 'Microsoft Teams'
+run = 'move-node-to-workspace W'
+
+[[on-window-detected]]
 if.app-name-regex-substring = 'Mail'
 run = 'move-node-to-workspace C'
 
