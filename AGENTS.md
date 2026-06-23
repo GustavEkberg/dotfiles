@@ -1,144 +1,125 @@
-# AGENTS.md — Dotfiles
+# AGENTS.md - Dotfiles
 
-Personal dotfiles for macOS (Apple Silicon). Config-only repo — no build system, no CI, no tests.
-Configs are source files; active-tool deployment is manual. No stow/symlink automation.
+**Generated:** 2026-06-23
+**Commit:** `2701471`
+**Branch:** `main`
 
-## Repository Structure
+## Overview
+
+Personal macOS Apple Silicon dotfiles. Config sources only; active-tool deployment is manual, with no stow/symlink automation and no CI/test harness.
+
+## Structure
 
 ```
-aerospace/          # AeroSpace tiling WM (macOS) — aerospace.toml
-fish/               # Fish shell — config.fish (single file, sources connections.sh if present)
-fonts/              # SauceCodePro Nerd Font
-keep/               # Keyboard layouts (Cantor Remix, Planck) — Vial JSON/VIL files
-nvim/               # Neovim (full Lua config)
-  init.lua          #   Entry point: leader key, loads user/* modules
-  lua/plugins/      #   lazy.nvim plugin specs (completion, core, git, lsp, markdown, navigation, telescope)
-  lua/user/         #   User modules (options, keymaps, autocmds, utils, lsp/)
-claude/             # Claude settings only — settings.json
-opencode/           # OpenCode AI agent config (opencode.json, agent/, command/, skill/, AGENTS.md)
-scripts/            # task-loop.sh — autonomous PRD-driven dev loop
-starship/           # Starship prompt — starship.toml
-tmux/               # tmux config + powerline theme/segments
-wezterm/            # WezTerm terminal — wezterm.lua
-install.sh          # Bootstrap: brew/apt + cargo install (packages only, no symlinks)
+dotfiles/
+|-- aerospace/          # AeroSpace config; copy to active path manually
+|-- chrome/             # Buildless local Chrome MV3 extensions
+|-- claude/             # Claude settings only
+|-- fish/               # Fish config; may source private connections.sh
+|-- fonts/              # Nerd Font binary
+|-- keep/               # Vial keyboard exports; not hand-authored
+|-- nvim/               # Full Neovim Lua config
+|-- opencode/           # OpenCode config, commands, agents, skills, plugins
+|-- pi/                 # Separate Pi skill/config experiments
+|-- scripts/            # task-loop.sh automation
+|-- starship/           # Starship prompt
+|-- tmux/               # tmux config + powerline scripts
+|-- wezterm/            # WezTerm config
+`-- install.sh          # Package bootstrap only; does not deploy configs
 ```
 
-## Validation Commands
+## Where To Look
 
-No test suite. Validate configs per-tool:
+| Task | Location | Notes |
+|------|----------|-------|
+| Neovim behavior | `nvim/AGENTS.md`, `nvim/init.lua`, `nvim/lua/` | Scoped guardrails live under `nvim/` |
+| OpenCode behavior | `opencode/AGENTS.md`, `opencode/opencode.json` | Agent-wide engineering rules live there |
+| OpenCode skills | `opencode/skill/AGENTS.md`, `opencode/skill/*/SKILL.md` | Skill packaging and reference/script rules |
+| OpenCode plugin auth | `opencode/plugins/AGENTS.md` | Local OAuth plugin provenance |
+| Chrome extensions | `chrome/AGENTS.md`, `chrome/*/manifest.json` | Manual Load unpacked flow |
+| Shell config | `fish/config.fish` | Sources private `connections.sh` if present |
+| Terminal stack | `wezterm/`, `tmux/`, `starship/` | Runtime configs require manual deployment |
+| Bootstrap packages | `install.sh` | Installs packages only |
+| Autonomous task loop | `scripts/task-loop.sh`, `opencode/command/complete-next-task.md` | PRD-driven OpenCode loop |
+
+## Code Map
+
+| Entry | Role |
+|-------|------|
+| `nvim/init.lua` | Sets leaders, loads `user.options`, `user.autocmds`, `user.keymaps`, `user.lazy`, `user.lsp.handlers` |
+| `nvim/lua/user/lazy.lua` | Bootstraps lazy.nvim and imports `lua/plugins/*` |
+| `nvim/lua/user/large_file.lua` | Disables expensive features for large buffers |
+| `fish/config.fish` | Main shell config and PATH/tool setup |
+| `tmux/tmux.conf` | tmux bindings/status/plugins; reload binding targets active `~/.tmux.conf` |
+| `wezterm/wezterm.lua` | Terminal config and scrollback-to-vim event |
+| `opencode/opencode.json` | OpenCode providers, plugin, MCP, permissions |
+| `opencode/command/*.md` | Slash command prompts |
+| `opencode/skill/*/SKILL.md` | Skill entry files loaded by OpenCode |
+| `chrome/*/manifest.json` | Chrome extension entry points |
+
+## Commands
+
+No repo-wide test suite. Validate touched configs only:
 
 ```sh
-# Fish — syntax check
 fish -n fish/config.fish
-
-# Bash scripts — syntax check
 bash -n scripts/task-loop.sh
 bash -n install.sh
-
-# Neovim — plugin health / load check
 nvim --headless "+Lazy! check" +qa
 nvim --headless "+checkhealth" "+w /tmp/nvim-health.log" +qa
-
-# WezTerm — parse config
 wezterm --config-file wezterm/wezterm.lua show-keys 2>&1 | head -5
-
-# Lua (if luacheck installed)
 luacheck nvim/lua/ --no-unused-args
 ```
 
-After editing any config: reload in the running tool or restart it. No hot-reload mechanism exists
-except tmux (`prefix + r` reloads `tmux.conf`).
+Chrome extension checks when edited:
 
-## Code Style
+```sh
+python3 -m json.tool chrome/color-picker/manifest.json >/dev/null
+python3 -m json.tool chrome/markdown-viewer/manifest.json >/dev/null
+node --check chrome/color-picker/popup.js
+node --check chrome/markdown-viewer/content.js
+```
 
-### Lua (Neovim)
+After editing any active config, reload the running tool or restart it. tmux has `prefix + r`; Chrome extensions must be reloaded in `chrome://extensions`.
 
-- 2-space indentation, spaces not tabs
-- `snake_case` for filenames and functions
-- Module pattern: every utility file returns `local M = {}` table
-- **Defensive loading** via `pcall(require, "module")` — never assume a plugin exists
-- Single quotes preferred for strings (inconsistent in places but trend toward `'...'`)
-- Plugin specs organized by concern: `completion`, `core`, `git`, `lsp`, `navigation`, `telescope`
-- User modules separated from plugin specs: `lua/user/` vs `lua/plugins/`
-- Deprecated files kept as empty stubs with comments to avoid breaking `require()` calls
+## Conventions
 
-### Fish
-
-- Extremely terse aliases (single-char: `o`, `v`, `vv`)
-- Conditional feature detection: `if type -q exa` / `if type -q bat` — graceful degradation
-- 2-space indentation
-- No greeting: `set -g fish_greeting`
-- Vi keybindings enabled
-
-### Bash
-
-- Strict mode: `set -euo pipefail`
-- 2-space indentation
-- `local` for all function variables
-- Argument parsing via `case` + `shift`
-
-### TOML (aerospace, starship)
-
-- 2-space indentation
-- Inline comments for context
-
-### General Principles
-
-- **Graceful degradation**: every tool conditionally loads optional deps
-- **Performance-conscious**: nvim has large-file detection (>1MB / >10K lines / >1000 char lines)
-  that disables syntax, treesitter, LSP, spell. See `lua/user/large_file.lua`
-- **Minimal changes**: surgical edits over broad refactors
-
-## Neovim Architecture
-
-**Plugin manager:** lazy.nvim (auto-bootstraps from GitHub)
-
-**Entry flow:** `init.lua` → sets leader (Space) → requires:
-  `user.options` → `user.autocmds` → `user.keymaps` → `user.lazy` → `user.lsp.handlers`
-
-**LSP stack:**
-- Mason manages server installs (pyright, html, tailwindcss, prismals, lua_ls, bashls, jsonls, eslint, yamlls)
-- TypeScript uses `typescript-tools.nvim` (NOT generic ts_ls)
-- Formatting: `conform.nvim` (prettier for JS/TS/CSS/HTML/JSON/YAML/MD, ruff for Python)
-- Linting: `nvim-lint` (mypy for Python)
-- Diagnostics: virtual text enabled, nerd font icons
-
-**Completion:** nvim-cmp with sources: LSP > nvim_lua > buffer > path. Filters out "Text" kind.
-60ms debounce, 200ms fetch timeout, auto-disabled for large files.
-
-**Key plugins:** neo-tree (float), telescope (fzf-native), harpoon v2, leap.nvim, gitsigns,
-diffview, lazygit.nvim, augment.vim (AI), which-key, treesitter (all grammars), trouble
-
-**Colorscheme:** bluloco-dark (active)
-
-## Key Patterns
-
-1. **`pcall` guarding** — All optional plugin `require()` calls wrapped in `pcall`. Follow this pattern.
-2. **Large-file system** — `user/large_file.lua` + `user/autocmds.lua` detects and optimizes.
-   `:OptimizeBuffer` / `:RestoreBuffer` commands available.
-3. **Deprecated stubs** — `lsp/lspconfig.lua` and `lsp/mason.lua` are empty stubs. Don't delete them.
-4. **Auto-format on save** — Rust: `cargo fmt` via autocmd. JS/TS/Python: conform.nvim.
-5. **Gitignored secrets** — `fish/connections.sh`, `.env*`, `secrets/*` — never create or commit these.
+- Minimal, surgical changes. Config repo; avoid framework/build-system creep.
+- Manual deployment only. Do not add install/symlink automation without explicit request.
+- Graceful degradation: optional tools/plugins must be feature-detected or guarded.
+- Lua: 2 spaces, `snake_case`, utility modules return `local M = {}`, guard optional plugin `require()` with `pcall`.
+- Fish: terse aliases, `type -q` checks, 2 spaces, no greeting, vi keybindings.
+- Bash: strict mode for maintained scripts, 2 spaces, `local` vars, `case` + `shift` parsing.
+- TOML: 2 spaces, inline comments where behavior is not obvious.
+- JS in Chrome extensions: vanilla, 2 spaces, single quotes, no semicolons, no build step by default.
 
 ## Agent Rules
 
-From `opencode/AGENTS.md` — these apply to all agent interactions in this repo:
+From `opencode/AGENTS.md`; apply repo-wide:
 
-- **Extreme concision** in commits and interactions. Sacrifice grammar for brevity.
-- **Be critical, not agreeable.** Challenge suggestions, identify flaws. Disagreement > false validation.
-- **Commit format:** `<type>: <description>` — types: feat, fix, docs, style, refactor, perf, test, chore, revert, build, ci
-- **pnpm** over npm, always.
-- **Type safety non-negotiable:** No `any`, no `!` (non-null assertion), no `as Type`.
-- **Make illegal states unrepresentable:** ADTs, discriminated unions, parse at boundaries.
-- **Fight entropy.** Leave the codebase better than you found it.
-- **Failing tests acceptable** when they expose genuine bugs and test correct behavior.
-- **Plans:** end with unresolved questions list (extremely concise).
+- Extreme concision in interactions and commits.
+- Be critical, not agreeable.
+- Commit format: `<type>: <description>`.
+- No AI/Claude attribution in commits.
+- Use `pnpm` instead of `npm` when applicable.
+- Preserve type safety: no `any`, no non-null assertions, no type assertions.
+- Split files past obvious complexity; do not grow monoliths.
+
+## Anti-Patterns
+
+- Do not programmatically install these configs from the repo.
+- Do not create or commit secrets: `fish/connections.sh`, `.env*`, `secrets/*`.
+- Do not hand-edit `keep/*.vil`, binary fonts, compiled spell files, vendored Mermaid, or OOXML schemas.
+- Do not delete Neovim deprecated stubs: `nvim/lua/user/lsp/lspconfig.lua`, `nvim/lua/user/lsp/mason.lua`.
+- Do not replace `typescript-tools.nvim` with generic `ts_ls`.
+- Do not assume `nvim --headless` validates this repo unless this repo is the active config or `XDG_CONFIG_HOME` is set.
+- Do not treat `install.sh` as deploy automation; it installs packages only.
 
 ## Gotchas
 
-- No symlink automation — you cannot "install" configs from this repo programmatically
-- `install.sh` only installs system packages, not configs
-- Fish sources `connections.sh` at runtime — it's gitignored and may not exist
-- `opencode/` has its own `AGENTS.md` with generic agent instructions (not dotfiles-specific)
-- Keyboard layouts in `keep/` are binary/JSON exports from Vial — not hand-editable
-- `claude/` stores only Claude settings; OpenCode owns agents, commands, skills, plugins, and config
+- `CLAUDE.md` is a symlink to this file.
+- `opencode/` has stricter engineering rules in its own `AGENTS.md`.
+- `opencode/opencode.json` contains machine-local absolute paths by design.
+- `tmux/tmux.conf` hardcodes an active shell path; verify local machine path before changing.
+- `fish/config.fish` sources private `connections.sh`; it may not exist.
+- `.gitignore` must cover any new local/private files before they are created.
