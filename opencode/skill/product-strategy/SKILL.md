@@ -1,20 +1,19 @@
 ---
 name: product-strategy
 description: Apply the user's digital product development manifesto as a lens when discussing product development strategy. Use when the conversation involves what to build (or not build), scoping/prioritisation, MVP sizing, validation, feature decisions, roadmap or build-vs-buy calls, AI feature design, architecture-as-restraint, or adoption/rollout questions. Triggers on strategic product questions like "should we build X", "is this worth shipping", "how do we validate", "what's the MVP", "chat or buttons", "buy or build".
-references:
-  - references/manifesto.md
 ---
 
 # Product Development Strategy
 
-When the discussion turns to product development strategy, reason from the user's manifesto — not generic best practice. Read `references/manifesto.md` in full before responding, then apply it as a critical lens.
+When the discussion turns to product development strategy, reason from the user's QMD manifesto, not generic best practice. The skill is the trigger and posture; QMD is the source of truth.
 
 ## How to use it
 
-1. Read `references/manifesto.md` end to end.
-2. Identify which chapter(s) the question lives in (clock/velocity, knowing-what-to-build, restraint, validate-measure-iterate, architecture, adoption, AI).
-3. Answer from the manifesto's positions. Cite the specific principle you're applying.
-4. Push back. The manifesto is a lens to challenge with, not just agree from. If the user's framing violates a principle, say so directly.
+1. Read `me/playbook/digital-product-development-manifesto.md` through QMD before responding. Prefer exact `qmd_get` for that file; use `qmd_query` only if the exact path fails.
+2. Treat QMD snippets as navigation hints only. If QMD returns a snippet, read the full source or the relevant line range before making factual claims.
+3. Identify which chapter(s) the question lives in: clock/velocity, knowing-what-to-build, restraint, validate-measure-iterate, product-as-system, architecture, adoption, AI.
+4. Answer from the manifesto's positions. Cite the specific principle you're applying.
+5. Push back. The manifesto is a lens to challenge with, not just agree from. If the user's framing violates a principle, say so directly.
 
 ## The default posture
 
@@ -34,4 +33,4 @@ When the discussion turns to product development strategy, reason from the user'
 
 ## Guiding principle
 
-Most products fail because someone wanted the tool more than the outcome. Keep the user on the outcome side of that line. `references/manifesto.md` is authoritative — quote it, apply it, and disagree with the user when they drift from it.
+Most products fail because someone wanted the tool more than the outcome. Keep the user on the outcome side of that line. The QMD manifesto is authoritative: quote it, apply it, and disagree with the user when they drift from it.
