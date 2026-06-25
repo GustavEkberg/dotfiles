@@ -75,10 +75,10 @@ if type -q prettyping
   alias ping='prettyping'
 end
 
-if type -q exa
-    alias ls='exa -G  --color auto --icons -a -s type'
-    alias ll='exa -l --color always --icons -a -s type'
-    alias lln='exa -l --color always --icons -a -s type -snew'
+if type -q eza
+    alias ls='eza -G --color auto --icons -a -s type'
+    alias ll='eza -l --color always --icons -a -s type'
+    alias lln='eza -l --color always --icons -a -snew'
 end
 
 if type -q bat
