@@ -12,11 +12,11 @@ Local plugins in `~/.config/opencode/plugins/` are **not** autoloaded. Reference
 
 ```json
 "plugin": [
-  "file:///Users/abraxas/.config/opencode/plugins/opencode-anthropic-auth.mjs"
+  "./plugins/opencode-anthropic-auth.mjs"
 ]
 ```
 
-Use absolute `file://` URI -- relative paths and `~` do not resolve.
+Use a config-relative path. `~` is not expanded in plugin entries.
 
 ## Why this plugin exists
 

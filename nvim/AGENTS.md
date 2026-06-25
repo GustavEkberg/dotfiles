@@ -75,5 +75,5 @@ luacheck nvim/lua/ --no-unused-args
 Repo-local validation may need:
 
 ```sh
-XDG_CONFIG_HOME=/Users/abraxas/code/dotfiles nvim --headless "+Lazy! check" +qa
+XDG_CONFIG_HOME=~/code/dotfiles nvim --headless "+Lazy! check" +qa
 ```

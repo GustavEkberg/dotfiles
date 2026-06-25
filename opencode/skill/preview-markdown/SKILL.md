@@ -32,9 +32,9 @@ Before writing the `/tmp` file, make every local file reference absolute.
 - Keep `https://`, `http://`, `mailto:`, and existing `file://` links unchanged.
 - Convert Markdown links to local files from `[label](relative/path.ext)` to `[label](file:///absolute/path.ext)`.
 - Convert image references from `![alt](relative/path.png)` to `![alt](file:///absolute/path.png)`.
-- Preserve explicit local file URLs like `[triage](file:///Users/abraxas/code/nigel/dp/reference/ISSUE_TRIAGE_140-166.md)` exactly, except for URL-encoding unsafe characters if needed.
-- Convert absolute POSIX paths like `/Users/abraxas/code/nigel/dp/reference/ISSUE_TRIAGE_140-166.md` to `[ISSUE_TRIAGE_140-166.md](file:///Users/abraxas/code/nigel/dp/reference/ISSUE_TRIAGE_140-166.md)`.
-- Convert bare local file URLs like `file:///Users/abraxas/code/nigel/dp/reference/ISSUE_TRIAGE_140-166.md` to `[ISSUE_TRIAGE_140-166.md](file:///Users/abraxas/code/nigel/dp/reference/ISSUE_TRIAGE_140-166.md)` unless they are already inside a Markdown link.
+- Preserve explicit local file URLs like `[triage](file:///absolute/path/to/ISSUE_TRIAGE_140-166.md)` exactly, except for URL-encoding unsafe characters if needed.
+- Convert absolute POSIX paths like `/absolute/path/to/ISSUE_TRIAGE_140-166.md` to `[ISSUE_TRIAGE_140-166.md](file:///absolute/path/to/ISSUE_TRIAGE_140-166.md)`.
+- Convert bare local file URLs like `file:///absolute/path/to/ISSUE_TRIAGE_140-166.md` to `[ISSUE_TRIAGE_140-166.md](file:///absolute/path/to/ISSUE_TRIAGE_140-166.md)` unless they are already inside a Markdown link.
 - Convert autolinks or plain file references only when they clearly refer to local files.
 - Resolve links relative to the source Markdown file's directory when copying an existing file.
 - Resolve links relative to the current workspace directory when creating a new temporary file from generated content.
@@ -48,13 +48,13 @@ If a referenced local path does not exist, still make it absolute using the corr
 For this input:
 
 ```md
-See /Users/abraxas/code/nigel/dp/reference/ISSUE_TRIAGE_140-166.md
+See ~/code/nigel/dp/reference/ISSUE_TRIAGE_140-166.md
 ```
 
 Write this Markdown:
 
 ```md
-See [ISSUE_TRIAGE_140-166.md](file:///Users/abraxas/code/nigel/dp/reference/ISSUE_TRIAGE_140-166.md)
+See [ISSUE_TRIAGE_140-166.md](file:///absolute/home/path/code/nigel/dp/reference/ISSUE_TRIAGE_140-166.md)
 ```
 
 ## Open Command
@@ -69,10 +69,10 @@ Quote paths. Do not use repo-relative paths when opening files.
 
 ## Verification
 
-Before opening Chrome, inspect the generated Markdown and verify expected local links appear as Markdown links with `file:///...` URLs. If the source includes `/Users/abraxas/code/nigel/dp/reference/ISSUE_TRIAGE_140-166.md`, the Markdown must include:
+Before opening Chrome, inspect the generated Markdown and verify expected local links appear as Markdown links with `file:///...` URLs. If the source includes `~/code/nigel/dp/reference/ISSUE_TRIAGE_140-166.md`, the Markdown must include:
 
 ```md
-[ISSUE_TRIAGE_140-166.md](file:///Users/abraxas/code/nigel/dp/reference/ISSUE_TRIAGE_140-166.md)
+[ISSUE_TRIAGE_140-166.md](file:///absolute/home/path/code/nigel/dp/reference/ISSUE_TRIAGE_140-166.md)
 ```
 
 ## Safety
