@@ -1,19 +1,17 @@
 ---
 name: frontend-design
-description: Create distinctive, production-grade frontend interfaces. Use when building web components, pages, or applications with React-based frameworks. Includes Tailwind CSS v4, shadcn/ui components, Motion animations, and visual design philosophy for avoiding generic AI aesthetics.
+description: Create distinctive, intentional, production-grade frontend interfaces. Use when building or reshaping web components, pages, or applications, especially with React frameworks, Tailwind CSS v4, shadcn/ui, and Motion.
 ---
 
 # Frontend Design
 
-Create distinctive, production-grade interfaces avoiding generic "AI slop" aesthetics.
+Create distinctive, production-grade interfaces that feel designed for this subject, not generated from a generic template. Act like the design lead at a small studio: make deliberate choices about palette, typography, structure, motion, and copy. Take one justified aesthetic risk, then keep the rest disciplined.
 
 ## When to Use
 
 - Building UI with React frameworks (Next.js, Vite, Remix)
 - Creating visually distinctive, memorable interfaces
-- Implementing accessible components with shadcn/ui
-- Styling with Tailwind CSS v4
-- Adding animations and micro-interactions
+- Implementing accessible components with shadcn/ui, Tailwind CSS v4, and Motion
 - Creating visual designs, posters, brand materials
 
 ## Reference Documentation
@@ -60,19 +58,44 @@ For sophisticated compositions: posters, brand materials, design systems.
 
 ## Design Thinking
 
-Before coding, commit to BOLD aesthetic direction:
+Before coding, commit to a subject-specific aesthetic direction:
 
-- **Purpose**: What problem? Who uses it?
-- **Tone**: Pick extreme - brutally minimal, maximalist chaos, retro-futuristic, organic, luxury, playful, editorial, brutalist, art deco, soft/pastel, industrial
-- **Differentiation**: What makes this UNFORGETTABLE?
+- **Subject**: What concrete product, audience, and page job? If unspecified, choose and state one.
+- **World**: What materials, instruments, artifacts, vocabulary, or constraints belong to this subject?
+- **Tone**: Pick a precise direction: brutally minimal, maximalist chaos, retro-futuristic, organic, luxury, playful, editorial, brutalist, art deco, soft/pastel, industrial, or something more specific.
+- **Differentiation**: What makes this memorable for this brief, not any brief?
+- **Signature**: What single element will the page be remembered by?
 
 Bold maximalism and refined minimalism both work. Key is intentionality.
+
+Work in two passes. First, create a compact design plan:
+
+- **Color**: 4-6 named colors with hex or OKLCH values.
+- **Type**: display, body, and optional utility/data roles. Avoid default families unless the product demands neutrality.
+- **Layout**: one-sentence concept plus quick ASCII wireframe when useful.
+- **Structure**: labels, dividers, numbering, and section rhythm must encode real information, not decoration.
+- **Motion**: one orchestrated moment or a small set of purposeful interactions. Prefer less motion if extra animation feels synthetic.
+- **Signature**: one distinctive device tied to the subject's world.
+
+Second, critique the plan before building:
+
+- Would this same plan fit an unrelated SaaS, portfolio, or landing page? If yes, revise.
+- Are colors, type, and layout derived from the subject, or just current defaults?
+- Does the hero express a thesis, not just a headline plus stats?
+- Is the risk concentrated in one place, with the rest quiet enough to support it?
+- Does the design still work on mobile, keyboard, and reduced-motion settings?
+
+Only then implement. Derive class names, tokens, copy, and interactions from the plan.
 
 ## Anti-Patterns (NEVER)
 
 - Overused fonts: Inter, Roboto, Arial, system fonts, Space Grotesk
 - Cliched colors: purple gradients on white
+- Default AI looks: warm cream plus serif plus terracotta, near-black plus acid accent, broadsheet hairlines without subject reason
 - Predictable layouts and component patterns
+- Numbered markers unless order matters
+- Decorative structure that does not explain the content
+- Scattered animation with no narrative purpose
 - Cookie-cutter design lacking character
 - Generic AI-generated aesthetics
 
@@ -89,14 +112,14 @@ Bold maximalism and refined minimalism both work. Key is intentionality.
 ## Core Stack Summary
 
 **Tailwind v4.1**: CSS-first config via `@theme`. Single `@import "tailwindcss"`. OKLCH colors. Container queries built-in.
-
 **shadcn/ui v3.6**: Copy-paste Radix components. Visual styles: Vega/Nova/Maia/Lyra/Mira. New: Field, InputGroup, Spinner, ButtonGroup.
-
 **Motion**: `import { motion, AnimatePresence } from 'motion/react'`. Declarative React animations. Use `tailwindcss-animate` for shadcn states.
 
 ## Typography
 
 Choose beautiful, unique fonts. Pair distinctive display with refined body. **Max 3 font weights** — e.g. regular (400), medium (500), bold (700). More dilutes hierarchy; fewer constrains expression.
+
+Typography carries personality. Make type treatment part of the design, not a neutral transport layer. Choose weights, widths, tracking, and scale deliberately.
 
 ```css
 @theme {
@@ -153,3 +176,23 @@ Unexpected layouts. Asymmetry. Overlap. Diagonal flow. Grid-breaking elements. G
 ## Backgrounds
 
 Create atmosphere: gradient meshes, noise textures, geometric patterns, layered transparencies, dramatic shadows, grain overlays.
+
+## Interface Copy
+
+Words are design material. Write from the user's side of the screen.
+
+- Use plain verbs and sentence case.
+- Name what users control, not how the system is implemented.
+- Keep action language consistent: `Publish` should lead to `Published`, not `Submitted`.
+- Make empty states directional: explain what to do next.
+- Make errors specific: what happened and how to fix it.
+- Avoid filler, hype, and clever labels that slow comprehension.
+
+## Build Quality
+
+- Responsive down to mobile.
+- Visible keyboard focus.
+- Reduced motion respected.
+- Semantic HTML before visual wrappers.
+- Check CSS specificity: avoid broad selectors that accidentally override component classes.
+- After implementation, remove one decorative accessory unless every element earns its place.
