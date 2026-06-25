@@ -31,9 +31,6 @@ keymap("v", "U", "<nop>")
 keymap('n', '<C-s>', '<cmd>lua _G._LAZYGIT_TOGGLE()<CR>', { noremap = true, silent = true })
 keymap('t', '<C-s>', '<cmd>lua _G._LAZYGIT_TOGGLE()<CR>', { noremap = true, silent = true })
 
-local utils = require("user.utils")
-local wk = utils.call_plugin("which-key")
-
 -- Registers
 local esc = vim.api.nvim_replace_termcodes("<Esc>", true,true, true)
 vim.fn.setreg("l","yoconsole.log('" .. esc .. "pa:'," .. esc .. "pa)" .. esc)
@@ -121,8 +118,13 @@ local eslint_fix = function()
   end
 end
 
+local register_which_key = function()
+  local ok, wk = pcall(require, "which-key")
+  if not ok then
+    return
+  end
 
-wk.add({
+  wk.add({
     { "<leader>g", group = "Git" },
     { "<leader>R", "<cmd>LspRestart<CR>", desc = "Restart LSP" },
     { "<leader>W", "<C-w>W", desc = "Focus Previous window" },
@@ -150,4 +152,12 @@ wk.add({
     { "<leader>is", "<cmd>Trouble symbols toggle focus=false<CR>", desc = "Document symbols" },
     { "<leader>il", "<cmd>Trouble loclist toggle<CR>", desc = "Location list" },
     { "<leader>iq", "<cmd>Trouble qflist toggle<CR>", desc = "Quickfix list" },
+  })
+end
+
+vim.api.nvim_create_autocmd("User", {
+  pattern = "VeryLazy",
+  callback = function()
+    vim.schedule(register_which_key)
+  end,
 })

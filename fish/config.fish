@@ -22,10 +22,18 @@ alias python='python3'
 alias yd='pnpm dev'
 alias yi='pnpm install'
 alias tp='tmux attach -t primary || tmux new -s primary' 
-alias o='opencode'
 
 function cpcp
-    cat $argv | pbcopy
+    if type -q pbcopy
+        cat $argv | pbcopy
+    else if type -q wl-copy
+        cat $argv | wl-copy
+    else if type -q xclip
+        cat $argv | xclip -selection clipboard
+    else
+        echo 'no clipboard tool found' >&2
+        return 1
+    end
 end
 
 function clean
@@ -55,7 +63,12 @@ end
 
 
 set -x PATH $PATH $HOME/.cargo/bin
-set -x PATH $PATH /opt/homebrew/bin
+if test -d $HOME/.local/bin
+    fish_add_path $HOME/.local/bin
+end
+if test -d /opt/homebrew/bin
+    fish_add_path /opt/homebrew/bin
+end
 
 # Only add yarn global bin to PATH if it exists and returns a valid path
 if type -q yarn
@@ -66,9 +79,15 @@ if type -q yarn
 end
 
 set -Ux PYENV_ROOT $HOME/.pyenv
-fish_add_path $PYENV_ROOT/bin
+if test -d $PYENV_ROOT/bin
+    fish_add_path $PYENV_ROOT/bin
+end
 
-set -x EDITOR /opt/homebrew/bin/nvim
+if type -q nvim
+    set -x EDITOR (command -v nvim)
+else
+    set -x EDITOR vi
+end
 set -x SAM_CLI_TELEMETRY 0
 
 if type -q prettyping
@@ -93,13 +112,24 @@ end
 
 # bun
 set --export BUN_INSTALL "$HOME/.bun"
-set --export PATH $BUN_INSTALL/bin $PATH
+if test -d $BUN_INSTALL/bin
+    fish_add_path $BUN_INSTALL/bin
+end
 
-pyenv init - | source
-starship init fish | source
+if type -q pyenv
+    pyenv init - | source
+end
+
+if type -q starship
+    starship init fish | source
+end
 
 # pnpm
-set -gx PNPM_HOME "$HOME/Library/pnpm"
+if test (uname -s) = Darwin
+  set -gx PNPM_HOME "$HOME/Library/pnpm"
+else
+  set -gx PNPM_HOME "$HOME/.local/share/pnpm"
+end
 if not string match -q -- $PNPM_HOME $PATH
   set -gx PATH "$PNPM_HOME" $PATH
 end

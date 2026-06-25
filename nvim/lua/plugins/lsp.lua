@@ -331,10 +331,34 @@ return {
   -- Treesitter
   {
     "nvim-treesitter/nvim-treesitter",
+    branch = "master",
     build = ":TSUpdate",
     config = function()
       require("nvim-treesitter.configs").setup({
-        ensure_installed = "all",
+        ensure_installed = {
+          "bash",
+          "c",
+          "css",
+          "fish",
+          "html",
+          "javascript",
+          "json",
+          "jsonc",
+          "lua",
+          "luadoc",
+          "markdown",
+          "markdown_inline",
+          "python",
+          "query",
+          "regex",
+          "rust",
+          "toml",
+          "tsx",
+          "typescript",
+          "vim",
+          "vimdoc",
+          "yaml",
+        },
         highlight = {
           enable = true,
           additional_vim_regex_highlighting = true,
