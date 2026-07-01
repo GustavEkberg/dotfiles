@@ -10,7 +10,7 @@
       "command": [
         "sh",
         "-lc",
-        "QMD_CONFIG_DIR=\"$HOME/code/takt/local-workspace/.qmd\" INDEX_PATH=\"$HOME/code/takt/local-workspace/.qmd/index.sqlite\" exec qmd mcp"
+        "QMD_CONFIG_DIR=\"$HOME/code/takt/local-workspace/.qmd\" INDEX_PATH=\"$HOME/code/takt/local-workspace/.qmd/index.sqlite\" exec bun x @tobilu/qmd@2.1.0 mcp"
       ],
       "enabled": true,
       "timeout": 30000
