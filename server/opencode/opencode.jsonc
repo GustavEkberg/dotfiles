@@ -1,0 +1,190 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+  "autoupdate": true,
+  "compaction": {
+    "auto": true,
+    "prune": true,
+    "tail_turns": 2,
+    "preserve_recent_tokens": 3000,
+    "reserved": 32768
+  },
+  "tool_output": {
+    "max_lines": 500,
+    "max_bytes": 12000
+  },
+  "plugin": [
+    "./plugins/opencode-anthropic-auth.mjs"
+  ],
+  "mcp": {
+    "qmd": {
+      "type": "local",
+      "command": [
+        "sh",
+        "-lc",
+        "QMD_CONFIG_DIR=\"$HOME/code/takt/local-workspace/.qmd\" INDEX_PATH=\"$HOME/code/takt/local-workspace/.qmd/index.sqlite\" exec bun x @tobilu/qmd@2.1.0 mcp"
+      ],
+      "enabled": true,
+      "timeout": 30000
+    }
+  },
+  "model": "openai/gpt-5.5",
+  "provider": {
+    "llama": {
+      "name": "Local llama.cpp",
+      "npm": "@ai-sdk/openai-compatible",
+      "api": "http://127.0.0.1:8080/v1",
+      "options": {
+        "apiKey": "local"
+      },
+      "models": {
+        "qwopus3.6-27b-mtp": {
+          "name": "Qwopus3.6 27B v2 MTP Q6_K (local quality)",
+          "family": "qwen3.6",
+          "tool_call": true,
+          "temperature": true,
+          "modalities": {
+            "input": [
+              "text"
+            ],
+            "output": [
+              "text"
+            ]
+          },
+          "limit": {
+            "context": 131072,
+            "output": 4096
+          },
+          "cost": {
+            "input": 0,
+            "output": 0
+          }
+        }
+      }
+    },
+    "openai": {
+      "models": {
+        "gpt-5.5": {
+          "options": {
+            "reasoningEffort": "medium"
+          }
+        }
+      }
+    }
+  },
+  "references": {
+    "next": {
+      "repository": "vercel/next.js",
+      "description": "Use for Next.js implementation details, examples, and docs source."
+    },
+    "effect": {
+      "repository": "Effect-TS/effect",
+      "description": "Use for Effect library implementation details, examples, and docs source."
+    },
+    "opencode": {
+      "repository": "anomalyco/opencode",
+      "description": "Use for OpenCode implementation details, config schema, and docs source."
+    }
+  },
+  "permission": {
+    "read": {
+      "*": "allow",
+      "*.env": "deny",
+      "*.env.*": "deny",
+      "*.envrc": "deny",
+      "secrets/*": "deny"
+    },
+    "external_directory": {
+      "/tmp": "allow",
+      "/tmp/*": "allow",
+      "~/code/takt/local-workspace/me": "allow",
+      "~/code/takt/local-workspace/me/**": "allow",
+      "~/code/takt/local-workspace/people": "allow",
+      "~/code/takt/local-workspace/people/**": "allow",
+      "~/code/takt/local-workspace/companies": "allow",
+      "~/code/takt/local-workspace/companies/**": "allow",
+      "~/code/takt/local-workspace/projects": "allow",
+      "~/code/takt/local-workspace/projects/**": "allow",
+      "~/code/takt/local-workspace/deals": "allow",
+      "~/code/takt/local-workspace/deals/**": "allow",
+      "~/code/takt/local-workspace/notes": "allow",
+      "~/code/takt/local-workspace/notes/**": "allow",
+      "~/code/takt/local-workspace/timeline": "allow",
+      "~/code/takt/local-workspace/timeline/**": "allow",
+      "~/code/takt/local-workspace/work": "allow",
+      "~/code/takt/local-workspace/work/**": "allow",
+      "~/code/takt/local-workspace/library": "allow",
+      "~/code/takt/local-workspace/library/**": "allow"
+    },
+    "edit": {
+      "/tmp/*": "allow"
+    },
+    "bash": {
+      "qmd update": "deny",
+      "qmd update *": "deny",
+      "qmd embed": "deny",
+      "qmd embed *": "deny",
+      "qmd cleanup": "deny",
+      "qmd cleanup *": "deny",
+      "qmd collection *": "deny",
+      "qmd context *": "deny",
+      "supabase reset": "deny",
+      "supabase reset *": "deny",
+      "supabase db reset": "deny",
+      "supabase db reset *": "deny",
+      "supabase function deploy": "deny",
+      "supabase function deploy *": "deny",
+      "supabase functions deploy": "deny",
+      "supabase functions deploy *": "deny",
+      "pnpm dev": "deny",
+      "pnpm dev *": "deny",
+      "pnpm run dev": "deny",
+      "pnpm run dev *": "deny",
+      "npm run dev": "deny",
+      "npm run dev *": "deny",
+      "npm dev": "deny",
+      "npm dev *": "deny",
+      "yarn dev": "deny",
+      "yarn dev *": "deny",
+      "yarn run dev": "deny",
+      "yarn run dev *": "deny",
+      "bun dev": "deny",
+      "bun dev *": "deny",
+      "bun run dev": "deny",
+      "bun run dev *": "deny",
+      "npx next dev": "deny",
+      "npx next dev *": "deny",
+      "npx vite": "deny",
+      "npx vite *": "deny",
+      "ruby": "deny",
+      "ruby *": "deny",
+      "irb": "deny",
+      "irb *": "deny",
+      "gem": "deny",
+      "gem *": "deny",
+      "rake": "deny",
+      "rake *": "deny",
+      "bundle": "deny",
+      "bundle *": "deny",
+      "bundler": "deny",
+      "bundler *": "deny",
+      "erb": "deny",
+      "erb *": "deny",
+      "perl": "deny",
+      "perl *": "deny",
+      "php": "deny",
+      "php *": "deny",
+      "osascript": "deny",
+      "osascript *": "deny",
+      "lua": "deny",
+      "lua *": "deny",
+      "luajit": "deny",
+      "luajit *": "deny",
+      "tclsh": "deny",
+      "tclsh *": "deny",
+      "groovy": "deny",
+      "groovy *": "deny",
+      "Rscript": "deny",
+      "Rscript *": "deny"
+    }
+  }
+}

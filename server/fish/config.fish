@@ -1,0 +1,138 @@
+fish_vi_key_bindings
+
+if test -f $HOME/.config/fish/connections.sh
+    source $HOME/.config/fish/connections.sh
+end
+set -g fish_greeting
+set -x LANG en_US.UTF-8
+
+alias o='opencode'
+alias la='lazygit'
+alias c='claude'
+alias ch='claude --channels plugin:telegram@claude-plugins-official'
+alias cr='claude --resume'
+alias oc='opencode --continue'
+alias vim='nvim'
+alias vi='nvim'
+alias v='nvim'
+alias vv='nvim .'
+alias ll='ls -lah'
+alias wttr='curl wttr.in/Gothenburg'
+alias python='python3'
+alias yd='pnpm dev'
+alias yi='pnpm install'
+alias tp='tmux attach -t primary || tmux new -s primary' 
+
+function cpcp
+    if type -q pbcopy
+        cat $argv | pbcopy
+    else if type -q wl-copy
+        cat $argv | wl-copy
+    else if type -q xclip
+        cat $argv | xclip -selection clipboard
+    else
+        echo 'no clipboard tool found' >&2
+        return 1
+    end
+end
+
+function clean
+    set -l dir (test -n "$argv[1]"; and echo $argv[1]; or echo .)
+    set -l targets
+    for t in node_modules .next
+        if test -e "$dir/$t"
+            set targets $targets "$dir/$t"
+        end
+    end
+    if test (count $targets) -eq 0
+        echo "nothing to clean in $dir"
+        return 0
+    end
+    printf 'rm -rf:\n'
+    for t in $targets
+        printf '  %s\n' $t
+    end
+    read -l -P 'proceed? [y/N] ' ans
+    if test "$ans" = y -o "$ans" = Y
+        rm -rf $targets
+    else
+        echo aborted
+    end
+end
+
+
+
+set -x PATH $PATH $HOME/.cargo/bin
+if test -d $HOME/.local/bin
+    fish_add_path $HOME/.local/bin
+end
+if test -d $HOME/n/bin
+    fish_add_path $HOME/n/bin
+end
+if test -d /opt/homebrew/bin
+    fish_add_path /opt/homebrew/bin
+end
+
+# Only add yarn global bin to PATH if it exists and returns a valid path
+if type -q yarn
+    set -l yarn_bin (yarn global bin 2>/dev/null)
+    if test -d "$yarn_bin"
+        set -gx PATH $yarn_bin $PATH
+    end
+end
+
+set -Ux PYENV_ROOT $HOME/.pyenv
+if test -d $PYENV_ROOT/bin
+    fish_add_path $PYENV_ROOT/bin
+end
+
+if type -q nvim
+    set -x EDITOR (command -v nvim)
+else
+    set -x EDITOR vi
+end
+set -x SAM_CLI_TELEMETRY 0
+
+if type -q prettyping
+  alias ping='prettyping'
+end
+
+if type -q eza
+    alias ls='eza -G --color auto --icons -a -s type'
+    alias ll='eza -l --color always --icons -a -s type'
+    alias lln='eza -l --color always --icons -a -snew'
+end
+
+if type -q bat
+    alias cat=bat
+    alias ccat='bat -pp'
+end
+
+if type -q zoxide
+    zoxide init fish | source
+    alias cd='z'
+end
+
+# bun
+set --export BUN_INSTALL "$HOME/.bun"
+if test -d $BUN_INSTALL/bin
+    fish_add_path $BUN_INSTALL/bin
+end
+
+if type -q pyenv
+    pyenv init - | source
+end
+
+if type -q starship
+    starship init fish | source
+end
+
+# pnpm
+set -gx PNPM_HOME "/home/abraxas/.local/share/pnpm"
+if not string match -q -- "$PNPM_HOME/bin" $PATH
+  set -gx PATH "$PNPM_HOME/bin" $PATH
+end
+# pnpm end
+
+# opencode
+fish_add_path $HOME/.opencode/bin

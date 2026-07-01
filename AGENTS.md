@@ -21,6 +21,7 @@ dotfiles/
 |-- nvim/               # Full Neovim Lua config
 |-- opencode/           # OpenCode config, commands, agents, skills, plugins
 |-- pi/                 # Separate Pi skill/config experiments
+|-- server/             # Server-specific commands, services, and config fragments
 |-- scripts/            # task-loop.sh automation
 |-- starship/           # Starship prompt
 |-- tmux/               # tmux config + powerline scripts
@@ -38,6 +39,7 @@ dotfiles/
 | OpenCode plugin auth | `opencode/plugins/AGENTS.md` | Local OAuth plugin provenance |
 | Chrome extensions | `chrome/AGENTS.md`, `chrome/*/manifest.json` | Manual Load unpacked flow |
 | Shell config | `fish/config.fish` | Sources private `connections.sh` if present |
+| Server-specific config | `server/AGENTS.md`, `server/` | Commands, services, OpenCode/Fish fragments for server hosts |
 | Terminal stack | `wezterm/`, `tmux/`, `starship/` | Runtime configs require manual deployment |
 | Bootstrap packages | `install.sh` | Installs packages only |
 | Autonomous task loop | `scripts/task-loop.sh`, `opencode/command/complete-next-task.md` | PRD-driven OpenCode loop |
@@ -109,6 +111,7 @@ From `opencode/AGENTS.md`; apply repo-wide:
 
 - Do not programmatically install these configs from the repo.
 - Do not create or commit secrets: `fish/connections.sh`, `.env*`, `secrets/*`.
+- Do not create or commit server secrets: use ignored `server/local/`, `server/**/*.local`, or `server/**/*.secret`.
 - Do not hand-edit `keep/*.vil`, binary fonts, compiled spell files, vendored Mermaid, or OOXML schemas.
 - Do not delete Neovim deprecated stubs: `nvim/lua/user/lsp/lspconfig.lua`, `nvim/lua/user/lsp/mason.lua`.
 - Do not replace `typescript-tools.nvim` with generic `ts_ls`.
