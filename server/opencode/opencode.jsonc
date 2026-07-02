@@ -25,6 +25,16 @@
       ],
       "enabled": true,
       "timeout": 30000
+    },
+    "shadcn": {
+      "type": "local",
+      "command": [
+        "pnpm",
+        "dlx",
+        "shadcn@latest",
+        "mcp"
+      ],
+      "enabled": true
     }
   },
   "model": "openai/gpt-5.5",
