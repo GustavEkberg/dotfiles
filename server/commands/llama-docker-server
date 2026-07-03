@@ -1,0 +1,349 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+MODELS_DIR="${MODELS_DIR:-$HOME/models}"
+IMAGE="${LLAMA_IMAGE:-ghcr.io/ggml-org/llama.cpp:server-cuda13}"
+CONTAINER="${LLAMA_CONTAINER:-qwopus-llama-server}"
+HOST="${LLAMA_HOST:-0.0.0.0}"
+PORT="${LLAMA_PORT:-8080}"
+CTX_SIZE="${LLAMA_CTX_SIZE:-}"
+CTX_SIZE_SOURCE="${LLAMA_CTX_SIZE:+env}"
+PARALLEL="${LLAMA_PARALLEL:-1}"
+GPU_LAYERS="${LLAMA_GPU_LAYERS:-999}"
+BATCH_SIZE="${LLAMA_BATCH_SIZE:-2048}"
+UBATCH_SIZE="${LLAMA_UBATCH_SIZE:-512}"
+THREADS="${LLAMA_THREADS:-12}"
+THREADS_BATCH="${LLAMA_THREADS_BATCH:-20}"
+SPEC_TYPE="${LLAMA_SPEC_TYPE:-draft-mtp}"
+SPEC_DRAFT_N_MAX="${LLAMA_SPEC_DRAFT_N_MAX:-4}"
+REASONING="${LLAMA_REASONING:-off}"
+REASONING_BUDGET="${LLAMA_REASONING_BUDGET:-0}"
+MLOCK="${LLAMA_MLOCK:-0}"
+CACHE_REUSE="${LLAMA_CACHE_REUSE:-}"
+LOG_DISABLE="${LLAMA_LOG_DISABLE:-0}"
+DEFAULT_MODEL="${LLAMA_MODEL:-$MODELS_DIR/qwopus3.6-27b-mtp/Qwopus3.6-27B-v2-MTP-Q5_K_M.gguf}"
+OPENCODE_CONFIG="${OPENCODE_CONFIG:-$HOME/.config/opencode/opencode.jsonc}"
+OPENCODE_OUTPUT="${LLAMA_OPENCODE_OUTPUT:-4096}"
+SYNC_OPENCODE="${LLAMA_SYNC_OPENCODE:-1}"
+NODE_BIN="${NODE_BIN:-}"
+MODEL="$DEFAULT_MODEL"
+ALIAS="${LLAMA_ALIAS:-}"
+DETACH=1
+EXTRA_ARGS=()
+
+usage() {
+  printf '%s\n' "Usage: $(basename "$0") [options] [-- llama.cpp args...]"
+  printf '%s\n' ""
+  printf '%s\n' "Options:"
+  printf '%s\n' "  --list                 List GGUF models under $MODELS_DIR"
+  printf '%s\n' "  --model PATH|NAME      Use a GGUF path, filename, or basename under $MODELS_DIR"
+  printf '%s\n' "  --alias NAME           API model alias (defaults to model filename without .gguf)"
+  printf '%s\n' "  --container NAME       Docker container name (default: $CONTAINER)"
+  printf '%s\n' "  --port PORT            Host/server port (default: $PORT)"
+  printf '%s\n' "  --ctx-size N           Context size (default: OpenCode model limit, fallback 24576)"
+  printf '%s\n' "  --opencode-output N    OpenCode output token limit (default: $OPENCODE_OUTPUT)"
+  printf '%s\n' "  --opencode-config PATH OpenCode config to sync (default: $OPENCODE_CONFIG)"
+  printf '%s\n' "  --no-sync-opencode     Do not update OpenCode model limits"
+  printf '%s\n' "  --no-mtp               Disable MTP speculative decoding"
+  printf '%s\n' "  --reasoning on|off|auto Reasoning mode (default: $REASONING)"
+  printf '%s\n' "  --foreground           Run container in foreground"
+  printf '%s\n' "  -h, --help             Show help"
+  printf '%s\n' ""
+  printf '%s\n' "Environment overrides: MODELS_DIR, LLAMA_MODEL, LLAMA_PORT, LLAMA_CTX_SIZE, LLAMA_SPEC_TYPE, LLAMA_REASONING, LLAMA_IMAGE, LLAMA_SYNC_OPENCODE, LLAMA_MLOCK, LLAMA_CACHE_REUSE, LLAMA_LOG_DISABLE"
+}
+
+list_models() {
+  if [[ ! -d "$MODELS_DIR" ]]; then
+    printf 'No models directory found: %s\n' "$MODELS_DIR" >&2
+    return 1
+  fi
+
+  find "$MODELS_DIR" -type f -name '*.gguf' -printf '%p\n' | sort
+}
+
+resolve_model() {
+  local requested="$1"
+
+  if [[ "$requested" = /* || "$requested" = ./* || "$requested" = ../* ]]; then
+    printf '%s\n' "$requested"
+    return
+  fi
+
+  if [[ -f "$MODELS_DIR/$requested" ]]; then
+    printf '%s\n' "$MODELS_DIR/$requested"
+    return
+  fi
+
+  local matches=()
+  while IFS= read -r match; do
+    matches+=("$match")
+  done < <(find "$MODELS_DIR" -type f -name '*.gguf' \( -name "$requested" -o -name "$requested.gguf" -o -name "*$requested*" \) | sort)
+
+  case "${#matches[@]}" in
+    0)
+      printf 'No matching GGUF found for: %s\n' "$requested" >&2
+      printf 'Run: %s --list\n' "$(basename "$0")" >&2
+      return 1
+      ;;
+    1)
+      printf '%s\n' "${matches[0]}"
+      ;;
+    *)
+      printf 'Multiple matching GGUF files found for: %s\n' "$requested" >&2
+      printf '%s\n' "${matches[@]}" >&2
+      return 1
+      ;;
+  esac
+}
+
+resolve_node() {
+  if [[ -n "$NODE_BIN" && -x "$NODE_BIN" ]]; then
+    return
+  fi
+
+  if command -v node >/dev/null 2>&1; then
+    NODE_BIN="$(command -v node)"
+    return
+  fi
+
+  for candidate in "$HOME/n/bin/node" "$HOME/.local/bin/node" "/usr/local/bin/node" "/usr/bin/node"; do
+    if [[ -x "$candidate" ]]; then
+      NODE_BIN="$candidate"
+      return
+    fi
+  done
+
+  printf 'node not found; set NODE_BIN or add node to PATH\n' >&2
+  return 127
+}
+
+opencode_model_context() {
+  if [[ ! -f "$OPENCODE_CONFIG" ]]; then
+    return
+  fi
+
+  "$NODE_BIN" - "$OPENCODE_CONFIG" "$ALIAS" <<'NODE'
+const fs = require("fs")
+
+const [configPath, alias] = process.argv.slice(2)
+const config = JSON.parse(fs.readFileSync(configPath, "utf8"))
+const context = config.provider?.llama?.models?.[alias]?.limit?.context
+
+if (Number.isInteger(context) && context > 0) {
+  console.log(context)
+}
+NODE
+}
+
+resolve_context_size() {
+  if [[ -n "$CTX_SIZE" ]]; then
+    return
+  fi
+
+  CTX_SIZE="$(opencode_model_context || true)"
+  if [[ -n "$CTX_SIZE" ]]; then
+    CTX_SIZE_SOURCE="opencode"
+    return
+  fi
+
+  CTX_SIZE=24576
+  CTX_SIZE_SOURCE="fallback"
+}
+
+sync_opencode_config() {
+  if [[ "$SYNC_OPENCODE" = "0" || "$SYNC_OPENCODE" = "false" ]]; then
+    return
+  fi
+
+  if [[ ! -f "$OPENCODE_CONFIG" ]]; then
+    printf 'OpenCode config not found, skipping sync: %s\n' "$OPENCODE_CONFIG" >&2
+    return
+  fi
+
+  "$NODE_BIN" - "$OPENCODE_CONFIG" "$ALIAS" "$CTX_SIZE" "$OPENCODE_OUTPUT" <<'NODE'
+const fs = require("fs")
+
+const [configPath, alias, contextRaw, outputRaw] = process.argv.slice(2)
+const context = Number(contextRaw)
+const output = Number(outputRaw)
+
+if (!Number.isInteger(context) || context <= 0) {
+  throw new Error(`Invalid context limit: ${contextRaw}`)
+}
+
+if (!Number.isInteger(output) || output <= 0) {
+  throw new Error(`Invalid output limit: ${outputRaw}`)
+}
+
+const text = fs.readFileSync(configPath, "utf8")
+const config = JSON.parse(text)
+config.provider ??= {}
+config.provider.llama ??= {
+  name: "Local llama.cpp",
+  npm: "@ai-sdk/openai-compatible",
+  api: "http://127.0.0.1:8080/v1",
+  options: { apiKey: "local" },
+  models: {},
+}
+config.provider.llama.models ??= {}
+
+const existing = config.provider.llama.models[alias]
+const template = existing ?? Object.values(config.provider.llama.models)[0] ?? {}
+config.provider.llama.models[alias] = {
+  ...template,
+  name: existing?.name ?? template.name ?? alias,
+  modalities: existing?.modalities ?? template.modalities ?? { input: ["text"], output: ["text"] },
+  cost: existing?.cost ?? template.cost ?? { input: 0, output: 0 },
+  limit: {
+    ...(existing?.limit ?? template.limit ?? {}),
+    context,
+    output,
+  },
+}
+
+fs.writeFileSync(configPath, `${JSON.stringify(config, null, 2)}\n`)
+NODE
+
+  printf 'Synced OpenCode model %s limits: context=%s output=%s\n' "$ALIAS" "$CTX_SIZE" "$OPENCODE_OUTPUT"
+}
+
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    --list)
+      list_models
+      exit 0
+      ;;
+    --model)
+      MODEL="${2:?--model requires a value}"
+      shift 2
+      ;;
+    --alias)
+      ALIAS="${2:?--alias requires a value}"
+      shift 2
+      ;;
+    --container)
+      CONTAINER="${2:?--container requires a value}"
+      shift 2
+      ;;
+    --port)
+      PORT="${2:?--port requires a value}"
+      shift 2
+      ;;
+    --ctx-size)
+      CTX_SIZE="${2:?--ctx-size requires a value}"
+      CTX_SIZE_SOURCE="arg"
+      shift 2
+      ;;
+    --opencode-output)
+      OPENCODE_OUTPUT="${2:?--opencode-output requires a value}"
+      shift 2
+      ;;
+    --opencode-config)
+      OPENCODE_CONFIG="${2:?--opencode-config requires a value}"
+      shift 2
+      ;;
+    --no-sync-opencode)
+      SYNC_OPENCODE=0
+      shift
+      ;;
+    --no-mtp)
+      SPEC_TYPE="none"
+      shift
+      ;;
+    --reasoning)
+      REASONING="${2:?--reasoning requires on, off, or auto}"
+      shift 2
+      ;;
+    --foreground)
+      DETACH=0
+      shift
+      ;;
+    -h|--help)
+      usage
+      exit 0
+      ;;
+    --)
+      shift
+      EXTRA_ARGS+=("$@")
+      break
+      ;;
+    *)
+      printf 'Unknown option: %s\n' "$1" >&2
+      usage >&2
+      exit 2
+      ;;
+  esac
+done
+
+MODEL="$(resolve_model "$MODEL")"
+MODEL="$(readlink -f "$MODEL")"
+
+if [[ ! -f "$MODEL" ]]; then
+  printf 'Model file does not exist: %s\n' "$MODEL" >&2
+  exit 1
+fi
+
+MODEL_DIR="$(dirname "$MODEL")"
+MODEL_FILE="$(basename "$MODEL")"
+if [[ -z "$ALIAS" ]]; then
+  ALIAS="${MODEL_FILE%.gguf}"
+fi
+
+resolve_node
+resolve_context_size
+sync_opencode_config
+
+DOCKER_MODE=(-d)
+RESTART_ARGS=(--restart unless-stopped)
+if [[ "$DETACH" -eq 0 ]]; then
+  DOCKER_MODE=(--rm -it)
+  RESTART_ARGS=()
+fi
+
+docker rm -f "$CONTAINER" >/dev/null 2>&1 || true
+
+ARGS=(
+  -m "/models/$MODEL_FILE"
+  --alias "$ALIAS"
+  --host "$HOST"
+  --port "$PORT"
+  --ctx-size "$CTX_SIZE"
+  --parallel "$PARALLEL"
+  --n-gpu-layers "$GPU_LAYERS"
+  --flash-attn auto
+  --batch-size "$BATCH_SIZE"
+  --ubatch-size "$UBATCH_SIZE"
+  --threads "$THREADS"
+  --threads-batch "$THREADS_BATCH"
+  --reasoning "$REASONING"
+  --reasoning-budget "$REASONING_BUDGET"
+)
+
+if [[ "$MLOCK" = "1" || "$MLOCK" = "true" ]]; then
+  ARGS+=(--mlock)
+fi
+
+if [[ -n "$CACHE_REUSE" ]]; then
+  ARGS+=(--cache-reuse "$CACHE_REUSE")
+fi
+
+if [[ "$LOG_DISABLE" = "1" || "$LOG_DISABLE" = "true" ]]; then
+  ARGS+=(--log-disable)
+fi
+
+if [[ "$SPEC_TYPE" != "none" ]]; then
+  ARGS+=(--spec-type "$SPEC_TYPE" --spec-draft-n-max "$SPEC_DRAFT_N_MAX")
+fi
+
+ARGS+=("${EXTRA_ARGS[@]}")
+
+docker run "${DOCKER_MODE[@]}" \
+  --name "$CONTAINER" \
+  "${RESTART_ARGS[@]}" \
+  --gpus all \
+  -p "$PORT:$PORT" \
+  -v "$MODEL_DIR:/models:ro" \
+  "$IMAGE" \
+  "${ARGS[@]}"
+
+printf 'Started %s on port %s with model %s as alias %s, context %s (%s)\n' "$CONTAINER" "$PORT" "$MODEL" "$ALIAS" "$CTX_SIZE" "$CTX_SIZE_SOURCE"
