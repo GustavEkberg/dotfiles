@@ -3,6 +3,8 @@ description: Review changes with parallel @code-review subagents
 ---
 Review the code changes using THREE (3) @code-review subagents and correlate results into a summary ranked by severity. Use the provided user guidance to steer the review and focus on specific code paths, changes, and/or areas of concern.
 
+For an interactive step-by-step review of implementation logic and tradeoffs, use `/logic-review` instead.
+
 Guidance: $ARGUMENTS
 
 Use git commands throughout.
