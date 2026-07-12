@@ -95,6 +95,11 @@ After editing any active config, reload the running tool or restart it. tmux has
 - TOML: 2 spaces, inline comments where behavior is not obvious.
 - JS in Chrome extensions: vanilla, 2 spaces, single quotes, no semicolons, no build step by default.
 
+## Frontend Workflow
+
+- Use browser screenshots to validate frontend changes before completion.
+- Use screenshots when discussing UI with the user so feedback is grounded in the rendered interface.
+
 ## Agent Rules
 
 From `opencode/AGENTS.md`; apply repo-wide:
