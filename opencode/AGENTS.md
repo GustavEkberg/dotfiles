@@ -6,6 +6,7 @@
 ## Package Management
 
 - Always use `pnpm` instead of `npm` when applicable
+- Before adding any dependency to `package.json`, installing a Python package locally, or using an equivalent package manager, validate and document why it is safe, actively maintained, and a standard ecosystem choice. Do not install packages that fail this review without explicit user approval.
 
 ## Code Quality Standards
 
