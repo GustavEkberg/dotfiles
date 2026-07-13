@@ -64,7 +64,8 @@
   },
   "permission": {
     "read": {
-      "*": "allow",
+      "~/code/takt/local-workspace": "allow",
+      "~/code/takt/local-workspace/**": "allow",
       "*.env": "deny",
       "*.env.*": "deny",
       "*.envrc": "deny",
@@ -73,45 +74,11 @@
     "external_directory": {
       "/tmp": "allow",
       "/tmp/*": "allow",
-      "~/code/takt/local-workspace/me": "allow",
-      "~/code/takt/local-workspace/me/**": "allow",
-      "~/code/takt/local-workspace/people": "allow",
-      "~/code/takt/local-workspace/people/**": "allow",
-      "~/code/takt/local-workspace/companies": "allow",
-      "~/code/takt/local-workspace/companies/**": "allow",
-      "~/code/takt/local-workspace/projects": "allow",
-      "~/code/takt/local-workspace/projects/**": "allow",
-      "~/code/takt/local-workspace/deals": "allow",
-      "~/code/takt/local-workspace/deals/**": "allow",
-      "~/code/takt/local-workspace/notes": "allow",
-      "~/code/takt/local-workspace/notes/**": "allow",
-      "~/code/takt/local-workspace/timeline": "allow",
-      "~/code/takt/local-workspace/timeline/**": "allow",
-      "~/code/takt/local-workspace/work": "allow",
-      "~/code/takt/local-workspace/work/**": "allow",
-      "~/code/takt/local-workspace/library": "allow",
-      "~/code/takt/local-workspace/library/**": "allow"
+      "~/code/takt/local-workspace": "allow",
+      "~/code/takt/local-workspace/**": "allow"
     },
     "edit": {
-      "/tmp/*": "allow",
-      "~/code/takt/local-workspace/me": "deny",
-      "~/code/takt/local-workspace/me/**": "deny",
-      "~/code/takt/local-workspace/people": "deny",
-      "~/code/takt/local-workspace/people/**": "deny",
-      "~/code/takt/local-workspace/companies": "deny",
-      "~/code/takt/local-workspace/companies/**": "deny",
-      "~/code/takt/local-workspace/projects": "deny",
-      "~/code/takt/local-workspace/projects/**": "deny",
-      "~/code/takt/local-workspace/deals": "deny",
-      "~/code/takt/local-workspace/deals/**": "deny",
-      "~/code/takt/local-workspace/notes": "deny",
-      "~/code/takt/local-workspace/notes/**": "deny",
-      "~/code/takt/local-workspace/timeline": "deny",
-      "~/code/takt/local-workspace/timeline/**": "deny",
-      "~/code/takt/local-workspace/work": "deny",
-      "~/code/takt/local-workspace/work/**": "deny",
-      "~/code/takt/local-workspace/library": "deny",
-      "~/code/takt/local-workspace/library/**": "deny"
+      "/tmp/*": "allow"
     },
     "bash": {
       "qmd update": "deny",
