@@ -1,5 +1,6 @@
 
 .DS_Store
+__pycache__/
 nvim/plugin/packer_compiled.lua
 keeb/planck_layout.json
 fish/connections.sh
