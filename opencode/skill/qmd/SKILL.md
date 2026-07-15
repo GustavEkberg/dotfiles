@@ -7,6 +7,8 @@ description: Search the user's local knowledge base for read-only personal conte
 
 Read-only access to the user's local knowledge base at `~/code/takt/local-workspace` through the global `qmd` MCP server.
 
+The qmd SQLite index is ignored per-computer cache state. Workspace hooks rebuild it asynchronously with the pinned local builder after indexed Git changes; it is not stored in Git.
+
 Use when the task needs context about:
 
 - The user: identity, priorities, routine, voice, preferences.
@@ -26,6 +28,7 @@ Use when the task needs context about:
 - For high-stakes or freshness-sensitive facts, read the source file from `~/code/takt/local-workspace` after qmd points to it.
 - Never write to the takt workspace from global sessions.
 - Never run qmd maintenance/write commands: `update`, `embed`, `cleanup`, `collection`, `context`.
+- If `status` fails, reports an empty index, or a rebuild is in progress, fall back to direct source reads under `~/code/takt/local-workspace`; never block the task on qmd.
 
 ## Collections
 
