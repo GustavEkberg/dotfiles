@@ -6,6 +6,8 @@
 ## Package Management
 
 - Always use `pnpm` instead of `npm` when applicable
+- Before invoking package binaries, inspect the relevant `package.json` scripts and dependencies. Prefer declared scripts; use `pnpm exec <binary>` only when that binary is installed in the relevant workspace package.
+- Never silently resolve a missing binary with a global install or unpinned `pnpm dlx`. Use an existing project tool, or report the skipped check. Add a dependency only when the task requires it and after the review below.
 - Before adding any dependency to `package.json`, installing a Python package locally, or using an equivalent package manager, validate and document why it is safe, actively maintained, and a standard ecosystem choice. Do not install packages that fail this review without explicit user approval.
 
 ## Code Quality Standards
