@@ -2,9 +2,6 @@
   "$schema": "https://opencode.ai/config.json",
   "autoupdate": true,
   "lsp": true,
-  "plugin": [
-    "./plugins/opencode-anthropic-auth.mjs"
-  ],
   "mcp": {
     "qmd": {
       "type": "local",
