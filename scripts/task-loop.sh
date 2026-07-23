@@ -5,7 +5,8 @@ set -euo pipefail
 # Usage: task-loop <feature> [--max-iterations=N] [--model=MODEL]
 
 MAX_ITERATIONS=50
-MODEL="anthropic/claude-opus-4-7"
+MODEL="openai/gpt-5.6-sol"
+VARIANT="high"
 
 while [[ $# -gt 0 ]]; do
     case $1 in
@@ -37,14 +38,14 @@ task_counts() {
 }
 
 for ((i=1; i<=MAX_ITERATIONS; i++)); do
-    printf '\n=== Iteration %d/%d  |  tasks: %s done  |  model: %s ===\n\n' \
-        "$i" "$MAX_ITERATIONS" "$(task_counts)" "$MODEL"
+    printf '\n=== Iteration %d/%d  |  tasks: %s done  |  model: %s (%s) ===\n\n' \
+        "$i" "$MAX_ITERATIONS" "$(task_counts)" "$MODEL" "$VARIANT"
 
     found=false
     while IFS= read -r line; do
         printf '%s\n' "$line"
         [[ "$line" == *"$COMPLETE_MARKER"* ]] && found=true
-    done < <(opencode run --model "$MODEL" --command complete-next-task "$FEATURE" 2>&1)
+    done < <(opencode run --model "$MODEL" --variant "$VARIANT" --command complete-next-task "$FEATURE" 2>&1)
 
     if $found; then
         printf '\nPRD complete after %d iterations.\n' "$i"
