@@ -35,6 +35,9 @@
     }
   },
   "model": "openai/gpt-5.6-sol",
+  "plugin": [
+    "opencode-claude-auth@latest"
+  ],
   "provider": {
     "openai": {
       "models": {
