@@ -14,7 +14,8 @@
     "max_bytes": 12000
   },
   "plugin": [
-    "./plugins/opencode-anthropic-auth.mjs"
+    "./plugins/opencode-anthropic-auth.mjs",
+    "./plugins/qmd-no-rerank.ts"
   ],
   "mcp": {
     "qmd": {

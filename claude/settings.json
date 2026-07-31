@@ -70,6 +70,19 @@
   "enabledPlugins": {
     "telegram@claude-plugins-official": true
   },
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "mcp__qmd__query",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "$HOME/code/dotfiles/claude/hooks/qmd-no-rerank.sh"
+          }
+        ]
+      }
+    ]
+  },
   "effortLevel": "high",
   "skipAutoPermissionPrompt": true
 }
