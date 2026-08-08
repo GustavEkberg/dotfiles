@@ -12,7 +12,7 @@ then
 else
   echo "Installing OSX packages"
   /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
-  brew install neovim tmux fish prettyping git jesseduffield/lazygit/lazygit node cmake
+  brew install neovim tmux fish prettyping git jesseduffield/lazygit/lazygit node cmake herdr
   brew install --cask 1password/tap/1password-cli
 fi
 

@@ -1,0 +1,89 @@
+[keys]
+prefix = "ctrl+a"
+new_tab = "prefix+c"
+next_tab = "prefix+n"
+previous_tab = "prefix+p"
+focus_pane_left = "prefix+h"
+focus_pane_down = "prefix+j"
+focus_pane_up = "prefix+k"
+focus_pane_right = "prefix+l"
+split_vertical = "prefix+%"
+split_horizontal = "prefix+shift+s"
+# Freed: the keyboard sends prefix+<digit>, mapped to spaces below.
+switch_tab = ""
+
+[theme]
+name = "catppuccin"
+auto_switch = false
+
+# Keyboard mid row sends prefix+0..prefix+5 (tmux window chords).
+# Mapped left to right onto spaces 1..6. Indexed switch_workspace only
+# accepts 1..9, so prefix+0 needs a custom command; the rest follow suit.
+
+[[keys.command]]
+key = "prefix+0"
+type = "shell"
+command = "/Users/abraxas/code/dotfiles/herdr/herdr-focus.sh workspace 1"
+description = "focus space 1"
+
+[[keys.command]]
+key = "prefix+1"
+type = "shell"
+command = "/Users/abraxas/code/dotfiles/herdr/herdr-focus.sh workspace 2"
+description = "focus space 2"
+
+[[keys.command]]
+key = "prefix+2"
+type = "shell"
+command = "/Users/abraxas/code/dotfiles/herdr/herdr-focus.sh workspace 3"
+description = "focus space 3"
+
+[[keys.command]]
+key = "prefix+3"
+type = "shell"
+command = "/Users/abraxas/code/dotfiles/herdr/herdr-focus.sh workspace 4"
+description = "focus space 4"
+
+[[keys.command]]
+key = "prefix+4"
+type = "shell"
+command = "/Users/abraxas/code/dotfiles/herdr/herdr-focus.sh workspace 5"
+description = "focus space 5"
+
+[[keys.command]]
+key = "prefix+5"
+type = "shell"
+command = "/Users/abraxas/code/dotfiles/herdr/herdr-focus.sh workspace 6"
+description = "focus space 6"
+
+# Keyboard bottom row sends shift+F1..F5 (CSI 1;2P..T) -> agents 1..5.
+
+[[keys.command]]
+key = "shift+f1"
+type = "shell"
+command = "/Users/abraxas/code/dotfiles/herdr/herdr-focus.sh agent 1"
+description = "focus agent 1"
+
+[[keys.command]]
+key = "shift+f2"
+type = "shell"
+command = "/Users/abraxas/code/dotfiles/herdr/herdr-focus.sh agent 2"
+description = "focus agent 2"
+
+[[keys.command]]
+key = "shift+f3"
+type = "shell"
+command = "/Users/abraxas/code/dotfiles/herdr/herdr-focus.sh agent 3"
+description = "focus agent 3"
+
+[[keys.command]]
+key = "shift+f4"
+type = "shell"
+command = "/Users/abraxas/code/dotfiles/herdr/herdr-focus.sh agent 4"
+description = "focus agent 4"
+
+[[keys.command]]
+key = "shift+f5"
+type = "shell"
+command = "/Users/abraxas/code/dotfiles/herdr/herdr-focus.sh agent 5"
+description = "focus agent 5"
