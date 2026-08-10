@@ -16,6 +16,14 @@ switch_tab = ""
 name = "catppuccin"
 auto_switch = false
 
+# Keyboard top-left key: labeled Hyper+F12 in Vial, but like the mid row it
+# actually sends a tmux chord — ctrl+a then 9 (tmux "go to window 9").
+[[keys.command]]
+key = "prefix+9"
+type = "shell"
+command = "/Users/abraxas/code/dotfiles/herdr/herdr-focus.sh workspace last"
+description = "focus last space"
+
 [[keys.command]]
 key = "prefix+shift+l"
 type = "shell"

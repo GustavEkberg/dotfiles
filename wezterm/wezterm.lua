@@ -75,7 +75,7 @@ config.keys = {
     key = 'o',
     mods = 'LEADER',
     action = wezterm.action.OpenLinkAtMouseCursor,
-  }
+  },
 }
 
 return config
