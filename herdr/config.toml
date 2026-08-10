@@ -16,6 +16,12 @@ switch_tab = ""
 name = "catppuccin"
 auto_switch = false
 
+[[keys.command]]
+key = "prefix+shift+l"
+type = "shell"
+command = "/Users/abraxas/code/dotfiles/herdr/herdr-layout.sh"
+description = "default layout: claude left, lazygit + cli right"
+
 # Keyboard mid row sends prefix+0..prefix+5 (tmux window chords).
 # Mapped left to right onto spaces 1..6. Indexed switch_workspace only
 # accepts 1..9, so prefix+0 needs a custom command; the rest follow suit.
@@ -87,3 +93,12 @@ key = "shift+f5"
 type = "shell"
 command = "/Users/abraxas/code/dotfiles/herdr/herdr-focus.sh agent 5"
 description = "focus agent 5"
+
+[ui.sound]
+enabled = false
+
+[ui.toast]
+delivery = "terminal"
+
+[ui]
+show_agent_labels_on_pane_borders = false
