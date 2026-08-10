@@ -137,3 +137,11 @@ end
 
 # opencode
 fish_add_path $HOME/.opencode/bin
+
+# Android
+set -Ux ANDROID_HOME $HOME/Library/Android/sdk
+set -Ux JAVA_HOME (/usr/libexec/java_home -v 17)
+
+fish_add_path $JAVA_HOME/bin
+fish_add_path $ANDROID_HOME/platform-tools
+fish_add_path $ANDROID_HOME/emulator
