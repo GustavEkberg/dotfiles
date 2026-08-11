@@ -5,10 +5,14 @@ local act = wezterm.action
 
 local config = wezterm.config_builder()
 
+-- ~/.wezterm.lua symlinks here, so wezterm.config_dir resolves to $HOME and
+-- cannot find the local modules. Point Lua at the repo directly.
+local dotfiles = os.getenv('HOME') .. '/code/dotfiles/wezterm'
+package.path = dotfiles .. '/?.lua;' .. dotfiles .. '/?/init.lua;' .. package.path
+
 -- Window configuration
 config.color_scheme = 'deep'
 config.font = wezterm.font('MesloLGS Nerd Font Mono')
-config.enable_tab_bar = false
 config.font_size = 14
 
 config.window_decorations = "RESIZE"
@@ -27,6 +31,9 @@ config.mouse_bindings = {
 
 -- Font configuration
 config.harfbuzz_features = { 'calt=0', 'clig=0', 'liga=0' }
+
+-- Status bar (replaces tmux-powerline; see wezterm/status/)
+require('status').setup(config)
 
 -- Events
 
