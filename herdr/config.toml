@@ -115,10 +115,10 @@ command = "/Users/abraxas/code/dotfiles/herdr/herdr-focus.sh agent 5"
 description = "focus agent 5"
 
 [ui.sound]
-enabled = false
+enabled = true
 
 [ui.toast]
-delivery = "terminal"
+delivery = "system"
 
 [ui]
 show_agent_labels_on_pane_borders = false

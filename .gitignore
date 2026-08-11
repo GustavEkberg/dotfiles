@@ -16,3 +16,4 @@ opencode/pnpm-lock.yaml
 server/local/
 server/**/*.local
 server/**/*.secret
+/opencode/plugins/herdr-agent-state.js
