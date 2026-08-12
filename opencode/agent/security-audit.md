@@ -49,6 +49,7 @@ Scan for:
 - **Deserialization**: Unsafe deserialization of untrusted data
 - **Crypto**: Weak algorithms, hardcoded IVs/salts, insufficient key lengths, insecure random
 - **Race conditions**: TOCTOU, double-spend, concurrent state mutation
+- **Async-context mixing**: see domain 5 — cross-request AsyncLocalStorage leakage in shared runtimes
 - **Error handling**: Stack traces in responses, verbose error messages, swallowed errors hiding failures
 
 ### 2. Agent & Skill Configuration
@@ -79,6 +80,53 @@ Critically evaluate all human-written text:
 - **Stale comments**: Comments describing security behavior that no longer matches the code
 - **TODO/FIXME/HACK markers**: Unresolved security-relevant items
 - **Overly permissive instructions**: AGENTS.md rules that weaken security posture
+
+### 5. Async-Context Request Isolation (ALS mixing)
+
+Cross-user session/cookie mixing in Node servers that combine (a) ONE shared runtime/scheduler/
+pool serving concurrent requests in one process with (b) request state in AsyncLocalStorage.
+CVE-2026-32887 class. Confirmed production-real: with only a partial mitigation, ~1/700 prod
+requests received a CONCURRENT user's Set-Cookie (persisted identity swap); dev ~1/100.
+
+**When to suspect it** — all three present:
+- Shared execution infrastructure: Effect `ManagedRuntime`, custom task queues/schedulers, job
+  runners, `toWebHandler`-style adapters, connection pools — anything module-level serving all
+  requests (Vercel Fluid Compute / any `next start` co-locates concurrent requests per process).
+- ALS-backed request state: Next.js `cookies()`/`headers()`, Nest CLS, OTel context, or auth
+  libraries that touch them (better-auth `nextCookies()`, Clerk `auth()`).
+- ALS access happening LAZILY inside deferred work (fibers, queued tasks, promise chains created
+  in shared infrastructure) instead of at the request boundary.
+
+**Greps**: `AsyncLocalStorage`, `ManagedRuntime|runPromise|runFork`, `next/headers` imported in
+lib/service code (not page/route bodies), `nextCookies|cookieCache`, `toWebHandler`,
+`AsyncLocalStorage.snapshot|AsyncResource.bind` (presence = someone knew; absence + the above =
+finding).
+
+**Audit checklist**:
+- Effect >= 3.20? (< 3.20 scheduler batches cross-fiber — CVE-2026-32887, sev CRITICAL.)
+- Do libraries WRITE ALS as a hidden side-effect of reads? better-auth's `nextCookies()` writes
+  cookie-cache refresh + token rotation on every `getSession` — a "read" call site is a write
+  vector. Enumerate the write paths, not just reads.
+- Is there a scheduler/continuation pin (per-task `AsyncLocalStorage.snapshot()` re-entry)? That
+  covers ONLY framework-scheduled continuations. Raw promise chains inside `tryPromise`-style
+  thunks (library internals) rely on native ALS propagation, which breaks mid-chain under
+  concurrency — they additionally need per-call re-entry: `scope.run(() => lib.call(...))` with
+  the snapshot captured at request entry. BOTH mechanisms or boundary-reads-passed-in; one alone
+  is a finding.
+- Idiomatic-safe alternative: resolve session/request state synchronously at the request boundary
+  (`auth.api.getSession({ headers: await headers() })` in the handler body) and pass VALUES into
+  deferred work. If the codebase does this everywhere, the class is structurally absent.
+- Structural enforcement present? Lint bans on `next/headers` in lib code, on running effects
+  outside the pinned runner, on raw auth-instance use outside the wrapping service. Prose-only
+  invariants regress — this class survived multiple fixes precisely because nothing enforced them.
+
+**Verification honesty**: the bug is type-clean and invisible to ALL serial tests and to
+deterministic unit tests (the escape is outside the framework's scheduler). Only a sized
+concurrent canary proves anything: distinct identities in separate cookie jars, TWO sequential
+requests each (corruption lands on response 1, misauthenticates request 2), force the write path
+(inject bare session token with no cookie-cache cookie), `maxRedirects: 0`, >= 700 executions
+(a 350-exec prod run was a false all-clear). Report the finding on architecture alone — do not
+require a repro; rarity scales with request overlap, so quiet staging traffic proves nothing.
 
 ## Methodology
 
