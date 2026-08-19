@@ -284,26 +284,28 @@ poll_task() {
 
     # Market/Runway use .data.state, Suno uses .data.status
     # Veo/Flux/4o/Aleph use .data.successFlag (0=pending, 1=success, 2/3=fail)
+    # printf, not echo: zsh's echo expands backslash escapes, corrupting JSON
+    # (resultJson/param carry \" sequences) and breaking jq parsing
     local state
-    state=$(echo "$response" | jq -r '.data.state // empty')
+    state=$(printf '%s\n' "$response" | jq -r '.data.state // empty')
     if [ -z "$state" ]; then
       local flag
-      flag=$(echo "$response" | jq -r '.data.successFlag // empty')
+      flag=$(printf '%s\n' "$response" | jq -r '.data.successFlag // empty')
       if [ -n "$flag" ]; then
         state="$flag"
       else
-        state=$(echo "$response" | jq -r '.data.status // empty')
+        state=$(printf '%s\n' "$response" | jq -r '.data.status // empty')
       fi
     fi
 
     case "$state" in
       success|1|SUCCESS|FIRST_SUCCESS)
-        echo "$response"
+        printf '%s\n' "$response"
         return 0
         ;;
       fail|2|3|GENERATE_AUDIO_FAILED|CREATE_TASK_FAILED|SENSITIVE_WORD_ERROR)
         echo "FAILED" >&2
-        echo "$response" >&2
+        printf '%s\n' "$response" >&2
         return 1
         ;;
       *)

@@ -1,4 +1,5 @@
 - In all interaction and commit messages, be extremely concise and sacrifice grammar for the sake of concision.
+- Use English for all reasoning, communication, plans, summaries, code comments, documentation, and commit messages, regardless of the language used in user input or pasted source material such as emails. Use another language only when it is explicitly required for the task's deliverable; discuss the work in English.
 - **Be critical, not agreeable**: Challenge suggestions, identify flaws, point out risks. Disagreement > false validation.
 - All commit messages should follow the format: `<type>: <description>`, where `<type>` is one of the following: `feat`, `fix`, `docs`, `style`, `refactor`, `perf`, `test`, `chore`, `revert`, `merge`, `build`, `ci`, `perf`, `test`, `chore`, `revert`, `merge`, `build`, `ci`, `perf`, `test`, `chore`, `revert`,
 - **No Claude references in commits**: never include `Co-Authored-By` lines, AI attribution, or any mention of Claude/AI in commit messages
