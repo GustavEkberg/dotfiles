@@ -11,6 +11,15 @@
 - Never silently resolve a missing binary with a global install or unpinned `pnpm dlx`. Use an existing project tool, or report the skipped check. Add a dependency only when the task requires it and after the review below.
 - Before adding any dependency to `package.json`, installing a Python package locally, or using an equivalent package manager, validate and document why it is safe, actively maintained, and a standard ecosystem choice. Do not install packages that fail this review without explicit user approval.
 
+## External Code
+
+- **Never fetch third-party code without explicit approval first.** Applies to any network retrieval of code intended to land in the repo or run locally: `curl`/`wget` of a library, CDN/unpkg/jsDelivr bundles, `git clone`, package tarballs, binaries, install scripts. Ask before running the command, not after.
+- Present the review before asking, in one short block: package + exact version, upstream repo, publisher/maintainer identity, license, last release date, download volume, and whether the source is canonical upstream or a fork.
+- Name the risk shape honestly. A low-star single-maintainer fork with a large install base is a supply-chain concern worth stating, not a green light. Prefer canonical upstream over a fork unless the fork is justified.
+- Always offer the no-dependency alternative and what it costs, so the choice is real.
+- Once approved: pin the exact version, vendor the file, and record source URL + SHA-256 next to it. No auto-upgrade, no unpinned re-fetch.
+- Vendored code is loaded attack surface. State what it can reach at runtime (network, user data, credentials) before it is accepted.
+
 ## Code Quality Standards
 
 - Make minimal, surgical changes
