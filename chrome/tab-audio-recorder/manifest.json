@@ -1,0 +1,21 @@
+{
+  "manifest_version": 3,
+  "name": "Tab Audio Recorder",
+  "description": "Record the audio of the active tab and save it as a WebM/Opus file.",
+  "version": "0.1.0",
+  "permissions": [
+    "activeTab",
+    "tabCapture",
+    "offscreen",
+    "downloads",
+    "storage"
+  ],
+  "background": {
+    "service_worker": "background.js",
+    "type": "module"
+  },
+  "action": {
+    "default_title": "Record tab audio",
+    "default_popup": "popup.html"
+  }
+}

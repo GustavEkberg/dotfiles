@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Tab Audio Recorder</title>
+    <link rel="stylesheet" href="popup.css">
+  </head>
+  <body>
+    <main>
+      <header>
+        <p>Tab Audio Recorder</p>
+        <h1>Record tab audio</h1>
+      </header>
+
+      <section class="meter">
+        <span id="dot" class="dot"></span>
+        <span id="elapsed" class="elapsed">00:00</span>
+      </section>
+
+      <button id="toggle" type="button" disabled>Start recording</button>
+
+      <p id="status" class="status">Checking recorder…</p>
+    </main>
+
+    <script type="module" src="popup.js"></script>
+  </body>
+</html>

@@ -7,7 +7,8 @@ Buildless local Chrome MV3 extensions. Keep them self-contained and manually loa
 ```
 chrome/
 |-- color-picker/       # Popup extension using EyeDropper API
-`-- markdown-viewer/    # file:// markdown renderer with Mermaid support
+|-- markdown-viewer/    # file:// markdown renderer with Mermaid support
+`-- tab-audio-recorder/ # tabCapture -> offscreen MediaRecorder -> WebM download
 ```
 
 ## Where To Look
@@ -19,6 +20,9 @@ chrome/
 | Markdown renderer | `markdown-viewer/content.js` | Content script; exits unless file is markdown |
 | Markdown styles | `markdown-viewer/style.css` | Scope CSS to extension-owned classes |
 | Mermaid vendor | `markdown-viewer/vendor/mermaid.min.js` | Vendored, minified, do not hand-edit |
+| Tab audio capture | `tab-audio-recorder/background.js` | Stream id handshake, state, saving |
+| Tab audio encoding | `tab-audio-recorder/offscreen.js` | Only context with a DOM for `MediaRecorder` |
+| Cross-context messages | `tab-audio-recorder/shared/messages.js` | Every message carries a `target` |
 | Manual install docs | `*/README.md` | Keep user-facing setup current |
 
 ## Conventions
@@ -51,8 +55,10 @@ chrome/
 ```sh
 python3 -m json.tool chrome/color-picker/manifest.json >/dev/null
 python3 -m json.tool chrome/markdown-viewer/manifest.json >/dev/null
+python3 -m json.tool chrome/tab-audio-recorder/manifest.json >/dev/null
 node --check chrome/color-picker/popup.js
 node --check chrome/markdown-viewer/content.js
+for f in chrome/tab-audio-recorder/*.js chrome/tab-audio-recorder/shared/*.js; do node --check "$f"; done
 ```
 
 Manual smoke required after edits:
@@ -60,3 +66,4 @@ Manual smoke required after edits:
 - Reload changed extension in `chrome://extensions`.
 - Color picker: pick visible pixel, verify RGB/hex and clipboard copy.
 - Markdown viewer: open local `.md`, test rendered/raw toggle, tables, code fences, Mermaid.
+- Tab audio recorder: record a playing tab, confirm audio stays audible, stop, verify the file in `Downloads/tab-audio/`.
