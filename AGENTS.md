@@ -43,6 +43,7 @@ dotfiles/
 | Terminal stack | `wezterm/`, `tmux/`, `starship/` | Runtime configs require manual deployment |
 | Bootstrap packages | `install.sh` | Installs packages only |
 | Autonomous task loop | `scripts/task-loop.sh`, `opencode/command/complete-next-task.md` | PRD-driven OpenCode loop |
+| Deferred work queue | `fish/config.fish` (`later` fn), `opencode/command/later.md` | `later "<thought>"` captures from any shell with no agent; `/later <thought>` captures in-session, `/later run` drains. Queue: `~/.local/share/opencode/later/<slug>.md` |
 
 ## Code Map
 

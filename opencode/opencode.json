@@ -80,7 +80,8 @@
       "~/code/takt/local-workspace/**": "allow"
     },
     "edit": {
-      "/tmp/*": "allow"
+      "/tmp/*": "allow",
+      "/Users/abraxas/.local/share/opencode/later/**": "allow"
     },
     "bash": {
       "qmd update": "deny",

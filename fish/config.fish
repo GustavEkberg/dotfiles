@@ -23,6 +23,22 @@ alias yd='pnpm dev'
 alias yi='pnpm install'
 alias tp='tmux attach -t primary || tmux new -s primary' 
 
+function later --description 'queue a thought for the agent to pick up later'
+    set -l root (git rev-parse --show-toplevel 2>/dev/null; or pwd)
+    set -l slug (string replace -r '^/' '' -- $root | string replace -a / -)
+    set -l dir "$HOME/.local/share/opencode/later"
+    set -l file "$dir/$slug.md"
+    mkdir -p $dir
+    if not test -f $file
+        printf '# Later — %s\n\n' $root > $file
+    end
+    if test (count $argv) -eq 0
+        cat $file
+        return
+    end
+    printf '%s\n' "- "(date +%F)" $argv" >> $file
+end
+
 function cpcp
     if type -q pbcopy
         cat $argv | pbcopy
