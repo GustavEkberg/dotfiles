@@ -22,11 +22,18 @@ Do NOT trigger for: non-Swedish companies, sole proprietors searching by persona
 
 ## Required Tooling
 
-Load `crawl4ai` skill first. allabolag.se is JS-rendered + Cloudflare-protected — plain `WebFetch` fails. Use `crwl` (Playwright-backed).
+Load the `browser-control` skill first. allabolag.se is JS-rendered and
+Cloudflare-protected, so plain `WebFetch` fails. Use a read-only Browser Control
+session and inspect the rendered page.
 
 ```bash
-which crwl || pip install -U crawl4ai && crawl4ai-setup
+browser-control status --json
+browser-control session new allabolag --read-only
 ```
+
+If Cloudflare presents a human challenge, attach the existing tab with the
+Browser Control toolbar button, adopt it into the `allabolag` session, and use
+`handoff()` for the challenge. Never automate CAPTCHA completion.
 
 ## URL Patterns
 
@@ -53,20 +60,28 @@ else                                → company name → search first
 **By orgnr (preferred — unambiguous):**
 
 ```bash
-crwl "https://www.allabolag.se/<orgnr>" -o markdown-fit --bypass-cache
+browser-control execute --session allabolag '
+  await page.goto("https://www.allabolag.se/<orgnr>")
+  await page.waitForLoadState("domcontentloaded")
+  return await snapshot({ maxItems: 300 })
+'
 ```
 
 **By name (ambiguous — verify match):**
 
 ```bash
-crwl "https://www.allabolag.se/what/<encoded-name>" -o markdown-fit
+browser-control execute --session allabolag '
+  await page.goto("https://www.allabolag.se/what/<encoded-name>")
+  await page.waitForLoadState("domcontentloaded")
+  return await snapshot({ maxItems: 300 })
+'
 ```
 
 Parse top result. If multiple matches with same/similar names → STOP and ask user which orgnr.
 
 ### Step 3: Extract Fields
 
-Parse the fit-markdown for:
+Parse the rendered snapshot for:
 
 | Field | Pattern hints |
 |-------|---------------|
@@ -89,7 +104,9 @@ Before returning, confirm:
 
 1. Extracted orgnr matches input orgnr (if user provided one)
 2. Extracted name plausibly matches input name (case/accent-insensitive substring or fuzzy)
-3. At least one of `address`, `sni`, `status` was extracted (else likely Cloudflare block — retry once with `-c "page_timeout=60000,wait_until=networkidle"`)
+3. At least one of `address`, `sni`, `status` was extracted. Otherwise inspect
+   the page for a Cloudflare challenge, use `handoff()` when needed, and retry
+   once with `ariaSnapshot()`.
 
 If verification fails → report failure, do not guess.
 
@@ -133,6 +150,7 @@ Fields not found → omit or show `—`. Never fabricate.
 
 - Don't `--deep-crawl` allabolag — single-page lookups only, will trigger rate limits
 - Don't use `WebFetch` — Cloudflare blocks non-browser UAs
+- Don't automate a Cloudflare challenge — use Browser Control `handoff()`
 - Don't return data without verifying orgnr-to-input match
 - Don't merge data from multiple companies if name search returned ambiguous results — ask user
 - Don't cache stale results across long-running sessions when status/financials matter — use `--bypass-cache`
