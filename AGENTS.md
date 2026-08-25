@@ -6,7 +6,7 @@
 
 ## Overview
 
-Personal macOS Apple Silicon dotfiles. Config sources only; active-tool deployment is manual, with no stow/symlink automation and no CI/test harness.
+Personal macOS Apple Silicon dotfiles. This repository is the source of truth for managed configuration; active local config paths are symlinked to files here. The repo has no symlink-creation automation or CI/test harness.
 
 ## Structure
 
@@ -87,8 +87,10 @@ After editing any active config, reload the running tool or restart it. tmux has
 
 ## Conventions
 
+- Make every OpenCode, Claude, and other managed configuration change in this repository. Never edit `~/.config/opencode`, `~/.claude`, or another active local config path directly; those paths are symlinked to this repo.
+- Do not create parallel local configuration outside this repository. Add or change the corresponding source file here.
 - Minimal, surgical changes. Config repo; avoid framework/build-system creep.
-- Manual deployment only. Do not add install/symlink automation without explicit request.
+- Do not add install/symlink automation without explicit request.
 - Graceful degradation: optional tools/plugins must be feature-detected or guarded.
 - Lua: 2 spaces, `snake_case`, utility modules return `local M = {}`, guard optional plugin `require()` with `pcall`.
 - Fish: terse aliases, `type -q` checks, 2 spaces, no greeting, vi keybindings.
@@ -100,6 +102,7 @@ After editing any active config, reload the running tool or restart it. tmux has
 
 - Use browser screenshots to validate frontend changes before completion.
 - Use screenshots when discussing UI with the user so feedback is grounded in the rendered interface.
+- Browser automation is programmatically restricted to loopback by `opencode/opencode.json` and `opencode/playwright/loopback-only.ts`; use web tools for external research.
 
 ## Agent Rules
 

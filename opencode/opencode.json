@@ -29,7 +29,12 @@
         "pnpm",
         "dlx",
         "@playwright/mcp@latest",
-        "--extension"
+        "--isolated",
+        "--block-service-workers",
+        "--allowed-origins",
+        "http://localhost:*;https://localhost:*;http://127.0.0.1:*;https://127.0.0.1:*;http://[::1]:*;https://[::1]:*",
+        "--init-page",
+        "/Users/abraxas/code/dotfiles/opencode/playwright/loopback-only.ts"
       ],
       "enabled": true
     }
@@ -149,7 +154,14 @@
       "groovy": "deny",
       "groovy *": "deny",
       "Rscript": "deny",
-      "Rscript *": "deny"
-    }
+      "Rscript *": "deny",
+      "*browser-control*": "deny",
+      "*agent-browser*": "deny"
+    },
+    "skill": {
+      "browser-control": "deny",
+      "agent-browser": "deny"
+    },
+    "playwright_browser_run_code_unsafe": "deny"
   }
 }
