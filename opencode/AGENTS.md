@@ -46,6 +46,10 @@
 - If no practical test harness or deterministic reproduction exists, state why before editing and use the strongest available validation.
 - Do not finish with new failing tests unless the user explicitly requests that result.
 
+## Subagent Coordination
+
+- Assign lint, test, typecheck, and build commands to one agent at a time. When multiple subagents work in parallel, tell them not to run broad verification; the parent runs it once after their changes land unless it explicitly delegates verification to one subagent.
+
 ## Plans
 
 - List unresolved questions at the end of each plan. Keep them minimal.
