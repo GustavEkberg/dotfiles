@@ -25,6 +25,11 @@
 - Prefer canonical upstream sources. Explain any fork choice and offer a no-dependency alternative with its cost.
 - For manually downloaded or vendored assets, record the immutable source URL and SHA-256 beside the asset. Never auto-upgrade or re-fetch an unpinned source.
 
+## Web Tools
+
+- Use `webfetch` for external web research, search-result retrieval, documentation, and scraping.
+- Use browser control only to validate or interact with locally running development work. Do not use it as a fallback for ordinary external fetching or scraping.
+
 ## Code Quality Standards
 
 - Make minimal, surgical changes
