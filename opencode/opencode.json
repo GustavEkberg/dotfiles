@@ -41,7 +41,7 @@
   },
   "model": "openai/gpt-5.6-sol",
   "plugin": [
-    "opencode-claude-auth@latest",
+    // "opencode-claude-auth@latest",
     "./plugins/qmd-no-rerank.ts"
   ],
   "provider": {
