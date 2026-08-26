@@ -161,7 +161,8 @@ const runXml = (text, opts) =>
   `<a:latin typeface="${FONT}"/><a:cs typeface="${FONT}"/></a:rPr><a:t>${xmlEscape(text)}</a:t></a:r>`;
 
 const paragraphXml = (line, opts) => {
-  const align = opts.align ?? "l";
+  const requestedAlign = opts.align ?? "l";
+  const align = requestedAlign === "c" ? "ctr" : requestedAlign;
   // PPTX <a:spcPct> uses thousandths of a percent — 100000 = 100% line
   // height. Passing the multiplier × 1000 (previous bug) collapses every
   // wrapped line to ~1.3% spacing, stacking them on top of each other.
@@ -361,6 +362,13 @@ const heroTailFont = (text) => {
   if (len > 60) return 24;
   return 28;
 };
+const dividerLeadFont = (text) => {
+  const len = String(text ?? "").length;
+  if (len > 32) return 60;
+  if (len > 20) return 76;
+  if (len > 12) return 96;
+  return 120;
+};
 const tableFont = (cols, rows) => {
   if (cols > 4 || rows > 6) return 10;
   if (cols > 3 || rows > 4) return 11;
@@ -440,39 +448,37 @@ const renderSection = (s, slide, page) => {
 };
 
 /**
- * Category divider. Announces the next category of slides: a small spaced
- * eyebrow over a short accent rule, a large category label, and an optional
- * one-line caption of what's coming. Distinct from `section` (giant left
- * number for navigation) and `hero` (an argument beat) — this is a calm
- * category break, vertically centred on dark.
+ * Category divider. Announces the next category with an oversized centred
+ * label and an optional one-line caption. Distinct from `section` (giant left
+ * number for navigation) and `hero` (a left-aligned argument beat).
  */
 const renderDivider = (s, slide, page) => {
   surface(s, COLORS.dark, true, page);
   const label = safe(slide.label, "Category");
   const hasEyebrow = Boolean(safe(slide.eyebrow, ""));
-  let y = 2.85;
   if (hasEyebrow) {
-    s.text(String(slide.eyebrow).toUpperCase(), 0.8, y, 11.5, 0.42, {
+    s.text(String(slide.eyebrow).toUpperCase(), 0.8, 1.65, 11.73, 0.42, {
       fontSize: 14,
       color: COLORS.faint,
       bold: true,
       spacing: 120,
+      align: "c",
       margin: 0,
     });
-    y += 0.62;
   }
-  // Short accent rule above the label.
-  s.line(0.82, y, 2.1, y, { color: blend(COLORS.dark, COLORS.white, 0.35), width: 1 });
-  s.text(label, 0.78, y + 0.28, 11.9, 2.4, {
-    fontSize: heroLeadFont(label),
+  s.text(label, 0.65, 2.55, 12.03, 2.4, {
+    fontSize: dividerLeadFont(label),
     color: COLORS.white,
     bold: true,
+    align: "c",
+    valign: "middle",
     margin: 0,
   });
   if (slide.caption) {
-    s.text(slide.caption, 0.8, y + 2.35, 11.4, 1.1, {
-      fontSize: 22,
+    s.text(slide.caption, 1.05, 4.75, 11.23, 0.8, {
+      fontSize: 24,
       color: COLORS.soft,
+      align: "c",
       margin: 0,
     });
   }
