@@ -549,7 +549,7 @@ const renderBody = (s, slide, page) => {
 };
 
 const renderBullets = (s, slide, page) => {
-  quietSurface(s, COLORS.light, false, page);
+  surface(s, COLORS.light, false, page);
   s.text(safe(slide.heading, "What matters"), 0.78, 1.05, 11.5, 1.0, {
     fontSize: 32,
     color: COLORS.ink,
