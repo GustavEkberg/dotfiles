@@ -1,6 +1,6 @@
 ---
 name: qmd
-description: Search the user's local knowledge base for read-only personal context: manifesto, priorities, business, people, companies, projects, deals, notes, library, and prior writing.
+description: "Search the user's local knowledge base for read-only personal context: manifesto, priorities, business, people, companies, projects, deals, notes, library, and prior writing."
 ---
 
 # Local Knowledge Base
