@@ -59,6 +59,7 @@ A deck file is plain markdown: YAML frontmatter, an `# H1`, then one `##` sectio
 ---
 title: My deck title      # deck title + cover fallback
 author: Gustav Ekberg     # metadata (default: Gustav Ekberg)
+date: 27 August 2026      # optional cover eyebrow
 ---
 ```
 
@@ -79,7 +80,7 @@ Each type reads the `##` heading plus the lines beneath it in a fixed way:
 
 | Type | Heading is… | Body beneath |
 | --- | --- | --- |
-| `cover` | deck title | first paragraph = subtitle / audience line |
+| `cover` | deck title | frontmatter `date` = eyebrow; first paragraph = subtitle / audience line |
 | `hero` | the thesis line | optional paragraph = second line |
 | `section` | `NN — Label` | number + label split on `—`/`-`/`:`; bare title → auto number |
 | `divider` | `NN — Label` or `Label` | split → eyebrow + category name; first paragraph = caption |

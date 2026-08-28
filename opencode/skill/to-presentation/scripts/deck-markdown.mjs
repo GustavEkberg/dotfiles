@@ -263,6 +263,7 @@ export const parseDeckMarkdown = (src, opts = {}) => {
   const h1 = lines.find((line) => /^#\s+/.test(line));
   const title = opts.title ?? data.title ?? (h1 ? stripMarkdown(h1.replace(/^#\s+/, "")) : "Presentation");
   const author = opts.author ?? data.author ?? "Gustav Ekberg";
+  const date = opts.date ?? data.date ?? "";
   const sections = [];
   let pendingKind = null;
   let current = null;
@@ -300,7 +301,10 @@ export const parseDeckMarkdown = (src, opts = {}) => {
   const baseDir = opts.baseDir || process.cwd();
   const slides = sections.map((section, i) => sectionToSlide(section, i, baseDir)).filter((slide) => slide !== null);
   if (!slides.some((slide) => slide.kind === "cover")) {
-    slides.unshift({ kind: "cover", title, subtitle: opts.subtitle ?? "" });
+    slides.unshift({ kind: "cover", title, subtitle: opts.subtitle ?? "", eyebrow: date });
+  } else if (date) {
+    const cover = slides.find((slide) => slide.kind === "cover");
+    cover.eyebrow = date;
   }
   if (!opts.noClosing && !slides.some((slide) => slide.kind === "closing")) {
     slides.push({ kind: "closing", title: "Let's talk.", subtitle: "gustav.im" });

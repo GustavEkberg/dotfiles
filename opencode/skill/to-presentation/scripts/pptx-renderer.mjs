@@ -390,12 +390,22 @@ const TABLE_RADIUS = 900;
 const renderCover = (s, slide) => {
   surface(s, COLORS.dark, true, 1);
   const title = safe(slide.title, "Presentation");
-  // Title is top-anchored. Box must hold 2 lines at 54pt (~1.9") without
-  // clipping into the subtitle below.
+  if (slide.eyebrow) {
+    s.text(String(slide.eyebrow).toUpperCase(), 0.78, 1.45, 11.5, 0.42, {
+      fontSize: 14,
+      color: COLORS.faint,
+      bold: true,
+      spacing: 120,
+      margin: 0,
+    });
+  }
+  // Title is bottom-anchored in a 2-line slot so a single line does not leave
+  // a phantom second line above the subtitle.
   s.text(title, 0.75, 1.95, 11.8, 2.4, {
     fontSize: heroLeadFont(title),
     color: COLORS.white,
     bold: true,
+    valign: "bottom",
     margin: 0,
   });
   if (slide.subtitle) {
@@ -738,6 +748,7 @@ const renderClosing = (s, slide, page) => {
     fontSize: heroLeadFont(title),
     color: COLORS.white,
     bold: true,
+    valign: "bottom",
     margin: 0,
   });
   if (slide.subtitle) {
