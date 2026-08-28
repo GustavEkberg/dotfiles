@@ -122,4 +122,5 @@ enabled = true
 delivery = "terminal"
 
 [ui]
+sidebar_start_collapsed = true
 show_agent_labels_on_pane_borders = false
