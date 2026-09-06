@@ -234,7 +234,37 @@ return {
   {
     "folke/zen-mode.nvim",
     config = function()
-      require("zen-mode").setup()
+      require("zen-mode").setup({
+        window = {
+          backdrop = 1,
+          width = 78,
+          options = {
+            colorcolumn = '',
+            cursorcolumn = false,
+            cursorline = false,
+            foldcolumn = '0',
+            linebreak = true,
+            list = false,
+            number = false,
+            relativenumber = false,
+            signcolumn = 'no',
+            spell = true,
+            wrap = true,
+          },
+        },
+        plugins = {
+          options = {
+            enabled = true,
+            laststatus = 0,
+            ruler = false,
+            showcmd = false,
+            showmode = false,
+          },
+          diagnostics = { enabled = true },
+          gitsigns = { enabled = true },
+          twilight = { enabled = false },
+        },
+      })
     end,
   },
 
