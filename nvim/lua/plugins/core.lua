@@ -237,6 +237,7 @@ return {
       require("zen-mode").setup({
         window = {
           backdrop = 1,
+          height = 0.85,
           width = 78,
           options = {
             colorcolumn = '',
