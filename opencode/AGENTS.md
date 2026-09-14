@@ -42,8 +42,8 @@
 ## Testing
 
 - Write tests that verify semantically correct behavior
-- For bug fixes, first add a regression test. Run it and confirm it fails for the expected reason. Implement the fix, then confirm the test passes.
-- If no practical test harness or deterministic reproduction exists, state why before editing and use the strongest available validation.
+- For bug fixes, add a regression test when the bug is deterministically reproducible in an appropriate existing test harness and the test protects meaningful behavior without brittle or disproportionate setup. Confirm it fails for the expected reason before the fix, then passes afterward.
+- Otherwise, briefly state why a regression test is not worthwhile and use the strongest practical validation. Do not create test infrastructure solely to satisfy this rule.
 - Do not finish with new failing tests unless the user explicitly requests that result.
 
 ## Subagent Coordination
