@@ -39,7 +39,7 @@
       "enabled": true
     }
   },
-  "model": "openai/gpt-6-astra",
+  "model": "openai/gpt-6-sol",
   "provider": {
     "llama": {
       "name": "Local llama.cpp",

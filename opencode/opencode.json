@@ -42,7 +42,7 @@
       "enabled": true
     }
   },
-  "model": "openai/gpt-6-astra",
+  "model": "openai/gpt-6-sol",
   "plugin": [
     // "opencode-claude-auth@latest",
     "./plugins/qmd-no-rerank.ts"

@@ -105,8 +105,9 @@ fi
 acquire_lock
 trap 'rm -rf "$LOCK"' EXIT INT TERM
 
-# Outliving the terminal would leave an orphaned poller behind.
-while pgrep -qx wezterm-gui; do
+# Outliving the terminal would leave an orphaned poller behind. macOS pgrep
+# excludes ancestors by default, so -a is required for this WezTerm child.
+while pgrep -ax wezterm-gui >/dev/null 2>&1; do
   tick
   sleep 1
 done
