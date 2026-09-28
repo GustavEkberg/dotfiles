@@ -17,3 +17,9 @@ server/local/
 server/**/*.local
 server/**/*.secret
 /opencode/plugins/herdr-agent-state.js
+/raycast/**/node_modules/
+/raycast/**/dist/
+/raycast/**/.env*
+/raycast/**/raycast-env.d.ts
+/raycast/**/.raycast-swift-build/
+/raycast/**/.swiftpm/

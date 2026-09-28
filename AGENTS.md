@@ -21,6 +21,7 @@ dotfiles/
 |-- nvim/               # Full Neovim Lua config
 |-- opencode/           # OpenCode config, commands, agents, skills, plugins
 |-- pi/                 # Separate Pi skill/config experiments
+|-- raycast/            # Local Raycast extensions; pinned upstream source and local patches
 |-- server/             # Server-specific commands, services, and config fragments
 |-- scripts/            # task-loop.sh automation
 |-- starship/           # Starship prompt
@@ -38,6 +39,7 @@ dotfiles/
 | OpenCode skills | `opencode/skill/AGENTS.md`, `opencode/skill/*/SKILL.md` | Skill packaging and reference/script rules |
 | OpenCode plugin auth | `opencode/plugins/AGENTS.md` | Local OAuth plugin provenance |
 | Chrome extensions | `chrome/AGENTS.md`, `chrome/*/manifest.json` | Manual Load unpacked flow |
+| Raycast extension | `raycast/aerospace/LOCAL.md`, `raycast/aerospace/src/` | Build locally; import into Raycast manually |
 | Shell config | `fish/config.fish` | Sources private `connections.sh` if present |
 | Server-specific config | `server/AGENTS.md`, `server/` | Commands, services, OpenCode/Fish fragments for server hosts |
 | Terminal stack | `wezterm/`, `tmux/`, `starship/` | Runtime configs require manual deployment |
