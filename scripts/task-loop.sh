@@ -5,7 +5,7 @@ set -euo pipefail
 # Usage: task-loop <feature> [--max-iterations=N] [--model=MODEL] [--variant=VARIANT]
 
 MAX_ITERATIONS=50
-MODEL="openai/gpt-5.6-sol"
+MODEL="openai/gpt-6.1-sol"
 VARIANT="high"
 
 while [[ $# -gt 0 ]]; do

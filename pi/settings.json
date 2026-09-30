@@ -1,4 +1,4 @@
 {
-  "defaultProvider": "anthropic",
-  "defaultModel": "claude-opus-4-7"
+  "defaultProvider": "openai",
+  "defaultModel": "gpt-6.1-sol"
 }
