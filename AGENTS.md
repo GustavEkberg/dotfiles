@@ -14,7 +14,7 @@ Personal macOS Apple Silicon dotfiles. This repository is the source of truth fo
 dotfiles/
 |-- aerospace/          # AeroSpace config; copy to active path manually
 |-- chrome/             # Buildless local Chrome MV3 extensions
-|-- claude/             # Claude settings only
+|-- claude/             # Thin Claude adapter; shared configuration comes from opencode/
 |-- fish/               # Fish config; may source private connections.sh
 |-- fonts/              # Nerd Font binary
 |-- keep/               # Vial keyboard exports; not hand-authored
@@ -134,6 +134,7 @@ From `opencode/AGENTS.md`; apply repo-wide:
 - `CLAUDE.md` is a symlink to this file.
 - `opencode/` has stricter engineering rules in its own `AGENTS.md`.
 - `opencode/opencode.json` contains machine-local absolute paths by design.
+- `claude/settings.json` contains Claude-only overrides; `bun claude/sync.ts` generates native settings, instructions, agents, and MCP definitions from OpenCode. Active Claude paths symlink to these repo files.
 - `tmux/tmux.conf` hardcodes an active shell path; verify local machine path before changing.
 - `fish/config.fish` sources private `connections.sh`; it may not exist.
 - `.gitignore` must cover any new local/private files before they are created.

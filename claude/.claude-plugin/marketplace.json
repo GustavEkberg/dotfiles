@@ -1,0 +1,12 @@
+{
+  "name": "dotfiles",
+  "metadata": { "description": "Local adapters for the shared OpenCode coding harness." },
+  "owner": { "name": "Gustav Ekberg" },
+  "plugins": [
+    {
+      "name": "opencode",
+      "description": "MCP servers generated from the canonical OpenCode configuration.",
+      "source": "./mcp"
+    }
+  ]
+}

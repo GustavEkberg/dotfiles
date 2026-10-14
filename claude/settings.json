@@ -1,88 +1,28 @@
 {
-  "permissions": {
-    "allow": [
-      "Bash(cat *)",
-      "Bash(ls *)",
-      "Bash(ls)",
-      "Bash(ls -*)",
-      "Bash(head *)",
-      "Bash(tail *)",
-      "Bash(wc *)",
-      "Bash(file *)",
-      "Bash(stat *)",
-      "Bash(du *)",
-      "Bash(tree *)",
-      "Bash(pwd)",
-      "Bash(which *)",
-      "Bash(echo *)",
-      "Bash(find *)",
-      "Bash(git add *)",
-      "Bash(git commit *)",
-      "Bash(git show *)",
-      "Read(~/.claude*)",
-      "Bash(GH_TOKEN=$GH_AGENT_TOKEN gh issue view *)",
-      "Bash(GH_TOKEN=$GH_AGENT_TOKEN gh issue list *)",
-      "Bash(GH_TOKEN=$GH_AGENT_TOKEN gh *)"
-    ],
-    "deny": [
-      "Bash(cat *.env*)",
-      "Bash(cat */.env*)",
-      "Bash(head *.env*)",
-      "Bash(head */.env*)",
-      "Bash(tail *.env*)",
-      "Bash(tail */.env*)",
-      "Bash(supabase db reset *)",
-      "Bash(supabase db reset)",
-      "Bash(supabase function deploy *)",
-      "Bash(supabase function deploy)",
-      "Bash(supabase functions deploy *)",
-      "Bash(supabase functions deploy)",
-      "Bash(supabase reset *)",
-      "Bash(supabase reset)",
-      "Bash(pnpm db:migrate *)",
-      "Bash(pnpm db:migrate)",
-      "Bash(npm run db:migrate *)",
-      "Bash(npm run db:migrate)",
-      "Bash(npx db:migrate *)",
-      "Bash(npx db:migrate)",
-      "Bash(pnpm dev)",
-      "Bash(pnpm dev *)",
-      "Bash(pnpm run dev)",
-      "Bash(pnpm run dev *)",
-      "Bash(npm run dev)",
-      "Bash(npm run dev *)",
-      "Bash(npm dev)",
-      "Bash(npm dev *)",
-      "Bash(yarn dev)",
-      "Bash(yarn dev *)",
-      "Bash(yarn run dev)",
-      "Bash(yarn run dev *)",
-      "Bash(bun dev)",
-      "Bash(bun dev *)",
-      "Bash(bun run dev)",
-      "Bash(bun run dev *)",
-      "Bash(npx next dev)",
-      "Bash(npx next dev *)",
-      "Bash(npx vite)",
-      "Bash(npx vite *)"
-    ]
+  "$schema": "https://json.schemastore.org/claude-code-settings.json",
+  "model": "opus",
+  "effortLevel": "high",
+  "disableClaudeAiConnectors": true,
+  "attribution": {
+    "commit": "",
+    "pr": ""
   },
   "enabledPlugins": {
-    "telegram@claude-plugins-official": true
+    "swift-lsp@claude-plugins-official": true
   },
   "hooks": {
-    "PreToolUse": [
+    "SessionStart": [
       {
-        "matcher": "mcp__qmd__query",
+        "matcher": "*",
         "hooks": [
           {
             "type": "command",
-            "command": "$HOME/code/dotfiles/claude/hooks/qmd-no-rerank.sh"
+            "command": "if [ -f \"$HOME/.claude/hooks/herdr-agent-state.sh\" ]; then sh \"$HOME/.claude/hooks/herdr-agent-state.sh\" session; fi",
+            "timeout": 10
           }
         ]
       }
     ]
   },
-  "effortLevel": "high",
-  "skipAutoPermissionPrompt": true
+  "theme": "dark-daltonized"
 }

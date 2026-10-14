@@ -53,3 +53,9 @@
 ## Plans
 
 - List unresolved questions at the end of each plan. Keep them minimal.
+
+## Coding Harness Configuration
+
+- `~/code/dotfiles/opencode/` is the source of truth for shared coding-harness instructions, skills, commands, agents, permissions, and MCP servers.
+- Edit managed configuration in `~/code/dotfiles`, then update its symlinks or generated adapters. Never create a separate configuration at an active home-directory path.
+- Claude-specific settings live in `~/code/dotfiles/claude/settings.json`. Run `bun ~/code/dotfiles/claude/sync.ts` after changing shared settings or agent definitions; generated Claude files are not hand-authored.

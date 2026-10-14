@@ -13,6 +13,8 @@ opencode/bun.lockb
 claude/skills/pptx/scripts/office/__pycache__
 opencode/pnpm-lock.yaml
 /claude/claude-settings.json
+/claude/generated/
+/claude/mcp/.mcp.json
 server/local/
 server/**/*.local
 server/**/*.secret
@@ -23,3 +25,4 @@ server/**/*.secret
 /raycast/**/raycast-env.d.ts
 /raycast/**/.raycast-swift-build/
 /raycast/**/.swiftpm/
+/opencode/skill/synced
