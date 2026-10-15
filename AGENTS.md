@@ -36,12 +36,13 @@ dotfiles/
 |------|----------|-------|
 | Neovim behavior | `nvim/AGENTS.md`, `nvim/init.lua`, `nvim/lua/` | Scoped guardrails live under `nvim/` |
 | OpenCode behavior | `opencode/AGENTS.md`, `opencode/opencode.json` | Agent-wide engineering rules live there |
+| OpenCode terminal settings | `opencode/cli.json` | V2 global CLI preferences; `tui.json` is the V1 source |
 | OpenCode skills | `opencode/skill/AGENTS.md`, `opencode/skill/*/SKILL.md` | Skill packaging and reference/script rules |
 | OpenCode plugin auth | `opencode/plugins/AGENTS.md` | Local OAuth plugin provenance |
 | Chrome extensions | `chrome/AGENTS.md`, `chrome/*/manifest.json` | Manual Load unpacked flow |
 | Raycast extension | `raycast/aerospace/LOCAL.md`, `raycast/aerospace/src/` | Build locally; import into Raycast manually |
 | Shell config | `fish/config.fish` | Sources private `connections.sh` if present |
-| Server-specific config | `server/AGENTS.md`, `server/` | Commands, services, OpenCode/Fish fragments for server hosts |
+| Server-specific config | `server/AGENTS.md`, `server/` | Commands, services, legacy plugins, Fish fragments; shared OpenCode config lives in `opencode/` |
 | Terminal stack | `wezterm/`, `tmux/`, `starship/` | Runtime configs require manual deployment |
 | Bootstrap packages | `install.sh` | Installs packages only |
 | Autonomous task loop | `scripts/task-loop.sh`, `opencode/command/complete-next-task.md` | PRD-driven OpenCode loop |
@@ -58,6 +59,7 @@ dotfiles/
 | `tmux/tmux.conf` | tmux bindings/status/plugins; reload binding targets active `~/.tmux.conf` |
 | `wezterm/wezterm.lua` | Terminal config and scrollback-to-vim event |
 | `opencode/opencode.json` | OpenCode providers, plugin, MCP, permissions |
+| `opencode/cli.json` | OpenCode V2 terminal preferences and keybindings |
 | `opencode/command/*.md` | Slash command prompts |
 | `opencode/skill/*/SKILL.md` | Skill entry files loaded by OpenCode |
 | `chrome/*/manifest.json` | Chrome extension entry points |
