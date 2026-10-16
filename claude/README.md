@@ -34,8 +34,13 @@ On a new machine, register the repo-local plugin once:
 ```sh
 claude plugin marketplace add "$HOME/code/dotfiles/claude"
 claude plugin install opencode@dotfiles --scope user
+claude plugin install figma@dotfiles --scope user
 bun claude/sync.ts
 ```
+
+`figma/` is a hand-authored, Claude-only plugin for Figma's remote MCP server
+(OpenCode is blocked by Figma). Authenticate once via `/mcp` → figma.
+The Figma skills remain shared in `opencode/skill`.
 
 Remove a legacy user-scoped QMD entry with `claude mcp remove qmd --scope user`
 after the plugin is installed, so Claude starts only the repo-defined server.

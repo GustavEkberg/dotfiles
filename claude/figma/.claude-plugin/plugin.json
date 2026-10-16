@@ -1,0 +1,9 @@
+{
+  "name": "figma",
+  "version": "1.0.0",
+  "author": { "name": "Gustav Ekberg" },
+  "description": "Claude-only Figma remote MCP server; Figma skills come from opencode/skill.",
+  "mcpServers": {
+    "figma": { "type": "http", "url": "https://mcp.figma.com/mcp" }
+  }
+}

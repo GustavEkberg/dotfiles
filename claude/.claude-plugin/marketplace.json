@@ -7,6 +7,11 @@
       "name": "opencode",
       "description": "MCP servers generated from the canonical OpenCode configuration.",
       "source": "./mcp"
+    },
+    {
+      "name": "figma",
+      "description": "Claude-only Figma remote MCP server.",
+      "source": "./figma"
     }
   ]
 }
