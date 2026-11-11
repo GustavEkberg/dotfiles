@@ -141,7 +141,7 @@ Use OKLCH for vivid colors. Dominant colors with sharp accents:
 
 ## Motion
 
-**Primary**: Motion for React animations. **Fallback**: CSS `@starting-style` for simple enter/exit.
+Prefer native CSS for simple transitions and entry/exit when it meets the project's browser targets. Use Motion for gestures, layout orchestration, or existing Motion integrations. Consult `modern-web-guidance` for platform behavior and fallbacks; do not replace working components or add dependencies merely to modernize.
 
 ```tsx
 import { motion, AnimatePresence } from 'motion/react';
