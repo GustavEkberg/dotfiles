@@ -6,12 +6,11 @@ end
 set -g fish_greeting
 set -x LANG en_US.UTF-8
 
-alias o='opencode'
 alias la='lazygit'
 alias c='claude'
 alias ch='claude --channels plugin:telegram@claude-plugins-official'
 alias cr='claude --resume'
-alias oc='opencode --continue'
+alias oc='o --continue'
 alias vim='nvim'
 alias vi='nvim'
 alias v='nvim'
@@ -22,6 +21,14 @@ alias python='python3'
 alias yd='pnpm dev'
 alias yi='pnpm install'
 alias tp='tmux attach -t primary || tmux new -s primary' 
+
+function o --description 'launch OpenCode with Corgi tracking when inside Corgi'
+  if test -n "$CORGI_PANE"; and type -q corgi
+    corgi agent opencode2 $argv
+  else
+    opencode $argv
+  end
+end
 
 function later --description 'queue a thought for the agent to pick up later'
     set -l root (git rev-parse --show-toplevel 2>/dev/null; or pwd)

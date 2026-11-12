@@ -1,0 +1,11 @@
+{
+  "prefix": "ctrl_a",
+  "keys": {
+    "split:down": ["prefix+S", "prefix+-", "prefix+\""],
+    "tab": [],
+    "goto-workspace": "prefix+0..5",
+    "swap:down": [],
+    "swap:up": [],
+    "swap:right": []
+  }
+}
