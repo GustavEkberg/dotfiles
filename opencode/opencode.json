@@ -6,6 +6,12 @@
   ],
   "lsp": true,
   "mcp": {
+    "servers": {
+      "executor": {
+        "type": "remote",
+        "url": "https://mcp.executor.sh/mcp?connection=6f1ffec1-57f8-4479-8885-a774ebd3969c"
+      }
+    },
     "qmd": {
       "type": "local",
       "command": [
